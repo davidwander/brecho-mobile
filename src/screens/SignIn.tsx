@@ -1,7 +1,9 @@
-import { VStack, Image, Center } from '@gluestack-ui/themed';
+import { VStack, Image, Center, Heading, Text } from '@gluestack-ui/themed';
 
 import BackgroundImg from '@assets/background.png';
 import Logo from '@assets/vb-logo.png';
+
+import { Input } from '@components/Input';
 
 export function SignIn() {
   return (
@@ -15,13 +17,28 @@ export function SignIn() {
         position="absolute"
       />
 
-      <Center my="$24" >
-        <Image 
-          source={Logo} 
-          rounded="$full" 
-          alt="Logotipo brecho Vitoriano" 
-        />
-      </Center>
+      <VStack flex={1} px="$10" pb="$16">
+        <Center my="$24" >
+          <Image 
+            source={Logo} 
+            rounded="$full" 
+            alt="Logotipo brecho Vitoriano" 
+          />
+
+          <Text color="$purple500" fontSize="$sm" lineHeight="$xl">
+            App Gerenciador E-commerce
+          </Text>
+        </Center>
+
+        <Center gap="$2">
+          <Heading color="$textLight400">
+            Entrar em Vitoriano Brecho
+          </Heading>
+
+          <Input placeholder="E-mail" />
+          <Input placeholder="Senha" />
+        </Center>
+      </VStack>
     </VStack>
   )
 }

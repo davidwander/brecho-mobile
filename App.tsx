@@ -8,7 +8,7 @@ import { GluestackUIProvider, Text, Center } from '@gluestack-ui/themed';
 
 import { config } from './config/gluestack-ui.config';
 
-import { Loading } from './src/Components/Loading';
+import { Loading } from './src/components/Loading';
 import { SignIn } from './src/screens/SignIn';
 
 export default function App() {
