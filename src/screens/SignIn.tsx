@@ -4,6 +4,7 @@ import BackgroundImg from '@assets/background.png';
 import Logo from '@assets/vb-logo.png';
 
 import { Input } from '@components/Input';
+import { Button } from '@components/Button';
 
 export function SignIn() {
   return (
@@ -42,6 +43,8 @@ export function SignIn() {
           />
 
           <Input placeholder="Senha" secureTextEntry />
+
+          <Button title="Entrar" />
         </Center>
       </VStack>
     </VStack>
