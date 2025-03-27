@@ -23,13 +23,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-<<<<<<< HEAD
     },
     "plugins": [
       "expo-font"
     ]
-=======
     }
->>>>>>> 9c40818afd08a826f7951003b220765098d43c44
   }
-}
