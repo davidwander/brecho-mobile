@@ -2,12 +2,14 @@ import {
   createBottomTabNavigator, 
   BottomTabNavigationProp 
 } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
 import { gluestackUIConfig } from '../../config/gluestack-ui.config';
 
 import { Home } from '@screens/Home';
 import { Calendar } from '@screens/Calendar';
 import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
+import { LinkText } from '../../config/theme/LinkText';
 
 import { 
   Home as HomeIcon,
@@ -35,6 +37,15 @@ export function AppRoutes() {
     <Navigator screenOptions={{ 
       headerShown: false,
       tabBarShowLabel: false, 
+      tabBarActiveTintColor: tokens.colors.purple500,
+      tabBarInactiveTintColor: tokens.colors.purple300,
+      tabBarStyle: {
+        backgroundColor: tokens.colors.trueGray600,
+        borderTopWidth: 0,
+        height: Platform.OS === "android" ? "auto" : 96,
+        paddingBottom: tokens.space["12"],
+        paddingTop: tokens.space["4"],
+      }
     }}>
       <Screen 
         name="home" 
