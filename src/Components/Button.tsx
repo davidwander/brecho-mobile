@@ -3,17 +3,25 @@ import { Button as GluestackButton, Text, ButtonSpinner } from '@gluestack-ui/th
 
 type Props = ComponentProps<typeof GluestackButton> & {
   title: string
+  variant?: "solid" | "outline" 
   isLoading?: boolean
 }
 
-export function Button({ title, isLoading = false, ...rest }: Props) {
+export function Button({ 
+  title, 
+  variant = "solid", 
+  isLoading = false, 
+  ...rest 
+}: Props) {
   return (
     <GluestackButton 
       w="$full"
       h="$14"
-      bg="$purple700"
+      bg={variant === "outline" ? "transparent" : "$purple700"}
+      borderWidth={variant === "outline" ? "$1" : "$0"}
+      borderColor="$purple700"
       rounded="$xl"
-      $active-bg="$purple800"
+      $active-bg={variant === "outline" ? "$light800" : "$purple800"}
       disabled={isLoading}
       {...rest}
     >
@@ -22,9 +30,10 @@ export function Button({ title, isLoading = false, ...rest }: Props) {
           <ButtonSpinner color="$textLight400" size="small" />
         ) : (
           <Text 
-          color="$textLight400" 
+          color={variant === "outline" ? "$purple500" : "$textLight400" }
           fontSize="$lg" 
           fontFamily="$heading"
+          lineHeight="$xl"
         >
           {title}
       </Text>
