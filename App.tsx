@@ -8,9 +8,10 @@ import { GluestackUIProvider } from '@gluestack-ui/themed';
 
 import { config } from './config/gluestack-ui.config';
 
+import { Routes } from './src/routes';
 import { Loading } from './src/components/Loading';
-import { SignIn } from './src/screens/SignIn';
-import { SignUp } from './src/screens/SignUp';
+//import { SignIn } from './src/screens/SignIn';
+//import { SignUp } from './src/screens/SignUp';
 
 export default function App() {
   const [fontsLoaded] = useFonts ({ Roboto_700Bold, Roboto_400Regular });
@@ -23,7 +24,7 @@ export default function App() {
         translucent
       />
 
-      {fontsLoaded ? <SignUp /> : <Loading /> }
+      {fontsLoaded ? <Routes /> : <Loading /> }
         
     </GluestackUIProvider>
   );
