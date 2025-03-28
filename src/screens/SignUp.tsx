@@ -6,7 +6,7 @@ import Logo from '@assets/vb-logo.png';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
-export function SignIn() {
+export function SignUp() {
   return (
     <ScrollView 
       contentContainerStyle={{ flexGrow: 1 }}
@@ -35,10 +35,12 @@ export function SignIn() {
             </Text>
           </Center>
 
-          <Center gap="$2">
+          <Center gap="$2" flex={1}>
             <Heading color="$textLight400">
-              Entrar em Vitoriano Brecho
+              Criar conta
             </Heading>
+
+            <Input placeholder="Nome" />
 
             <Input 
               placeholder="E-mail" 
@@ -48,22 +50,10 @@ export function SignIn() {
 
             <Input placeholder="Senha" secureTextEntry />
 
-            <Button title="Entrar" />
+            <Button title="Criar e entrar" />
           </Center>
 
-          <Center flex={1} justifyContent="flex-end" mt="$4">
-            <Text
-              color="$textLight400"
-              mb="$3"
-              fontFamily="$body"
-              fontSize="$sm"
-              lineHeight="$xl"
-            >
-              Ainda não tem acesso?
-            </Text>
-
-            <Button title="Criar conta" variant="outline" />
-          </Center>
+          <Button title="Voltar para o login" variant="outline" mt="$12" />
         </VStack>
       </VStack>
     </ScrollView>
