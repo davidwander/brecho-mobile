@@ -6,21 +6,20 @@ import { Platform } from 'react-native';
 import { gluestackUIConfig } from '../../config/gluestack-ui.config';
 
 import { Home } from '@screens/Home';
-import { Calendar } from '@screens/Calendar';
+import { RegisterNew } from '@screens/RegisterNew';
 import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
-import { LinkText } from '../../config/theme/LinkText';
 
 import { 
   Home as HomeIcon,
-  Calendar as CalendarIcon,
+  BadgePlus,
   Truck,
   User,
 } from 'lucide-react-native';
 
 type AppRoutes = {
   home: undefined,
-  calendar: undefined,
+  registerNew: undefined,
   shipments: undefined,
   profile: undefined,
 }
@@ -58,11 +57,11 @@ export function AppRoutes() {
       />
 
       <Screen 
-        name="calendar" 
-        component={Calendar} 
+        name="registerNew" 
+        component={RegisterNew} 
         options={{
           tabBarIcon: ({ color }) => (
-            <CalendarIcon color={color} width={iconSize} height={iconSize} />
+            <BadgePlus color={color} width={iconSize} height={iconSize} />
           ),
         }}
       />
