@@ -15,16 +15,22 @@ import {
   Platform, 
   ScrollView, 
   Keyboard, 
-  TouchableWithoutFeedback, 
-  View
-} from 'react-native';
+  TouchableWithoutFeedback} from 'react-native';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
+const generateRegisterId = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 export function RegisterNew() {
   const [name, setName] = useState('');
-  const [registerId, setRegisterId] = useState(Date.now().toString()); 
+  const [registerId, setRegisterId] = useState(generateRegisterId()); 
+
+  const handleGenerateNewRegisterId = () => {
+    setRegisterId(generateRegisterId());
+  };
 
   const [rawCostPrice, setRawCostPrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
@@ -146,8 +152,7 @@ export function RegisterNew() {
 
               <Button 
                 title="Gerar Novo Registro" 
-                onPress={() => setRegisterId(Date.now().toString()
-                )} 
+                onPress={handleGenerateNewRegisterId}
               />
               
               <Button 
