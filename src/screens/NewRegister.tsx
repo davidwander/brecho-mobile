@@ -8,6 +8,16 @@ import {
   Actionsheet, 
   ActionsheetBackdrop, 
   ActionsheetContent, 
+  Select, 
+  SelectTrigger, 
+  SelectInput, 
+  SelectIcon, 
+  SelectPortal, 
+  SelectBackdrop, 
+  SelectContent, 
+  SelectDragIndicator, 
+  SelectDragIndicatorWrapper, 
+  SelectItem
 } from '@gluestack-ui/themed';
 
 import { 
@@ -27,7 +37,8 @@ const generateRegisterId = () => {
 export function NewRegister() {
   const [name, setName] = useState('');
   const [registerId, setRegisterId] = useState(generateRegisterId()); 
-
+  const [selectedPiece, setSelectedPiece] = useState('');
+  
   const handleGenerateNewRegisterId = () => {
     setRegisterId(generateRegisterId());
   };
@@ -98,6 +109,7 @@ export function NewRegister() {
             showsVerticalScrollIndicator={false}
           >
             <VStack space="md" w="90%" alignSelf="center" py="$4">
+              
               <Text 
                 color="$white" 
                 fontSize="$lg" 
@@ -107,11 +119,36 @@ export function NewRegister() {
                 Registrar Nova Peça
               </Text>
 
-              <Input 
-                placeholder="Nome da Peça" 
-                value={name} 
-                onChangeText={setName} 
-              />
+              <Select 
+                onValueChange={setSelectedPiece} 
+                selectedValue={selectedPiece}>
+                <SelectTrigger 
+                  bg="$gray500" 
+                  borderRadius="$lg" 
+                  px="$4" 
+                  py="$6" 
+                  borderWidth="$1" 
+                  borderColor="$white"
+                >
+                  <SelectInput 
+                    placeholder="Escolha a peça" 
+                    color="$white"
+                    fontSize="$md"
+                  />
+                  <SelectIcon color='$white' />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent bg="$gray500" borderRadius="$lg" borderWidth="$1" borderColor="$white">
+                    <SelectDragIndicatorWrapper>
+                      <SelectDragIndicator />
+                    </SelectDragIndicatorWrapper>
+                    <SelectItem label="Blusa" value="blusa" />
+                    <SelectItem label="Calça" value="calca" />
+                    <SelectItem label="Jaqueta" value="jaqueta" />
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
 
               <Input 
                 placeholder="Preço de Custo"
