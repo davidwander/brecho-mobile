@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 import { gluestackUIConfig } from '../../config/gluestack-ui.config';
 
 import { Home } from '@screens/Home';
-import { RegisterNew } from '@screens/RegisterNew';
+import { NewRegister } from '@screens/NewRegister';
 import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
@@ -19,7 +19,7 @@ import {
 
 type AppRoutes = {
   home: undefined,
-  registerNew: undefined,
+  newRegister: undefined,
   shipments: undefined,
   profile: undefined,
 }
@@ -57,8 +57,8 @@ export function AppRoutes() {
       />
 
       <Screen 
-        name="registerNew" 
-        component={RegisterNew} 
+        name="newRegister" 
+        component={NewRegister} 
         options={{
           tabBarIcon: ({ color }) => (
             <BadgePlus color={color} width={iconSize} height={iconSize} />

@@ -24,7 +24,7 @@ const generateRegisterId = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-export function RegisterNew() {
+export function NewRegister() {
   const [name, setName] = useState('');
   const [registerId, setRegisterId] = useState(generateRegisterId()); 
 
@@ -91,7 +91,7 @@ export function RegisterNew() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Center flex={1} bg="$textDark900">
+        <Center flex={1} bg="$textDark900" pt="$10">
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
             style={{ width: '100%' }}
