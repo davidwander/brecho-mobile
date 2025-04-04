@@ -7,7 +7,7 @@ import {
   VStack, 
   Actionsheet, 
   ActionsheetBackdrop, 
-  ActionsheetContent, 
+  ActionsheetContent,
   Select, 
   SelectTrigger, 
   SelectInput, 
@@ -25,7 +25,8 @@ import {
   Platform, 
   ScrollView, 
   Keyboard, 
-  TouchableWithoutFeedback} from 'react-native';
+  TouchableWithoutFeedback
+} from 'react-native';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
@@ -38,7 +39,7 @@ export function NewRegister() {
   const [name, setName] = useState('');
   const [registerId, setRegisterId] = useState(generateRegisterId()); 
   const [selectedPiece, setSelectedPiece] = useState('');
-  
+
   const handleGenerateNewRegisterId = () => {
     setRegisterId(generateRegisterId());
   };
@@ -46,7 +47,6 @@ export function NewRegister() {
   const [rawCostPrice, setRawCostPrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
   const [rawProfitMargin, setRawProfitMargin] = useState('');
-  
   const [profitMargin, setProfitMargin] = useState('');
   const [salePrice, setSalePrice] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +57,7 @@ export function NewRegister() {
     setRawProfitMargin(numericValue); 
     setProfitMargin(text); 
   };
-  
+
   const handleProfitMarginBlur = () => {
     if (rawProfitMargin) {
       setProfitMargin(`${rawProfitMargin}%`);
@@ -68,9 +68,7 @@ export function NewRegister() {
 
   const handleCostPriceChange = (text: string) => {
     let numericValue = text.replace(/[^0-9,]/g, "");
-    
     numericValue = numericValue.replace(",", ".");
-
     setRawCostPrice(numericValue); 
     setCostPrice(text); 
   };
@@ -88,7 +86,6 @@ export function NewRegister() {
   const calculateSalePrice = () => {
     const cost = parseFloat(rawCostPrice);
     const margin = parseFloat(profitMargin);
-    
     if (!isNaN(cost) && !isNaN(margin)) {
       const sale = cost + (cost * (margin / 100));
       setSalePrice(`R$ ${sale.toFixed(2).replace(".", ",")}`);
@@ -109,43 +106,52 @@ export function NewRegister() {
             showsVerticalScrollIndicator={false}
           >
             <VStack space="md" w="90%" alignSelf="center" py="$4">
-              
-              <Text 
-                color="$white" 
-                fontSize="$lg" 
-                fontFamily="$heading" 
-                lineHeight="$xl"
-              >
+              <Text color="$white" fontSize="$lg" fontFamily="$heading" lineHeight="$xl">
                 Registrar Nova Peça
               </Text>
 
-              <Select 
-                onValueChange={setSelectedPiece} 
-                selectedValue={selectedPiece}>
+              <Select onValueChange={setSelectedPiece} selectedValue={selectedPiece}>
                 <SelectTrigger 
                   bg="$gray500" 
-                  borderRadius="$lg" 
-                  px="$4" 
-                  py="$6" 
+                  borderRadius="$xl" 
+                  height="$12"  
                   borderWidth="$1" 
-                  borderColor="$white"
+                  borderColor="$coolGray500"
+                  flexDirection="row"
+                  justifyContent="space-between"
+                  alignItems="center"
                 >
                   <SelectInput 
                     placeholder="Escolha a peça" 
                     color="$white"
                     fontSize="$md"
+                    fontFamily="$body"
                   />
                   <SelectIcon color='$white' />
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectBackdrop />
-                  <SelectContent bg="$gray500" borderRadius="$lg" borderWidth="$1" borderColor="$white">
+                  <SelectContent 
+                    bg="$trueGray700" 
+                    borderRadius="$lg"
+                  >
                     <SelectDragIndicatorWrapper>
                       <SelectDragIndicator />
                     </SelectDragIndicatorWrapper>
-                    <SelectItem label="Blusa" value="blusa" />
-                    <SelectItem label="Calça" value="calca" />
-                    <SelectItem label="Jaqueta" value="jaqueta" />
+
+                    {[ 
+                      {label: "Blusa", value: "blusa" }, 
+                      {label: "Vestido", value: "vestido" }, 
+                      {label: "Calça", value: "calca"} 
+                    ].map(({ label, value }) => (
+                      <SelectItem  
+                        key={value}
+                        value={value}
+                        label={label}
+                        bg="$gray600"
+                        $text={{ color: "$white" }}
+                      />
+                    ))}
                   </SelectContent>
                 </SelectPortal>
               </Select>
@@ -199,10 +205,7 @@ export function NewRegister() {
             </VStack>
           </ScrollView>
 
-          <Actionsheet 
-            isOpen={isOpen} 
-            onClose={() => setIsOpen(false)}
-          >
+          <Actionsheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <ActionsheetBackdrop />
             <ActionsheetContent>
               {/* Aqui adicionamos as opções depois */}
