@@ -133,6 +133,7 @@ export function NewRegister() {
                   <SelectBackdrop />
                   <SelectContent 
                     bg="$trueGray700" 
+                    
                     borderRadius="$lg"
                   >
                     <SelectDragIndicatorWrapper>
@@ -149,7 +150,7 @@ export function NewRegister() {
                         value={value}
                         label={label}
                         bg="$gray600"
-                        $text={{ color: "$white" }}
+                        
                       />
                     ))}
                   </SelectContent>
