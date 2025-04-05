@@ -39,6 +39,7 @@ export function NewRegister() {
   const [name, setName] = useState('');
   const [registerId, setRegisterId] = useState(generateRegisterId()); 
   const [selectedPiece, setSelectedPiece] = useState('');
+  const [description, setDescription] = useState('');
 
   const handleGenerateNewRegisterId = () => {
     setRegisterId(generateRegisterId());
@@ -163,6 +164,12 @@ export function NewRegister() {
 
                 </SelectPortal>
               </Select>
+
+              <Input 
+                placeholder="Descrição"
+                value={description}
+                onChangeText={setDescription}
+              />
 
               <Input 
                 placeholder="Preço de Custo"
