@@ -8,70 +8,63 @@ import {
 import {
   KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback
 } from 'react-native';
-
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
 const generateRegisterId = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+const PIECES = [
+  'Blusa', 'Camisa', 'Camiseta', 'T-Shirt', 'Top', 'Saia', 'Short',
+  'Calça', 'Vestido', 'Calçados', 'Acessórios'
+];
+
 export function NewRegister() {
+  const [name, setName] = useState('');
+  const [registerId, setRegisterId] = useState(generateRegisterId()); 
+  const [selectedPiece, setSelectedPiece] = useState('');
+  const [description, setDescription] = useState('');
+  const [rawCostPrice, setRawCostPrice] = useState('');
+  const [costPrice, setCostPrice] = useState('');
+  const [rawProfitMargin, setRawProfitMargin] = useState('');
+  const [profitMargin, setProfitMargin] = useState('');
+  const [salePrice, setSalePrice] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const [form, setForm] = useState({
-    name: '',
-    description: '',
-    selectedPiece: '',
-    rawCostPrice: '',
-    costPrice: '',
-    rawProfitMargin: '',
-    profitMargin: '',
-    salePrice: '',
-    registerId: generateRegisterId()
-  });
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const updateForm = (field: string, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
+  const handleGenerateNewRegisterId = () => setRegisterId(generateRegisterId());
 
   const handleProfitMarginChange = (text: string) => {
-    const raw = text.replace(/[^0-9]/g, "");
-    updateForm('rawProfitMargin', raw);
-    updateForm('profitMargin', text);
+    const numeric = text.replace(/[^0-9]/g, '');
+    setRawProfitMargin(numeric);
+    setProfitMargin(text);
   };
 
   const handleProfitMarginBlur = () => {
-    updateForm('profitMargin', form.rawProfitMargin ? `${form.rawProfitMargin}%` : '');
+    if (rawProfitMargin) setProfitMargin(`${rawProfitMargin}%`);
+    else setProfitMargin('');
   };
 
   const handleCostPriceChange = (text: string) => {
-    const raw = text.replace(/[^0-9,]/g, "").replace(",", ".");
-    updateForm('rawCostPrice', raw);
-    updateForm('costPrice', text);
+    let numeric = text.replace(/[^0-9,]/g, '').replace(',', '.');
+    setRawCostPrice(numeric);
+    setCostPrice(text);
   };
 
   const handleCostPriceBlur = () => {
-    if (form.rawCostPrice) {
-      const formatted = `R$ ${parseFloat(form.rawCostPrice).toFixed(2).replace(".", ",")}`;
-      updateForm('costPrice', formatted);
-      calculateSalePrice();
-    } else {
-      updateForm('costPrice', '');
-    }
+    if (rawCostPrice) {
+      const formatted = `R$ ${parseFloat(rawCostPrice).toFixed(2).replace('.', ',')}`;
+      setCostPrice(formatted);
+    } else setCostPrice('');
+    calculateSalePrice();
   };
 
   const calculateSalePrice = () => {
-    const cost = parseFloat(form.rawCostPrice);
-    const margin = parseFloat(form.rawProfitMargin);
+    const cost = parseFloat(rawCostPrice);
+    const margin = parseFloat(rawProfitMargin);
     if (!isNaN(cost) && !isNaN(margin)) {
       const sale = cost + (cost * (margin / 100));
-      updateForm('salePrice', `R$ ${sale.toFixed(2).replace(".", ",")}`);
+      setSalePrice(`R$ ${sale.toFixed(2).replace('.', ',')}`);
     }
-  };
-
-  const handleNewRegisterId = () => {
-    updateForm('registerId', generateRegisterId());
   };
 
   return (
@@ -82,99 +75,43 @@ export function NewRegister() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <Center flex={1} bg="$textDark900" pt="$10">
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-            style={{ width: '100%' }}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
             <VStack space="md" w="90%" alignSelf="center" py="$4">
               <Text color="$white" fontSize="$lg" fontFamily="$heading" lineHeight="$xl">
                 Registrar Nova Peça
               </Text>
 
-              <Select
-                onValueChange={value => updateForm('selectedPiece', value)}
-                selectedValue={form.selectedPiece}
-              >
-                <SelectTrigger
-                  bg="$gray500"
-                  borderRadius="$xl"
-                  height="$12"
-                  borderWidth="$1"
-                  borderColor="$coolGray500"
-                  flexDirection="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <SelectInput
-                    placeholder="Escolha a peça"
-                    color="$white"
-                    fontSize="$md"
-                    fontFamily="$body"
-                  />
+              <Select onValueChange={setSelectedPiece} selectedValue={selectedPiece}>
+                <SelectTrigger bg="$gray500" borderRadius="$xl" height="$12" borderWidth="$1" borderColor="$coolGray500"
+                  flexDirection="row" justifyContent="space-between" alignItems="center">
+                  <SelectInput placeholder="Escolha a peça" color="$white" fontSize="$md" fontFamily="$body" />
                   <SelectIcon color='$white' />
                 </SelectTrigger>
-
                 <SelectPortal>
                   <SelectBackdrop />
                   <SelectContent bg="$trueGray700" width="100%" borderRadius="$lg">
                     <SelectDragIndicatorWrapper />
-                    {[
-                      "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top",
-                      "Saia", "Short", "Calça", "Vestido", "Calçados", "Acessórios"
-                    ].map((label) => (
-                      <SelectItem
-                        key={label}
-                        value={label.toLowerCase()}
-                        label={label}
-                        bg="$gray600"
-                        sx={{ _text: { color: "$white" } }}
-                      />
+                    {PIECES.map(p => (
+                      <SelectItem key={p} value={p.toLowerCase()} label={p} bg="$gray600" sx={{ _text: { color: "$white" } }} />
                     ))}
                   </SelectContent>
                 </SelectPortal>
               </Select>
 
-              <Input
-                placeholder="Descrição"
-                value={form.description}
-                onChangeText={text => updateForm('description', text)}
-              />
-
-              <Input
-                placeholder="Preço de Custo"
-                value={form.costPrice}
-                onChangeText={handleCostPriceChange}
-                onBlur={handleCostPriceBlur}
-                keyboardType="numeric"
-              />
-
-              <Input
-                placeholder="Margem de Lucro (%)"
-                value={form.profitMargin}
-                keyboardType="numeric"
-                onChangeText={handleProfitMarginChange}
-                onBlur={handleProfitMarginBlur}
-              />
+              <Input placeholder="Descrição" value={description} onChangeText={setDescription} />
+              <Input placeholder="Preço de Custo" value={costPrice} onChangeText={handleCostPriceChange} onBlur={handleCostPriceBlur} keyboardType="numeric" />
+              <Input placeholder="Margem de Lucro (%)" value={profitMargin} keyboardType="numeric" onChangeText={handleProfitMarginChange} onBlur={handleProfitMarginBlur} />
 
               <Center mt="$4" gap="$2">
                 <Button title="Calcular Preço de Venda" onPress={calculateSalePrice} />
               </Center>
 
               <Center gap="$2">
-                <Input
-                  placeholder="Preço de Venda"
-                  value={form.salePrice}
-                  editable={false}
-                  color="$white"
-                />
-                <Input
-                  editable={false}
-                  value={`Registro: ${form.registerId.slice(0, 6)}`}
-                />
+                <Input placeholder="Preço de Venda" value={salePrice} editable={false} color="$white" />
+                <Input editable={false} value={`Registro: ${registerId.slice(0, 6)}`} />
               </Center>
 
-              <Button title="Gerar Novo Registro" onPress={handleNewRegisterId} />
+              <Button title="Gerar Novo Registro" onPress={handleGenerateNewRegisterId} />
               <Button title="Abrir Menu" onPress={() => setIsOpen(true)} />
             </VStack>
           </ScrollView>
@@ -182,7 +119,7 @@ export function NewRegister() {
           <Actionsheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <ActionsheetBackdrop />
             <ActionsheetContent>
-              {/* Opções do menu aqui */}
+              {/* Opções futuras do menu */}
             </ActionsheetContent>
           </Actionsheet>
         </Center>
