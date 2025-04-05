@@ -1,96 +1,77 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-
-import { 
-  Center, 
-  Text, 
-  VStack, 
-  Actionsheet, 
-  ActionsheetBackdrop, 
-  ActionsheetContent,
-  Select, 
-  SelectTrigger, 
-  SelectInput, 
-  SelectIcon, 
-  SelectPortal, 
-  SelectBackdrop, 
-  SelectContent, 
-  SelectDragIndicator, 
-  SelectDragIndicatorWrapper, 
-  SelectItem
+import {
+  Center, Text, VStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
+  Select, SelectTrigger, SelectInput, SelectIcon, SelectPortal, SelectBackdrop,
+  SelectContent, SelectDragIndicatorWrapper, SelectItem
 } from '@gluestack-ui/themed';
-
-import { 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
-  Keyboard, 
-  TouchableWithoutFeedback
+import {
+  KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback
 } from 'react-native';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
-const generateRegisterId = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+const generateRegisterId = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export function NewRegister() {
-  const [name, setName] = useState('');
-  const [registerId, setRegisterId] = useState(generateRegisterId()); 
-  const [selectedPiece, setSelectedPiece] = useState('');
-  const [description, setDescription] = useState('');
-
-  const handleGenerateNewRegisterId = () => {
-    setRegisterId(generateRegisterId());
-  };
-
-  const [rawCostPrice, setRawCostPrice] = useState('');
-  const [costPrice, setCostPrice] = useState('');
-  const [rawProfitMargin, setRawProfitMargin] = useState('');
-  const [profitMargin, setProfitMargin] = useState('');
-  const [salePrice, setSalePrice] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    selectedPiece: '',
+    rawCostPrice: '',
+    costPrice: '',
+    rawProfitMargin: '',
+    profitMargin: '',
+    salePrice: '',
+    registerId: generateRegisterId()
+  });
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const updateForm = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleProfitMarginChange = (text: string) => {
-    let numericValue = text.replace(/[^0-9]/g, "");
-    setRawProfitMargin(numericValue); 
-    setProfitMargin(text); 
+    const raw = text.replace(/[^0-9]/g, "");
+    updateForm('rawProfitMargin', raw);
+    updateForm('profitMargin', text);
   };
 
   const handleProfitMarginBlur = () => {
-    if (rawProfitMargin) {
-      setProfitMargin(`${rawProfitMargin}%`);
-    } else {
-      setProfitMargin('');
-    }
+    updateForm('profitMargin', form.rawProfitMargin ? `${form.rawProfitMargin}%` : '');
   };
 
   const handleCostPriceChange = (text: string) => {
-    let numericValue = text.replace(/[^0-9,]/g, "");
-    numericValue = numericValue.replace(",", ".");
-    setRawCostPrice(numericValue); 
-    setCostPrice(text); 
+    const raw = text.replace(/[^0-9,]/g, "").replace(",", ".");
+    updateForm('rawCostPrice', raw);
+    updateForm('costPrice', text);
   };
 
   const handleCostPriceBlur = () => {
-    if (rawCostPrice) {
-      const formattedValue = `R$ ${parseFloat(rawCostPrice).toFixed(2).replace(".", ",")}`;
-      setCostPrice(formattedValue);
+    if (form.rawCostPrice) {
+      const formatted = `R$ ${parseFloat(form.rawCostPrice).toFixed(2).replace(".", ",")}`;
+      updateForm('costPrice', formatted);
+      calculateSalePrice();
     } else {
-      setCostPrice('');
+      updateForm('costPrice', '');
     }
-    calculateSalePrice();
   };
 
   const calculateSalePrice = () => {
-    const cost = parseFloat(rawCostPrice);
-    const margin = parseFloat(profitMargin);
+    const cost = parseFloat(form.rawCostPrice);
+    const margin = parseFloat(form.rawProfitMargin);
     if (!isNaN(cost) && !isNaN(margin)) {
       const sale = cost + (cost * (margin / 100));
-      setSalePrice(`R$ ${sale.toFixed(2).replace(".", ",")}`);
+      updateForm('salePrice', `R$ ${sale.toFixed(2).replace(".", ",")}`);
     }
+  };
+
+  const handleNewRegisterId = () => {
+    updateForm('registerId', generateRegisterId());
   };
 
   return (
@@ -111,119 +92,97 @@ export function NewRegister() {
                 Registrar Nova Peça
               </Text>
 
-              <Select onValueChange={setSelectedPiece} selectedValue={selectedPiece}>
-                <SelectTrigger 
-                  bg="$gray500" 
-                  borderRadius="$xl" 
-                  height="$12"  
-                  borderWidth="$1" 
+              <Select
+                onValueChange={value => updateForm('selectedPiece', value)}
+                selectedValue={form.selectedPiece}
+              >
+                <SelectTrigger
+                  bg="$gray500"
+                  borderRadius="$xl"
+                  height="$12"
+                  borderWidth="$1"
                   borderColor="$coolGray500"
                   flexDirection="row"
                   justifyContent="space-between"
                   alignItems="center"
                 >
-                  <SelectInput 
-                    placeholder="Escolha a peça" 
+                  <SelectInput
+                    placeholder="Escolha a peça"
                     color="$white"
                     fontSize="$md"
                     fontFamily="$body"
                   />
                   <SelectIcon color='$white' />
                 </SelectTrigger>
+
                 <SelectPortal>
                   <SelectBackdrop />
-                  <SelectContent
-                    bg="$trueGray700"
-                    width="100%"
-                    borderRadius="$lg"
-                  >
+                  <SelectContent bg="$trueGray700" width="100%" borderRadius="$lg">
                     <SelectDragIndicatorWrapper />
-
                     {[
-                      { label: "Blusa", value: "blusa" },
-                      { label: "Camisa", value: "camisa" },
-                      { label: "Camiseta", value: "camiseta" },
-                      { label: "T-Shirt", value: "t-shirt" },
-                      { label: "Top", value: "top" },
-                      { label: "Saia", value: "saia" },
-                      { label: "Short", value: "short" },
-                      { label: "Calça", value: "calca" },
-                      { label: "Vestido", value: "vestido" },
-                      { label: "Calçados", value: "calçados" },
-                      { label: "Acessórios", value: "acessórios" },
-                    ].map(({ label, value }) => (
+                      "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top",
+                      "Saia", "Short", "Calça", "Vestido", "Calçados", "Acessórios"
+                    ].map((label) => (
                       <SelectItem
-                        key={value}
-                        value={value}
+                        key={label}
+                        value={label.toLowerCase()}
                         label={label}
                         bg="$gray600"
                         sx={{ _text: { color: "$white" } }}
                       />
                     ))}
                   </SelectContent>
-
                 </SelectPortal>
               </Select>
 
-              <Input 
+              <Input
                 placeholder="Descrição"
-                value={description}
-                onChangeText={setDescription}
+                value={form.description}
+                onChangeText={text => updateForm('description', text)}
               />
 
-              <Input 
+              <Input
                 placeholder="Preço de Custo"
-                value={costPrice} 
-                onChangeText={handleCostPriceChange} 
-                onBlur={handleCostPriceBlur} 
+                value={form.costPrice}
+                onChangeText={handleCostPriceChange}
+                onBlur={handleCostPriceBlur}
                 keyboardType="numeric"
               />
-              
-              <Input 
+
+              <Input
                 placeholder="Margem de Lucro (%)"
-                value={profitMargin}
+                value={form.profitMargin}
                 keyboardType="numeric"
                 onChangeText={handleProfitMarginChange}
                 onBlur={handleProfitMarginBlur}
               />
 
               <Center mt="$4" gap="$2">
-                <Button 
-                  title="Calcular Preço de Venda" 
-                  onPress={calculateSalePrice} 
-                />
-              </Center> 
+                <Button title="Calcular Preço de Venda" onPress={calculateSalePrice} />
+              </Center>
 
               <Center gap="$2">
-                <Input 
-                  placeholder="Preço de Venda" 
-                  value={salePrice} 
-                  editable={false} 
-                  color="$white" 
+                <Input
+                  placeholder="Preço de Venda"
+                  value={form.salePrice}
+                  editable={false}
+                  color="$white"
                 />
-
-                <Input 
-                  editable={false} 
-                  value={`Registro: ${registerId.slice(0, 6)}`} 
+                <Input
+                  editable={false}
+                  value={`Registro: ${form.registerId.slice(0, 6)}`}
                 />
               </Center>
 
-              <Button 
-                title="Gerar Novo Registro" 
-                onPress={handleGenerateNewRegisterId}
-              />
-              
-              <Button 
-                title="Abrir Menu" 
-                onPress={() => setIsOpen(true)} 
-              />
+              <Button title="Gerar Novo Registro" onPress={handleNewRegisterId} />
+              <Button title="Abrir Menu" onPress={() => setIsOpen(true)} />
             </VStack>
           </ScrollView>
 
           <Actionsheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <ActionsheetBackdrop />
             <ActionsheetContent>
-              {/* Aqui adicionamos as opções depois */}
+              {/* Opções do menu aqui */}
             </ActionsheetContent>
           </Actionsheet>
         </Center>
