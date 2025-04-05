@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+
+import { useProduct } from '@contexts/ProductContext';
+
 import {
   Center, Text, VStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
   Select, SelectTrigger, SelectInput, SelectIcon, SelectPortal, SelectBackdrop,
@@ -30,8 +33,37 @@ export function NewRegister() {
   const [salePrice, setSalePrice] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const { addProduct } = useProduct();
 
-  const handleGenerateNewRegisterId = () => setRegisterId(generateRegisterId());
+
+  const handleRegisterAndGenerateNewId = () => {
+    if (!selectedPiece || !description || !rawCostPrice || !rawProfitMargin) return;
+  
+    const cost = parseFloat(rawCostPrice);
+    const margin = parseFloat(rawProfitMargin);
+    const sale = cost + (cost * (margin / 100));
+  
+    const product = {
+      id: registerId,
+      name,
+      type: selectedPiece,
+      description,
+      costPrice: cost,
+      profitMargin: margin,
+      salePrice: sale,
+    };
+  
+    addProduct(product);
+    setRegisterId(generateRegisterId()); 
+    setSelectedPiece('');
+    setDescription('');
+    setRawCostPrice('');
+    setCostPrice('');
+    setRawProfitMargin('');
+    setProfitMargin('');
+    setSalePrice('');
+  };
+  
 
   const handleProfitMarginChange = (text: string) => {
     const numeric = text.replace(/[^0-9]/g, '');
@@ -111,7 +143,7 @@ export function NewRegister() {
                 <Input editable={false} value={`Registro: ${registerId.slice(0, 6)}`} />
               </Center>
 
-              <Button title="Gerar Novo Registro" onPress={handleGenerateNewRegisterId} />
+              <Button title="Gerar Novo Registro" onPress={handleRegisterAndGenerateNewId} />
               <Button title="Abrir Menu" onPress={() => setIsOpen(true)} />
             </VStack>
           </ScrollView>
