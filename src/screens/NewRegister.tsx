@@ -131,29 +131,36 @@ export function NewRegister() {
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectBackdrop />
-                  <SelectContent 
-                    bg="$trueGray700" 
-                    
+                  <SelectContent
+                    bg="$trueGray700"
+                    width="100%"
                     borderRadius="$lg"
                   >
-                    <SelectDragIndicatorWrapper>
-                      <SelectDragIndicator />
-                    </SelectDragIndicatorWrapper>
+                    <SelectDragIndicatorWrapper />
 
-                    {[ 
-                      {label: "Blusa", value: "blusa" }, 
-                      {label: "Vestido", value: "vestido" }, 
-                      {label: "Calça", value: "calca"} 
+                    {[
+                      { label: "Blusa", value: "blusa" },
+                      { label: "Camisa", value: "camisa" },
+                      { label: "Camiseta", value: "camiseta" },
+                      { label: "T-Shirt", value: "t-shirt" },
+                      { label: "Top", value: "top" },
+                      { label: "Saia", value: "saia" },
+                      { label: "Short", value: "short" },
+                      { label: "Calça", value: "calca" },
+                      { label: "Vestido", value: "vestido" },
+                      { label: "Calçados", value: "calçados" },
+                      { label: "Acessórios", value: "acessórios" },
                     ].map(({ label, value }) => (
-                      <SelectItem  
+                      <SelectItem
                         key={value}
                         value={value}
                         label={label}
                         bg="$gray600"
-                        
+                        sx={{ _text: { color: "$white" } }}
                       />
                     ))}
                   </SelectContent>
+
                 </SelectPortal>
               </Select>
 
