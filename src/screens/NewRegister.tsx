@@ -6,11 +6,14 @@ import { useProduct } from '@contexts/ProductContext';
 import {
   Center, Text, VStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
   Select, SelectTrigger, SelectInput, SelectIcon, SelectPortal, SelectBackdrop,
-  SelectContent, SelectDragIndicatorWrapper, SelectItem
+  SelectContent, SelectDragIndicatorWrapper, SelectItem, Box, ActionsheetItem
 } from '@gluestack-ui/themed';
 import {
   KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback
 } from 'react-native';
+
+import { Package, BarChart2, Users, X } from 'lucide-react-native';
+
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
@@ -150,8 +153,26 @@ export function NewRegister() {
 
           <Actionsheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <ActionsheetBackdrop />
-            <ActionsheetContent>
-              {/* Opções futuras do menu */}
+            <ActionsheetContent bg="$trueGray600" rounded="$2xl" padding="$4" height="auto">
+              <VStack w="$full" px="$4" py="$2">
+                <ActionsheetItem>
+                  <Box mr="$3">
+                    <Package color="#fff" size={24} />
+                  </Box>
+                </ActionsheetItem>
+
+                <ActionsheetItem>
+                  <Box mr="$3">
+                    <BarChart2 color="#fff" size={24} />
+                  </Box>
+                </ActionsheetItem>
+
+                <ActionsheetItem>
+                  <Box mr="$3">
+                    <Users color="#fff" size={24} />
+                  </Box>
+                </ActionsheetItem>
+              </VStack>
             </ActionsheetContent>
           </Actionsheet>
         </Center>
