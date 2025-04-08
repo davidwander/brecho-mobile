@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import { useProduct } from '@contexts/ProductContext';
@@ -37,7 +37,7 @@ export function NewRegister() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { addProduct } = useProduct();
-
+  const [dropdownReady, setDropdownReady] = useState(false);
 
   const handleRegisterAndGenerateNewId = () => {
     if (!selectedPiece || !description || !rawCostPrice || !rawProfitMargin) return;
@@ -66,7 +66,6 @@ export function NewRegister() {
     setProfitMargin('');
     setSalePrice('');
   };
-  
 
   const handleProfitMarginChange = (text: string) => {
     const numeric = text.replace(/[^0-9]/g, '');
@@ -102,6 +101,13 @@ export function NewRegister() {
     }
   };
 
+  const handleOpenDropdown = () => {
+    setDropdownReady(false);
+    setTimeout(() => {
+      setDropdownReady(true);
+    }, 50);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -132,38 +138,35 @@ export function NewRegister() {
                 Registrar Nova Peça
               </Text>
 
-              <Select 
-                onValueChange={setSelectedPiece} 
-                selectedValue={selectedPiece}
-              >
+              <Select onOpen={handleOpenDropdown}>
                 <SelectTrigger 
-                  bg="$gray500" 
-                  borderRadius="$xl" 
-                  height="$12" 
-                  borderWidth="$1" 
-                  borderColor="$coolGray500"
-                  flexDirection="row" justifyContent="space-between" alignItems="center"
+                  variant="outline" 
+                  size="md"
+                  h="$12"
+                  rounded="$lg"
                 >
-                  <SelectInput 
-                    placeholder="Escolha a peça" 
-                    color="$white" 
-                    fontSize="$md" 
-                    fontFamily="$body" 
-                  />
-                  <SelectIcon color='$white' />
+                  <SelectInput placeholder="Escolha a peça" />
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectBackdrop />
-                  <SelectContent 
-                    bg="$trueGray700" 
-                    width="100%" 
-                    borderRadius="$lg"
-                  >
-                    <SelectDragIndicatorWrapper />
-                    {PIECES.map(p => (
-                      <SelectItem key={p} value={p.toLowerCase()} label={p} bg="$gray600" sx={{ _text: { color: "$white" } }} />
-                    ))}
-                  </SelectContent>
+                  {dropdownReady && (
+                    <SelectContent
+                      bg="$trueGray700"
+                      width="100%"
+                      borderRadius="$lg"
+                    >
+                      <SelectDragIndicatorWrapper />
+                      {PIECES.map((p) => (
+                        <SelectItem
+                          key={p}
+                          value={p.toLowerCase()}
+                          label={p}
+                          bg="$gray600"
+                          sx={{ _text: { color: "$white" } }}
+                        />
+                      ))}
+                    </SelectContent>
+                  )}
                 </SelectPortal>
               </Select>
 
@@ -204,7 +207,7 @@ export function NewRegister() {
                 />
                 <Input 
                   editable={false} 
-                  value={`Registro: ${registerId.slice(0, 6)}`} 
+                  value={`Cod: ${registerId.slice(0, 6)}`} 
                 />
               </Center>
 
