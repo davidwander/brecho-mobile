@@ -18,7 +18,7 @@ import {
   Center 
 } from '@gluestack-ui/themed';
 import { PieChart, LineChart } from 'react-native-chart-kit';
-import { CircleCheckBig, CircleDollarSign, ShoppingBag, ChartColumnBig } from 'lucide-react-native';
+import { CircleCheckBig, CircleDollarSign, ShoppingBag, ChartColumnBig, Banknote, ArrowDownToLine, ArrowUpToLine } from 'lucide-react-native';
 
 export function Home() {
   const products = [
@@ -53,26 +53,41 @@ export function Home() {
 
   return (
     <VStack flex={1} bg="$backgroundDark900" px="$4" pt="$16">
-      <Text color="$textLight400" fontSize="$xl" mb="$4">Dashboard</Text>
+      <Text color="$textLight400" fontSize="$xl" mb="$4">
+        Dashboard
+      </Text>
 
       <Box bg="$cyan600" p="$4" rounded="$lg" mb="$4">
         <HStack alignItems="center" gap="$2">
           <Icon as={CircleCheckBig} size="sm" color="$white" />
-          <Text color="$white">Você ultrapassou sua meta de vendas este mês!</Text>
+          <Text color="$white" lineHeight="$xl" fontFamily="$heading">
+            Você ultrapassou sua meta de vendas este mês!
+          </Text>
         </HStack>
       </Box>
 
       <ScrollView flex={1} showsVerticalScrollIndicator={false}>
         <Box bg="$backgroundDark800" p="$4" rounded="$lg" mb="$4">
-          <Text color="$textLight400" fontSize="$lg" mb="$2">Filtrar por Período:</Text>
-          <Select selectedValue={selectedPeriod} onValueChange={setSelectedPeriod}>
+          <Text 
+            color="$textLight400" 
+            fontSize="$lg"
+            mb="$2" 
+            lineHeight="$xl" 
+            fontFamily="$heading"
+          >
+            Filtrar por Período:
+          </Text>
+          <Select 
+            selectedValue={selectedPeriod} 
+            onValueChange={setSelectedPeriod}
+          >
             <SelectTrigger>
               <SelectInput placeholder="Selecione um período" color="$textLight400" />
-              <SelectIcon as={CircleCheckBig} size="sm" color="$white" />
+              <SelectIcon as={CircleCheckBig} size="sm" color="$white" px="$4" />
             </SelectTrigger>
             <SelectPortal>
               <SelectBackdrop />
-              <SelectContent>
+              <SelectContent bg="$backgroundDark800" rounded="$lg" p="$4">
                 <SelectItem label="Diário" value="Diário" />
                 <SelectItem label="Semanal" value="Semanal" />
                 <SelectItem label="Mensal" value="Mensal" />
@@ -82,15 +97,17 @@ export function Home() {
         </Box>
 
         <Box bg="$backgroundDark800" p="$4" rounded="$lg" mb="$4">
-          <Text color="$textLight400" fontSize="$lg" mb="$2">Métricas:</Text>
+          <Text color="$textLight400" fontSize="$lg" mb="$2">
+            Métricas:
+          </Text>
           <HStack justifyContent="space-between">
             <Center>
-              <Icon as={CircleDollarSign} size="md" color="$blue500" />
+              <Icon as={ArrowDownToLine} size="md" color="$blue500" />
               <Text color="$textLight400">Entradas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalSales.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Icon as={ShoppingBag} size="md" color="$red500" />
+              <Icon as={ArrowUpToLine} size="md" color="$red500" />
               <Text color="$textLight400">Saídas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalCost.toFixed(2)}</Text>
             </Center>
