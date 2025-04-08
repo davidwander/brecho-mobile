@@ -218,6 +218,7 @@ export function NewRegister() {
               <Button 
                 title="Abrir Menu" 
                 onPress={() => setIsOpen(true)} 
+                variant="outline"
               />
             </VStack>
           </ScrollView>
