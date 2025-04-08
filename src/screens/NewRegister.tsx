@@ -138,14 +138,21 @@ export function NewRegister() {
                 Registrar Nova Peça
               </Text>
 
-              <Select onOpen={handleOpenDropdown}>
+              <Select
+                selectedValue={selectedPiece}
+                onValueChange={(value) => setSelectedPiece(value)}
+                onOpen={handleOpenDropdown}
+              >
                 <SelectTrigger 
                   variant="outline" 
                   size="md"
                   h="$12"
                   rounded="$lg"
                 >
-                  <SelectInput placeholder="Escolha a peça" />
+                  <SelectInput
+                    placeholder="Escolha a peça"
+                    color="$white"
+                  />
                 </SelectTrigger>
                 <SelectPortal>
                   <SelectBackdrop />
