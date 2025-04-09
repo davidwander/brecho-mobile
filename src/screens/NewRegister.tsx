@@ -1,18 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import { useProduct } from '@contexts/ProductContext';
 
 import {
-  Center, Text, VStack, HStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
-  Select, SelectTrigger, SelectInput, SelectIcon, SelectPortal, SelectBackdrop,
+  Text, VStack, HStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
+  Select, SelectTrigger, SelectInput, SelectPortal, SelectBackdrop,
   SelectContent, SelectDragIndicatorWrapper, SelectItem, Box, ActionsheetItem
 } from '@gluestack-ui/themed';
+
 import {
-  KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback
+  KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, View
 } from 'react-native';
 
-import { ClipboardList , ReceiptText, DollarSign, Calendar } from 'lucide-react-native';
+import { ClipboardList , DollarSign, Calendar } from 'lucide-react-native';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
@@ -38,14 +39,15 @@ export function NewRegister() {
   const router = useRouter();
   const { addProduct } = useProduct();
   const [dropdownReady, setDropdownReady] = useState(false);
+  const [sheetReady, setSheetReady] = useState(false);
 
   const handleRegisterAndGenerateNewId = () => {
     if (!selectedPiece || !description || !rawCostPrice || !rawProfitMargin) return;
-  
+
     const cost = parseFloat(rawCostPrice);
     const margin = parseFloat(rawProfitMargin);
     const sale = cost + (cost * (margin / 100));
-  
+
     const product = {
       id: registerId,
       name,
@@ -55,7 +57,7 @@ export function NewRegister() {
       profitMargin: margin,
       salePrice: sale,
     };
-  
+
     addProduct(product);
     setRegisterId(generateRegisterId()); 
     setSelectedPiece('');
@@ -103,44 +105,49 @@ export function NewRegister() {
 
   const handleOpenDropdown = () => {
     setDropdownReady(false);
-    setTimeout(() => {
-      setDropdownReady(true);
-    }, 50);
+    setTimeout(() => setDropdownReady(true), 50);
+  };
+
+  const openSheet = () => {
+    setSheetReady(false);
+    setIsOpen(true);
+    setTimeout(() => setSheetReady(true), 50);
+  };
+
+  const closeSheet = () => {
+    setIsOpen(false);
+    setSheetReady(false);
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Center 
-          flex={1} 
-          bg="$textDark900" 
-          pt="$10"
-        >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} style={{ width: '100%' }} 
+        <View style={{ flex: 1, backgroundColor: '#121214' }}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              paddingVertical: 40,
+              paddingHorizontal: 20,
+            }}
             showsVerticalScrollIndicator={false}
           >
-            <VStack 
-              space="md" 
-              w="90%" 
-              alignSelf="center" 
-              py="$4"
-            >
+            <VStack space="md">
               <Text 
                 color="$white" 
                 fontSize="$lg" 
-                fontFamily="$heading" lineHeight="$xl"
+                fontFamily="$heading" 
+                lineHeight="$xl"
               >
                 Registrar Nova Peça
               </Text>
 
               <Select
                 selectedValue={selectedPiece}
-                onValueChange={(value) => setSelectedPiece(value)}
+                onValueChange={setSelectedPiece}
                 onOpen={handleOpenDropdown}
               >
                 <SelectTrigger 
@@ -199,24 +206,21 @@ export function NewRegister() {
                 onBlur={handleProfitMarginBlur} 
               />
 
-              <Center mt="$4" gap="$2">
-                <Button 
-                  title="Calcular Preço de Venda" 
-                  onPress={calculateSalePrice} 
-                />
-              </Center>
+              <Button 
+                title="Calcular Preço de Venda" 
+                onPress={calculateSalePrice} 
+              />
 
-              <Center gap="$2">
-                <Input 
-                  placeholder="Preço de Venda" 
-                  value={salePrice} 
-                  editable={false} color="$white" 
-                />
-                <Input 
-                  editable={false} 
-                  value={`Cod: ${registerId.slice(0, 6)}`} 
-                />
-              </Center>
+              <Input 
+                placeholder="Preço de Venda" 
+                value={salePrice} 
+                editable={false} 
+                color="$white" 
+              />
+              <Input 
+                editable={false} 
+                value={`Cod: ${registerId.slice(0, 6)}`} 
+              />
 
               <Button 
                 title="Gerar Novo Registro" 
@@ -224,31 +228,36 @@ export function NewRegister() {
               />
               <Button 
                 title="Abrir Menu" 
-                onPress={() => setIsOpen(true)} 
+                onPress={openSheet} 
                 variant="outline"
               />
             </VStack>
           </ScrollView>
 
-          <Actionsheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
+          <Actionsheet 
+            isOpen={isOpen}
+            onClose={closeSheet}
+          >
             <ActionsheetBackdrop />
+            {sheetReady && (
               <ActionsheetContent 
                 bg="$trueGray600" 
                 rounded="$2xl" 
                 p="$8"
-                maxHeight={300}
+                minHeight={150}
               >
                 <HStack 
                   flexWrap="wrap" 
                   justifyContent="space-evenly"
                   alignItems="center"
                   gap="$2"
+                  opacity={sheetReady ? 1 : 0}
+                  pointerEvents={sheetReady ? 'auto' : 'none'}
                 >
                   <ActionsheetItem 
-                    w={80}
-                    h={80}
-                    p="$2" 
-                    justifyContent="center"
+                    w={80} 
+                    h={80} 
+                    p="$2" justifyContent="center"
                   >
                     <Box 
                       borderWidth={1}
@@ -262,12 +271,10 @@ export function NewRegister() {
                       <ClipboardList color="#fff" size={36} />
                     </Box>
                   </ActionsheetItem>
-
-                  <ActionsheetItem
-                    w={80}
-                    h={80}
-                    p="$2" 
-                    justifyContent="center"
+                  <ActionsheetItem 
+                    w={80} 
+                    h={80} 
+                    p="$2" justifyContent="center"
                   >
                     <Box 
                       borderWidth={1}
@@ -281,12 +288,10 @@ export function NewRegister() {
                       <DollarSign color="#fff" size={36} />
                     </Box>
                   </ActionsheetItem>
-
-                  <ActionsheetItem
-                    w={80}
-                    h={80}
-                    p="$2" 
-                    justifyContent="center"
+                  <ActionsheetItem 
+                    w={80} 
+                    h={80} 
+                    p="$2" justifyContent="center"
                   >
                     <Box 
                       borderWidth={1}
@@ -302,8 +307,9 @@ export function NewRegister() {
                   </ActionsheetItem>
                 </HStack>
               </ActionsheetContent>
+            )}
           </Actionsheet>
-        </Center>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
