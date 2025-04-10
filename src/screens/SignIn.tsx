@@ -10,9 +10,14 @@ import Logo from '@assets/vb-logo.png';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
+type FormDataProps = {
+  email: string;
+  password: string;
+}
+
 export function SignIn() {
 
-  const { control, handleSubmit } = useForm();
+  const { control, handleSubmit } = useForm<FormDataProps>();
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
@@ -20,8 +25,8 @@ export function SignIn() {
     navigation.navigate("signUp")
   };
 
-  function handleSignIn(data: any) {
-    console.log(data)
+  function handleSignIn({ email, password }: FormDataProps) {
+    console.log({ email, password })
   };
 
   return (
