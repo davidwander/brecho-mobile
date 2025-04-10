@@ -1,12 +1,6 @@
-import { 
-  VStack, 
-  Image, 
-  Center, 
-  Heading, 
-  Text, 
-  ScrollView 
-} from '@gluestack-ui/themed';
+import { VStack, Image, Center, Heading, Text, ScrollView } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
+import { useForm, Controller } from 'react-hook-form';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 
@@ -17,10 +11,17 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
 export function SignIn() {
+
+  const { control, handleSubmit } = useForm();
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   function handleNewAccount() {
     navigation.navigate("signUp")
+  };
+
+  function handleSignIn(data: any) {
+    console.log(data)
   };
 
   return (
@@ -56,15 +57,43 @@ export function SignIn() {
               Entrar em Vitoriano Brecho
             </Heading>
 
-            <Input 
-              placeholder="E-mail" 
-              keyboardType="email-address" 
-              autoCapitalize="none" 
+            <Controller 
+              name="email"
+              control={control}
+              render={({ field: { onChange, value }}) => {
+                return (
+                  <Input 
+                    placeholder="E-mail" 
+                    keyboardType="email-address" 
+                    autoCapitalize="none" 
+                    onChangeText={onChange} 
+                    value={value}
+                  />
+                )
+              }}
             />
 
-            <Input placeholder="Senha" secureTextEntry />
+            <Controller 
+              name="password"
+              control={control}
+              render={({ field: { onChange, value }}) => {
+                return (
+                  <Input 
+                    placeholder="Senha" 
+                    secureTextEntry 
+                    onChangeText={onChange} 
+                    value={value}
+                    onSubmitEditing={handleSubmit(handleSignIn)}
+                    returnKeyType="send"
+                  />
+                )
+              }}
+            />
 
-            <Button title="Entrar" />
+            <Button 
+              title="Entrar" 
+              onPress={handleSubmit(handleSignIn)} 
+            />
           </Center>
 
           <Center flex={1} justifyContent="flex-end" mt="$4">
