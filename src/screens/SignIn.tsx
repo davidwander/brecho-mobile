@@ -1,6 +1,8 @@
 import { VStack, Image, Center, Heading, Text, ScrollView } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 
@@ -13,11 +15,18 @@ import { Button } from '@components/Button';
 type FormDataProps = {
   email: string;
   password: string;
-}
+};
+
+const signInSchema = yup.object({
+  email: yup.string().required("Informe o e-mail").email("E-mail inválido"),
+  password: yup.string().required("Informe a senha"),
+})
 
 export function SignIn() {
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>();
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
+    resolver: yupResolver(signInSchema),
+  });
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
@@ -65,13 +74,6 @@ export function SignIn() {
             <Controller 
               name="email"
               control={control}
-              rules={{
-                required: "E-mail obrigatório",
-                pattern: {
-                  value: /^\S+@\S+$/i,
-                  message: "E-mail inválido"
-                }
-              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
@@ -89,13 +91,6 @@ export function SignIn() {
             <Controller 
               name="password"
               control={control}
-              rules={{
-                required: "Senha obrigatória",
-                minLength: {
-                  value: 6,
-                  message: "A senha deve ter pelo menos 6 dígitos"
-                }
-              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 

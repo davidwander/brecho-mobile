@@ -1,6 +1,8 @@
 import { VStack, Image, Center, Heading, Text, ScrollView } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 import BackgroundImg from '@assets/background.png';
 import Logo from '@assets/vb-logo.png';
@@ -13,11 +15,21 @@ type FormDataProps = {
   email: string;
   password: string;
   confirmPassword: string;
-}
+};
+
+const signUpSchema = yup.object({
+  name: yup.string().required("Informe o nome"),
+  email: yup.string().required("Informe o e-mail").email("E-mail inválido"),
+  password: yup.string().required("Informe a senha"),
+  confirmPassword: yup.string().required("Confirme a senha"),
+
+});
 
 export function SignUp() {
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>();
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
+    resolver: yupResolver(signUpSchema),
+  });
 
   const navigation = useNavigation();
 
@@ -65,9 +77,6 @@ export function SignUp() {
             <Controller 
               control={control}
               name="name"
-              rules={{
-                required: "Informe o nome",
-              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
@@ -83,13 +92,6 @@ export function SignUp() {
             <Controller 
               control={control}
               name="email"
-              rules={{
-                required: "Informe o e-mail",
-                pattern: {
-                  value: /^\S+@\S+$/i,
-                  message: "E-mail inválido"
-                }
-              }}
               render={({ field: { onChange, value }}) =>{
                 return(
                   <Input 
@@ -107,13 +109,6 @@ export function SignUp() {
             <Controller 
               control={control}
               name="password"
-              rules={{
-                required: "Informe a senha",
-                minLength: {
-                  value: 6,
-                  message: "A senha deve ter pelo menos 6 caracteres"
-                }
-              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
@@ -130,9 +125,6 @@ export function SignUp() {
             <Controller 
               control={control}
               name="confirmPassword"
-              rules={{
-                required: "Confirme a senha",
-              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
