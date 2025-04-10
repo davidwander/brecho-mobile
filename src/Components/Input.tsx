@@ -27,6 +27,7 @@ export function Input({
       w="$full"
     >
       <GluestackInput 
+        isInvalid={isInvalid}
         bg="$borderDark800"
         h="$14"
         px="$4"
@@ -34,7 +35,11 @@ export function Input({
         rounded="$xl"
         $focus={{
           borderWidth: 1,
-          borderColor: "$purple700"
+          borderColor: invalid ? "$red500" : "$purple700"
+        }}
+        $invalid={{
+          borderWidth: 1,
+          borderColor: "$red500"
         }}
       >
         <InputField 

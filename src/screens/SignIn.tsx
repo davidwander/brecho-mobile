@@ -17,7 +17,7 @@ type FormDataProps = {
 
 export function SignIn() {
 
-  const { control, handleSubmit } = useForm<FormDataProps>();
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>();
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
@@ -65,6 +65,13 @@ export function SignIn() {
             <Controller 
               name="email"
               control={control}
+              rules={{
+                required: "E-mail obrigatório",
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: "E-mail inválido"
+                }
+              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
@@ -73,6 +80,7 @@ export function SignIn() {
                     autoCapitalize="none" 
                     onChangeText={onChange} 
                     value={value}
+                    errorMessage={errors.email?.message}
                   />
                 )
               }}
@@ -81,6 +89,13 @@ export function SignIn() {
             <Controller 
               name="password"
               control={control}
+              rules={{
+                required: "Senha obrigatória",
+                minLength: {
+                  value: 6,
+                  message: "A senha deve ter pelo menos 6 dígitos"
+                }
+              }}
               render={({ field: { onChange, value }}) => {
                 return (
                   <Input 
@@ -88,6 +103,7 @@ export function SignIn() {
                     secureTextEntry 
                     onChangeText={onChange} 
                     value={value}
+                    errorMessage={errors.password?.message}
                     onSubmitEditing={handleSubmit(handleSignIn)}
                     returnKeyType="send"
                   />
