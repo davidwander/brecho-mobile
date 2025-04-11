@@ -9,25 +9,21 @@ import {
 
 type Props = ComponentProps<typeof InputField> & {
   errorMessage?: string | null;
-  isInvalid?: boolean;
   isReadOnly?: boolean;
 }
 
 export function Input({ 
   isReadOnly = false,
   errorMessage = null,
-  isInvalid = false,
   ...rest
 }: Props) {
-  const invalid = !!errorMessage || isInvalid
+  const invalid = !!errorMessage;
 
-  return(
-    <FormControl 
-      isInvalid={invalid}
-      w="$full"
-    >
-      <GluestackInput 
-        isInvalid={isInvalid}
+  return (
+    <FormControl isInvalid={invalid} w="$full">
+      <GluestackInput
+        isInvalid={invalid}
+        isReadOnly={isReadOnly}
         bg="$borderDark800"
         h="$14"
         px="$4"
@@ -46,15 +42,17 @@ export function Input({
           color="$textLight400"
           fontFamily="$body"
           placeholderTextColor="$textLight400"
-          {...rest} 
+          {...rest}
         />
       </GluestackInput>
 
-      <FormControlError>
-        <FormControlErrorText color="$red500">
-          {errorMessage}
-        </FormControlErrorText>
-      </FormControlError>
+      {invalid && (
+        <FormControlError>
+          <FormControlErrorText color="$red500">
+            {errorMessage}
+          </FormControlErrorText>
+        </FormControlError>
+      )}
     </FormControl>
-  )
+  );
 }
