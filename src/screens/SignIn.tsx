@@ -19,7 +19,7 @@ type FormDataProps = {
 
 const signInSchema = yup.object({
   email: yup.string().required("Informe o e-mail").email("E-mail inválido"),
-  password: yup.string().required("Informe a senha"),
+  password: yup.string().required("Informe a senha").min(6, "A senha deve ter no mínimo 6 dígitos"),
 })
 
 export function SignIn() {
