@@ -3,11 +3,7 @@ import { useRouter } from 'expo-router';
 
 import { useProduct } from '@contexts/ProductContext';
 
-import {
-  Text, VStack, HStack, Actionsheet, ActionsheetBackdrop, ActionsheetContent,
-  Select, SelectTrigger, SelectInput, SelectPortal, SelectBackdrop,
-  SelectContent, SelectDragIndicatorWrapper, SelectItem, Box, ActionsheetItem
-} from '@gluestack-ui/themed';
+import { Text, VStack } from '@gluestack-ui/themed';
 
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -17,13 +13,10 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, View
 } from 'react-native';
 
-import { ClipboardList , DollarSign, Calendar } from 'lucide-react-native';
-
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { DropdownSelector } from '@components/DropdownSelector';
 import { ActionSheetMenu } from '@components/ActionSheetMenu';
-
 
 const generateRegisterId = (type: string) => {
   const prefix = type.trim().toUpperCase().slice(0, 3);
@@ -93,7 +86,6 @@ export function NewRegister() {
     addProduct(product);
   
     setRegisterId(newId);
-  
     reset();
     setSalePrice('');
   };
