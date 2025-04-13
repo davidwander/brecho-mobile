@@ -21,6 +21,9 @@ import { ClipboardList , DollarSign, Calendar } from 'lucide-react-native';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { DropdownSelector } from '@components/DropdownSelector';
+import { ActionSheetMenu } from '@components/ActionSheetMenu';
+
 
 const generateRegisterId = (type: string) => {
   const prefix = type.trim().toUpperCase().slice(0, 3);
@@ -183,47 +186,14 @@ export function NewRegister() {
                 name="selectedPiece"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <Select
-                  selectedValue={value}
-                  onValueChange={(itemValue) => {
-                    onChange(itemValue);
-                  }}
-                  onOpen={handleOpenDropdown}
-                >
-                  <SelectTrigger 
-                    variant="outline" 
-                    size="md"
-                    h="$12"
-                    rounded="$lg"
-                    borderColor={errors.selectedPiece ? "$red500" : "$trueGray500"}
-                  >
-                    <SelectInput
-                      placeholder="Escolha a peça"
-                      color="$white"
-                    />
-                  </SelectTrigger>
-                  <SelectPortal>
-                    <SelectBackdrop />
-                    {dropdownReady && (
-                      <SelectContent
-                        bg="$trueGray700"
-                        width="100%"
-                        borderRadius="$lg"
-                      >
-                        <SelectDragIndicatorWrapper />
-                        {PIECES.map((p) => (
-                          <SelectItem
-                            key={p}
-                            value={p.toLowerCase()}
-                            label={p}
-                            bg="$gray600"
-                            sx={{ _text: { color: "$white" } }}
-                          />
-                        ))}
-                      </SelectContent>
-                    )}
-                  </SelectPortal>
-                </Select>
+                  <DropdownSelector 
+                    value={value} 
+                    onChange={onChange} 
+                    error={!!errors.selectedPiece} 
+                    pieces={PIECES} 
+                    onOpen={handleOpenDropdown} 
+                    dropdownReady={dropdownReady}
+                  />
                 )}
               />
 
@@ -310,81 +280,11 @@ export function NewRegister() {
             </VStack>
           </ScrollView>
 
-          <Actionsheet 
+          <ActionSheetMenu
             isOpen={isOpen}
             onClose={closeSheet}
-          >
-            <ActionsheetBackdrop />
-            {sheetReady && (
-              <ActionsheetContent 
-                bg="$trueGray600" 
-                rounded="$2xl" 
-                p="$8"
-                minHeight={150}
-              >
-                <HStack 
-                  flexWrap="wrap" 
-                  justifyContent="space-evenly"
-                  alignItems="center"
-                  gap="$2"
-                  opacity={sheetReady ? 1 : 0}
-                  pointerEvents={sheetReady ? 'auto' : 'none'}
-                >
-                  <ActionsheetItem 
-                    w={80} 
-                    h={80} 
-                    p="$2" justifyContent="center"
-                  >
-                    <Box 
-                      borderWidth={1}
-                      borderColor="$purple500"
-                      w={80}
-                      h={80}
-                      rounded="$xl"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <ClipboardList color="#fff" size={36} />
-                    </Box>
-                  </ActionsheetItem>
-                  <ActionsheetItem 
-                    w={80} 
-                    h={80} 
-                    p="$2" justifyContent="center"
-                  >
-                    <Box 
-                      borderWidth={1}
-                      borderColor="$purple500"
-                      w={80}
-                      h={80}
-                      rounded="$xl"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <DollarSign color="#fff" size={36} />
-                    </Box>
-                  </ActionsheetItem>
-                  <ActionsheetItem 
-                    w={80} 
-                    h={80} 
-                    p="$2" justifyContent="center"
-                  >
-                    <Box 
-                      borderWidth={1}
-                      borderColor="$purple500"
-                      w={80}
-                      h={80}
-                      rounded="$xl"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Calendar color="#fff" size={36} />
-                    </Box>
-                  </ActionsheetItem>
-                </HStack>
-              </ActionsheetContent>
-            )}
-          </Actionsheet>
+            sheetReady={sheetReady}
+          />
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
