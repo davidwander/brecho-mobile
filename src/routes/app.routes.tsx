@@ -9,12 +9,17 @@ import { Home } from '@screens/Home';
 import { NewRegister } from '@screens/NewRegister';
 import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
+import { StockUp } from '@screens/menu/StockUp';
+import { Exits } from '@screens/menu/Exits';
+import { Calendar } from '@screens/menu/Calendar';
 
 import { 
   Home as HomeIcon,
   BadgePlus,
   Truck,
   User,
+  ClipboardList,
+  DollarSign,
 } from 'lucide-react-native';
 
 type AppRoutes = {
@@ -22,6 +27,9 @@ type AppRoutes = {
   newRegister: undefined,
   shipments: undefined,
   profile: undefined,
+  stockUp: undefined,
+  exits: undefined,
+  calendar: undefined
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;
@@ -86,6 +94,17 @@ export function AppRoutes() {
         }}
       />
 
+      <Screen 
+        name="stockUp" 
+        component={StockUp} 
+        options={{ tabBarButton: () => null }} // esconde da bottom tab
+      />
+
+      <Screen 
+        name="exits" 
+        component={Exits} 
+        options={{ tabBarButton: () => null }} // esconde da bottom tab
+      />
     </Navigator>
   )
 }

@@ -1,8 +1,7 @@
-// ActionSheetMenu.tsx
 import { useNavigation } from '@react-navigation/native';
 import { Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetItem, HStack, Box } from '@gluestack-ui/themed';
 import { ClipboardList, DollarSign, Calendar } from 'lucide-react-native';
-import { AppNavigatorRoutesProps } from '../routes/app.routes'; // ajuste o caminho conforme seu projeto
+import { AppNavigatorRoutesProps } from '../routes/app.routes'; 
 
 interface ActionSheetMenuProps {
   isOpen: boolean;
@@ -13,11 +12,10 @@ interface ActionSheetMenuProps {
 export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenuProps) {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
 
-  // Ícones com suas respectivas rotas
   const icons = [
-    { icon: ClipboardList, route: 'shipments' },
-    { icon: DollarSign, route: 'newRegister' },
-    { icon: Calendar, route: 'profile' },
+    { icon: ClipboardList, route: 'stockUp' },
+    { icon: DollarSign, route: 'exits' },
+    { icon: Calendar, route: 'calendar' },
   ];
 
   return (
@@ -46,8 +44,8 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                 p="$2" 
                 justifyContent="center"
                 onPress={() => {
-                  onClose();           // fecha o action sheet
-                  navigation.navigate(route as any); // navega para a rota
+                  onClose();           
+                  navigation.navigate(route as any);
                 }}
               >
                 <Box 
