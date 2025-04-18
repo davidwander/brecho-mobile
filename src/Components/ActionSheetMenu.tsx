@@ -1,7 +1,16 @@
+// components/ActionSheetMenu.tsx
 import { useNavigation } from '@react-navigation/native';
-import { Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetItem, HStack, Box } from '@gluestack-ui/themed';
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetItem,
+  HStack,
+  Box,
+} from '@gluestack-ui/themed';
 import { ClipboardList, DollarSign, Calendar } from 'lucide-react-native';
-import { AppNavigatorRoutesProps } from '../routes/app.routes'; 
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@routes/AppStackRoutes';
 
 interface ActionSheetMenuProps {
   isOpen: boolean;
@@ -10,7 +19,7 @@ interface ActionSheetMenuProps {
 }
 
 export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenuProps) {
-  const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const icons = [
     { icon: ClipboardList, route: 'stockUp' },
@@ -22,14 +31,14 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
     <Actionsheet isOpen={isOpen} onClose={onClose}>
       <ActionsheetBackdrop />
       {sheetReady && (
-        <ActionsheetContent 
-          bg="$trueGray600" 
-          rounded="$2xl" 
+        <ActionsheetContent
+          bg="$trueGray600"
+          rounded="$2xl"
           p="$8"
           minHeight={150}
         >
-          <HStack 
-            flexWrap="wrap" 
+          <HStack
+            flexWrap="wrap"
             justifyContent="space-evenly"
             alignItems="center"
             gap="$2"
@@ -37,18 +46,18 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
             pointerEvents={sheetReady ? 'auto' : 'none'}
           >
             {icons.map(({ icon: Icon, route }, index) => (
-              <ActionsheetItem 
+              <ActionsheetItem
                 key={index}
-                w={80} 
-                h={80} 
-                p="$2" 
+                w={80}
+                h={80}
+                p="$2"
                 justifyContent="center"
                 onPress={() => {
-                  onClose();           
-                  navigation.navigate(route as any);
+                  onClose();
+                  navigation.navigate(route as keyof RootStackParamList);
                 }}
               >
-                <Box 
+                <Box
                   borderWidth={1}
                   borderColor="$purple500"
                   w={80}
