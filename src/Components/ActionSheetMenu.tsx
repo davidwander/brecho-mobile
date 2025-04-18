@@ -54,7 +54,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                 justifyContent="center"
                 onPress={() => {
                   onClose();
-                  navigation.navigate(route as keyof RootStackParamList);
+                  navigation.navigate(route as "calendar" | "stockUp" | "exits");
                 }}
               >
                 <Box
