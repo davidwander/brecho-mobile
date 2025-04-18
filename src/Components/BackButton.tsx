@@ -18,9 +18,9 @@ const BackButton: React.FC<BackButtonProps> = ({
 }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleGoHome = () => {
+  const handleGoRegister = () => {
     navigation.navigate("tabs", {
-      screen: "home", 
+      screen: "newRegister", 
     });
   };
 
@@ -38,7 +38,7 @@ const BackButton: React.FC<BackButtonProps> = ({
         bgColor: "$trueGray500", 
         transform: [{ scale: 0.95 }], 
       }}
-      onPress={handleGoHome}
+      onPress={handleGoRegister}
     >
       <Icon as={ChartNoAxesGantt} size="xl" color={iconColor} />
     </Pressable>
