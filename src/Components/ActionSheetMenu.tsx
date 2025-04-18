@@ -1,4 +1,4 @@
-// components/ActionSheetMenu.tsx
+import { useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
   Actionsheet,
@@ -11,6 +11,8 @@ import {
 import { ClipboardList, DollarSign, Calendar } from 'lucide-react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
+import { Animated, Pressable } from 'react-native'
+
 
 interface ActionSheetMenuProps {
   isOpen: boolean;
@@ -45,31 +47,70 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
             opacity={sheetReady ? 1 : 0}
             pointerEvents={sheetReady ? 'auto' : 'none'}
           >
-            {icons.map(({ icon: Icon, route }, index) => (
-              <ActionsheetItem
-                key={index}
-                w={80}
-                h={80}
-                p="$2"
-                justifyContent="center"
-                onPress={() => {
-                  onClose();
-                  navigation.navigate(route as "calendar" | "stockUp" | "exits");
-                }}
-              >
-                <Box
-                  borderWidth={1}
-                  borderColor="$purple500"
+            {icons.map(({ icon: Icon, route }, index) => {
+              const scale = useRef(new Animated.Value(1)).current;
+
+              const onPressIn = () => {
+                Animated.spring(scale, {
+                  toValue: 0.95,
+                  useNativeDriver: true,
+                }).start();
+              };
+
+              const onPressOut = () => {
+                Animated.spring(scale, {
+                  toValue: 1,
+                  friction: 3, 
+                  tension: 40,
+                  useNativeDriver: true,
+                }).start();
+              };
+              return (
+                <ActionsheetItem
+                  key={index}
                   w={80}
                   h={80}
-                  rounded="$xl"
-                  alignItems="center"
+                  p="$2"
                   justifyContent="center"
+                  bg="transparent"
+                  $pressed={{
+                    bg: "$trueGray300",
+                    rounded: "$xl"
+                  }}
+                  $hover={{
+                    bg: "$trueGray00"
+                  }}
                 >
-                  <Icon color="#fff" size={36} />
-                </Box>
-              </ActionsheetItem>
-            ))}
+                  <Pressable 
+                    onPressIn={onPressIn} 
+                    onPressOut={onPressOut}
+                    onPress={() => {
+                      onClose();
+                      navigation.navigate(route as "calendar" | "stockUp" | "exits");
+                    }}
+                  >
+                    <Animated.View
+                      style={{
+                        transform: [{ scale }],
+                        width: 80,
+                        height: 80,
+                        backgroundColor: '#9647d6', 
+                        borderRadius: 20,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 5,
+                        elevation: 6,
+                      }}
+                    >
+                      <Icon color="#fff" size={36} />
+                    </Animated.View>
+                  </Pressable>
+                </ActionsheetItem>
+              );
+            })}
           </HStack>
         </ActionsheetContent>
       )}
