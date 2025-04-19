@@ -6,13 +6,11 @@ import {
   ActionsheetContent,
   ActionsheetItem,
   HStack,
-  Box,
 } from '@gluestack-ui/themed';
 import { ClipboardList, DollarSign, Calendar } from 'lucide-react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
-import { Animated, Pressable } from 'react-native'
-
+import { Animated, Pressable } from 'react-native';
 
 interface ActionSheetMenuProps {
   isOpen: boolean;
@@ -27,6 +25,12 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
     { icon: ClipboardList, route: 'stockUp' },
     { icon: DollarSign, route: 'exits' },
     { icon: Calendar, route: 'calendar' },
+  ];
+
+  const scales = [
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
   ];
 
   return (
@@ -48,7 +52,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
             pointerEvents={sheetReady ? 'auto' : 'none'}
           >
             {icons.map(({ icon: Icon, route }, index) => {
-              const scale = useRef(new Animated.Value(1)).current;
+              const scale = scales[index];
 
               const onPressIn = () => {
                 Animated.spring(scale, {
@@ -60,11 +64,12 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
               const onPressOut = () => {
                 Animated.spring(scale, {
                   toValue: 1,
-                  friction: 3, 
+                  friction: 3,
                   tension: 40,
                   useNativeDriver: true,
                 }).start();
               };
+
               return (
                 <ActionsheetItem
                   key={index}
@@ -82,7 +87,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                   }}
                 >
                   <Pressable 
-                    onPressIn={onPressIn} 
+                    onPressIn={onPressIn}
                     onPressOut={onPressOut}
                     onPress={() => {
                       onClose();
@@ -94,7 +99,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                         transform: [{ scale }],
                         width: 80,
                         height: 80,
-                        backgroundColor: '#9647d6', 
+                        backgroundColor: '#9647d6',
                         borderRadius: 20,
                         alignItems: 'center',
                         justifyContent: 'center',
