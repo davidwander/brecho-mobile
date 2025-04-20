@@ -29,8 +29,8 @@ export function StockUp() {
         color="$white"
         fontSize="$lg"
         fontFamily="$heading"
-        mt="$8"
-        mb="$6"
+        mt="$4"
+        mb="$4"
         lineHeight="$lg"
       >
         Estoque de Peças
@@ -41,12 +41,21 @@ export function StockUp() {
         data={["Todos", ...uniqueTypes]}
         keyExtractor={(item) => item}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ marginBottom: 1 }}
-        ItemSeparatorComponent={() => <Box width={8} />}
+        contentContainerStyle={{ paddingBottom: 4, marginBottom: 8 }}
+        style={{ maxHeight: 60 }}
+        ItemSeparatorComponent={() => <Box width={8} height={8} />}
         renderItem={({ item }) => {
           const isSelected = selectedType === item || (item === 'Todos' && selectedType === null);
           return (
             <TouchableOpacity 
+              style={{ 
+                marginBottom: 4,
+                elevation: 6,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 22,
+               }}
               onPress={() => setSelectedType(item === 'Todos' ? null : item)}
             >
               <Box
@@ -55,13 +64,17 @@ export function StockUp() {
                 bg={isSelected ? "$purple700" : "$backgroundDark700"}
                 borderRadius="$lg"
                 borderWidth={1}
+                justifyContent="center"
+                alignItems="center"
+                height={44}
                 borderColor={isSelected ? "$purple700" : "$backgroundDark500"}
               >
                 <Text
                   color={isSelected ? "$white" : "$gray300"}
-                  fontSize="$lg"
+                  fontSize="$md"
                   fontFamily="$heading"
-                  lineHeight="$md"
+                  lineHeight="$2xl"
+                  alignContent="center"
                 >
                   {item}
                 </Text>
@@ -75,7 +88,7 @@ export function StockUp() {
         data={filteredProducts}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={{ paddingBottom: 50, flexGrow: 1 }}
         renderItem={({ item }) => (
           <Box
             bg="$backgroundDark900"

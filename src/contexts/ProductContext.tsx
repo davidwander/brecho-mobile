@@ -46,6 +46,33 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       profitMargin: 100,
       salePrice: 70.00,
     },
+    {
+      id: '4',
+      name: 'Calça Jeans Skinny',
+      type: 'Calça Jeans',
+      description: 'Calça jeans azul, tamanho 38',
+      costPrice: 35.00,
+      profitMargin: 100,
+      salePrice: 70.00,
+    },
+    {
+      id: '5',
+      name: 'Calça Jeans Skinny',
+      type: 'Calça Jeans',
+      description: 'Calça jeans azul, tamanho 38',
+      costPrice: 35.00,
+      profitMargin: 100,
+      salePrice: 70.00,
+    },
+    {
+      id: '6',
+      name: 'Calça Jeans Skinny',
+      type: 'Calça Jeans',
+      description: 'Calça jeans azul, tamanho 38',
+      costPrice: 35.00,
+      profitMargin: 100,
+      salePrice: 70.00,
+    },
   ]);
 
   const addProduct = (product: Product) => {
