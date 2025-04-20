@@ -4,6 +4,7 @@ import { FlatList, TouchableOpacity, Modal } from 'react-native';
 import { VStack, HStack, Text, Box, Button } from '@gluestack-ui/themed';
 
 import { Eye, EyeOff } from 'lucide-react-native';
+import BackButton from '@components/BackButton';
 
 
 export function StockUp() {
@@ -23,6 +24,7 @@ export function StockUp() {
 
   return (
     <VStack flex={1} px="$3" pt="$12" pb="$10">
+      <BackButton />
       <Text
         color="$white"
         fontSize="$lg"

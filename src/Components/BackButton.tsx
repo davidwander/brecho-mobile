@@ -10,11 +10,14 @@ interface BackButtonProps {
   style?: ViewStyle;
   iconColor?: string;
   iconSize?: number;
+  absolute?: boolean;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({
   style,
-  iconColor = "white"
+  iconColor = "white",
+  iconSize = 24,
+  absolute = false,
 }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -26,13 +29,16 @@ const BackButton: React.FC<BackButtonProps> = ({
 
   return (
     <Pressable
-      position="absolute"
-      top="$14"
-      left="$4"
-      zIndex={100}
+      {...(absolute && {
+        position: "absolute",
+        top: "$12",
+        left: "$4",
+        zIndex: 100 ,
+      })}
       bgColor="$trueGray600" 
       borderRadius="$full" 
       p="$3" 
+      alignSelf="flex-start"
       style={style} 
       $pressed={{
         bgColor: "$trueGray500", 
