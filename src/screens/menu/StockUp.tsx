@@ -5,7 +5,7 @@ import { VStack, HStack, Text, Box, Button } from '@gluestack-ui/themed';
 
 import { Eye, EyeOff } from 'lucide-react-native';
 import BackButton from '@components/BackButton';
-
+import ProductDetailsModal from '@components/ProductDetailsModal';
 
 export function StockUp() {
   const { products } = useProduct();
@@ -166,47 +166,12 @@ export function StockUp() {
         }
       />
 
-      <Modal
+      <ProductDetailsModal 
         visible={!!selectedItem}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSelectedItem(null)}
-      >
-         <Box
-          flex={1}
-          justifyContent="center"
-          alignItems="center"
-          bg="rgba(0,0,0,0.6)"
-        >
-          <Box
-            bg="$backgroundDark900"
-            p="$6"
-            borderRadius="$2xl"
-            width="90%"
-          >
-            <Text fontSize="$lg" fontFamily="$heading" color="$white" mb="$4">
-              Detalhes da Peça
-            </Text>
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
 
-            <Text color="$white" mb="$1">Nome: {selectedItem?.name}</Text>
-            <Text color="$white" mb="$1">Tipo: {selectedItem?.type}</Text>
-            <Text color="$white" mb="$1">Descrição: {selectedItem?.description}</Text>
-            <Text color="$white" mb="$1">Código: {selectedItem?.id}</Text>
-            <Text color="$red400" mb="$1">Preço de Custo: R$ {selectedItem?.costPrice?.toFixed(2).replace('.', ',')}</Text>
-            <Text color="$green400" mb="$4">Preço de Venda: R$ {selectedItem?.salePrice?.toFixed(2).replace('.', ',')}</Text>
-
-            <Button 
-              w="$16" 
-              alignSelf="flex-end" 
-              bg="$purple700" 
-              rounded="$xl"
-              onPress={() => setSelectedItem(null)} 
-            >
-              <EyeOff color="white" />
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </VStack>
   );
 }
