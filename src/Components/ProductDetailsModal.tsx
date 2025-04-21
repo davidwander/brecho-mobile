@@ -70,7 +70,7 @@ export default function ProductDetailsModal({
             rounded="$xl"
             onPress={onClose}
           >
-            <EyeOff color="white" />
+            <EyeOff color="white" size={28} />
           </Button>
         </Box>
       </Box>

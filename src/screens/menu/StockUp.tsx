@@ -161,7 +161,7 @@ export function StockUp() {
             </VStack>
 
             <Button 
-              w="$20"
+              w="$16"
               alignSelf="flex-end"
               bg="$purple700"
               rounded="$xl"
