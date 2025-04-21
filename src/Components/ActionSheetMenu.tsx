@@ -22,9 +22,9 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const icons = [
-    { icon: ClipboardList, route: 'stockUp' },
-    { icon: DollarSign, route: 'exits' },
-    { icon: Calendar, route: 'calendar' },
+    { icon: ClipboardList, route: "stockUp" },
+    { icon: DollarSign, route: "exits" },
+    { icon: Calendar, route: "calendar" },
   ];
 
   const scales = [
@@ -49,7 +49,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
             alignItems="center"
             gap="$2"
             opacity={sheetReady ? 1 : 0}
-            pointerEvents={sheetReady ? 'auto' : 'none'}
+            pointerEvents={sheetReady ? "auto" : "none"}
           >
             {icons.map(({ icon: Icon, route }, index) => {
               const scale = scales[index];
@@ -101,8 +101,8 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                         height: 80,
                         backgroundColor: '#9647d6',
                         borderRadius: 20,
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        alignItems: "center",
+                        justifyContent: "center",
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: 0.3,

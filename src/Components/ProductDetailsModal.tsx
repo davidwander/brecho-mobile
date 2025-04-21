@@ -57,10 +57,10 @@ export default function ProductDetailsModal({
             COD: {item?.id}
           </Text>
           <Text color="$red400" mb="$2" lineHeight="$md">
-            Preço de Custo: R$ {item?.costPrice?.toFixed(2).replace('.', ',')}
+            Preço de Custo: R$ {item?.costPrice?.toFixed(2).replace(".", ",")}
           </Text>
           <Text color="$green400" mb="$4" lineHeight="$md">
-            Preço de Venda: R$ {item?.salePrice?.toFixed(2).replace('.', ',')}
+            Preço de Venda: R$ {item?.salePrice?.toFixed(2).replace(".", ",")}
           </Text>
 
           <Button

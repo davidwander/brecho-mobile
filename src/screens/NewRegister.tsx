@@ -25,8 +25,8 @@ const generateRegisterId = (type: string) => {
 };
 
 const PIECES = [
-  'Blusa', 'Camisa', 'Camiseta', 'T-Shirt', 'Top', 'Saia', 'Short',
-  'Calça', 'Vestido', 'Calçados', 'Acessórios'
+  "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
+  "Calça", "Vestido", "Calçados", "Acessórios"
 ];
 
 type FormDataProps = {
@@ -47,10 +47,10 @@ export function NewRegister() {
   const { control, handleSubmit, formState: { errors }, reset, setValue, clearErrors } = useForm <FormDataProps>({
     resolver: yupResolver(newRegisterSchema),
     defaultValues: {
-      description: '',
-      costPrice: '',
-      profitMargin: '',
-      selectedPiece: '',
+      description: "",
+      costPrice: "",
+      profitMargin: "",
+      selectedPiece: "",
     },
   })
 
@@ -67,8 +67,8 @@ export function NewRegister() {
   const [sheetReady, setSheetReady] = useState(false);
 
   const handleRegister = (data: FormDataProps) => {
-    const cost = parseFloat(data.costPrice.replace(',', '.'));
-    const margin = parseFloat(data.profitMargin.replace('%', ''));
+    const cost = parseFloat(data.costPrice.replace(",", "."));
+    const margin = parseFloat(data.profitMargin.replace("%", ""));
     const sale = cost + (cost * (margin / 100));
 
     const newId = generateRegisterId(data.selectedPiece);
@@ -87,27 +87,27 @@ export function NewRegister() {
   
     setRegisterId(newId);
     reset();
-    setSalePrice('');
+    setSalePrice("");
   };
 
   const handleProfitMarginChange = (text: string) => {
-    const numeric = text.replace(/[^0-9]/g, '');
+    const numeric = text.replace(/[^0-9]/g, "");
     setRawProfitMargin(numeric);
-    setValue('profitMargin', numeric);
+    setValue("profitMargin", numeric);
     if (numeric !== "") {
       clearErrors('profitMargin');
     }
   };
 
   const handleProfitMarginBlur = () => {
-    if (rawProfitMargin) setValue('profitMargin', `${rawProfitMargin}%`);
-    else setValue('profitMargin', '');
+    if (rawProfitMargin) setValue("profitMargin", `${rawProfitMargin}%`);
+    else setValue("profitMargin", "");
   };
 
   const handleCostPriceChange = (text: string) => {
     const numeric = text.replace(/[^0-9,]/g, '').replace(',', '.');
     setRawCostPrice(numeric);
-    setValue('costPrice', numeric);
+    setValue("costPrice", numeric);
     if (numeric !== "") {
       clearErrors('costPrice');
     }
@@ -116,9 +116,9 @@ export function NewRegister() {
   const handleCostPriceBlur = () => {
     if (rawCostPrice) {
       const formatted = `R$ ${parseFloat(rawCostPrice).toFixed(2).replace('.', ',')}`;
-      setValue('costPrice', formatted);
+      setValue("costPrice", formatted);
     } else {
-      setValue('costPrice', '');
+      setValue("costPrice", "");
     }
     calculateSalePrice();
   };
@@ -151,14 +151,14 @@ export function NewRegister() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, backgroundColor: '#262626' }}>
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,
-              justifyContent: 'center',
+              justifyContent: "center",
               paddingVertical: 40,
               paddingHorizontal: 20,
             }}
