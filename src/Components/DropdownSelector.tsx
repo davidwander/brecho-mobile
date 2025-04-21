@@ -1,4 +1,18 @@
-import { Select, SelectTrigger, SelectInput, SelectPortal, SelectBackdrop, SelectContent, SelectDragIndicatorWrapper, SelectItem } from '@gluestack-ui/themed';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+} from '@gluestack-ui/themed';
+
+export const PIECES = [
+  "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
+  "Calça", "Vestido", "Calçados", "Acessórios"
+];
 
 interface DropdownSelectorProps {
   value: string;

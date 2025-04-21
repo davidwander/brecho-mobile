@@ -1,25 +1,24 @@
 import { useProduct } from '@contexts/ProductContext';
 import { useState, useMemo } from 'react';
-import { FlatList, TouchableOpacity, Modal } from 'react-native';
+import { FlatList, TouchableOpacity } from 'react-native';
 import { VStack, HStack, Text, Box, Button } from '@gluestack-ui/themed';
-
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye,Tag, DollarSign } from 'lucide-react-native';
 import BackButton from '@components/BackButton';
 import ProductDetailsModal from '@components/ProductDetailsModal';
 
 export function StockUp() {
-  const { products } = useProduct();
+  const { products } = useProduct(); 
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const uniqueTypes = useMemo(() => {
-    const types = products.map(p => p.type);
-    return Array.from(new Set(types));
-  }, [products]);
+  const allTypes = [
+    "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
+    "Calça", "Vestido", "Calçados", "Acessórios"
+  ];
 
   const filteredProducts = useMemo(() => {
-    if (!selectedType) return products;
-    return products.filter(p => p.type === selectedType);
+    if (!selectedType) return products;  
+    return products.filter(p => p.type === selectedType); 
   }, [products, selectedType]);
 
   return (
@@ -38,7 +37,7 @@ export function StockUp() {
 
       <FlatList
         horizontal
-        data={["Todos", ...uniqueTypes]}
+        data={["Todos", ...allTypes]} 
         keyExtractor={(item) => item}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 8, marginBottom: 8 }}
@@ -55,7 +54,7 @@ export function StockUp() {
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.2,
                 shadowRadius: 22,
-               }}
+              }}
               onPress={() => setSelectedType(item === 'Todos' ? null : item)}
             >
               <Box
@@ -91,66 +90,89 @@ export function StockUp() {
         contentContainerStyle={{ paddingBottom: 50, flexGrow: 1 }}
         renderItem={({ item }) => (
           <Box
-            bg="$backgroundDark900"
-            p="$4"
-            borderRadius="$2xl"
+            bg="$backgroundDark800"
+            p="$5"
+            borderRadius="$3xl"
             mb="$4"
+            borderWidth={1}
+            borderColor="$trueGray800"
             style={{
-              elevation: 6,
+              elevation: 3,
               shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 22,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 12,
             }}
           >
-            <HStack justifyContent="space-between" alignItems="center" mb="$3">
-              <Text
-                color="$white"
-                fontSize="$lg"
-                fontFamily="$heading"
-                lineHeight="$md"
-              >
-                {item.type}
-              </Text>
-              <Box
-                px="$3"
-                py="$2"
-                bg="$gray700"
-                borderRadius="$sm"
-              >
-                <VStack alignItems="center" gap="$1">
-                  <Text 
-                    fontSize="$md" 
-                    color="$green500" 
-                    lineHeight="$sm"
-                    fontWeight="$bold"
-                  >
-                    {item.name}
-                  </Text>
+            <HStack 
+              justifyContent="space-between" 
+              alignItems="flex-start" 
+              mb="$6"
+            >
+              <VStack flex={1}>
+                <Text
+                  color="$white"
+                  fontSize="$2xl"
+                  fontFamily="$heading"
+                  lineHeight="$lg"
+                >
+                  {item.type}
+                </Text>
+                <Text 
+                  fontSize="$md" 
+                  color="$green500" 
+                  fontFamily="$body"
+                  mt="$2"
+                  lineHeight="$md"
+                  numberOfLines={2}
+                  style={{ maxWidth: 180 }}
+                >
+                  {item.description}
+                </Text>
+              </VStack>
 
-                  <Text color="$trueGray400">
-                    COD: 123456
-                  </Text>
-                </VStack>
+              <Box
+                px="$1"
+                py="$0"
+                alignItems="flex-end"
+              >
+                <Text color="$trueGray300" fontSize="$sm">
+                  COD:
+                </Text>
+                <Text color="$trueGray100" fontSize="$xl">
+                  {item.id}
+                </Text>
               </Box>
             </HStack>
 
-            <Text
-              color="$white"
-              fontSize="$sm"
-              lineHeight="$md"
-            >
-              {item.description}
-            </Text>
+            <VStack gap="$2" mb="$1">
+              <HStack alignItems="center" gap="$2">
+                <DollarSign size={22} color="#888" />
+                <Text color="$white" fontSize="$sm">
+                  Custo: R$ {item.costPrice}
+                </Text>
+              </HStack>
+              <HStack alignItems="center" gap="$2">
+                <Tag size={22} color="#888" />
+                <Text color="$white" fontSize="$sm">
+                  Venda: R$ {item.salePrice}
+                </Text>
+              </HStack>
+            </VStack>
 
             <Button 
-              w="$16" 
-              alignSelf="flex-end" 
-              bg="$purple700" 
+              w="$20"
+              alignSelf="flex-end"
+              bg="$purple700"
               rounded="$xl"
               onPress={() => setSelectedItem(item)}
+              style={{
+                transform: [{ scale: 1 }],
+              }}
             >
-              <Eye color="white" />
+              <HStack alignItems="center" justifyContent="center" gap="$2">
+                <Eye color="white" size={28} />
+              </HStack>
             </Button>
           </Box>
         )}
@@ -168,10 +190,9 @@ export function StockUp() {
 
       <ProductDetailsModal 
         visible={!!selectedItem}
-        item={selectedItem}
-        onClose={() => setSelectedItem(null)}
+        item={selectedItem} 
+        onClose={() => setSelectedItem(null)} 
       />
-
     </VStack>
   );
 }
