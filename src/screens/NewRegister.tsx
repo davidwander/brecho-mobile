@@ -52,7 +52,10 @@ export function NewRegister() {
   const [sheetReady, setSheetReady] = useState(false);
 
   const handleRegister = (data: FormDataProps) => {
-    const cost = parseFloat(data.costPrice.replace(",", "."));
+    const cost = parseFloat(data.costPrice
+      .replace("R$", "")
+      .replace(",", ".")
+      .trim());
     const margin = parseFloat(data.profitMargin.replace("%", ""));
     const sale = cost + (cost * (margin / 100));
 
@@ -66,6 +69,7 @@ export function NewRegister() {
       costPrice: cost,
       profitMargin: margin,
       salePrice: sale,
+      createdAt: new Date().toISOString()
     };
 
     addProduct(product);
