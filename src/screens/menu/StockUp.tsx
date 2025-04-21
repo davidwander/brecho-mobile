@@ -23,11 +23,11 @@ export function StockUp() {
   }, [products, selectedType]);
 
   return (
-    <VStack flex={1} px="$3" pt="$12" pb="$10">
+    <VStack flex={1} px="$3" pt="$14" pb="$12" gap="$2">
       <BackButton />
       <Text
         color="$white"
-        fontSize="$lg"
+        fontSize="$xl"
         fontFamily="$heading"
         mt="$4"
         mb="$4"
@@ -41,9 +41,9 @@ export function StockUp() {
         data={["Todos", ...uniqueTypes]}
         keyExtractor={(item) => item}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 4, marginBottom: 8 }}
-        style={{ maxHeight: 60 }}
-        ItemSeparatorComponent={() => <Box width={8} height={8} />}
+        contentContainerStyle={{ paddingBottom: 8, marginBottom: 8 }}
+        style={{ maxHeight: 80 }}
+        ItemSeparatorComponent={() => <Box width={8} height={6} />}
         renderItem={({ item }) => {
           const isSelected = selectedType === item || (item === 'Todos' && selectedType === null);
           return (

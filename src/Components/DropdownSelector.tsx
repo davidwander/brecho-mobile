@@ -26,9 +26,9 @@ export function DropdownSelector({
       <SelectTrigger 
         variant="outline" 
         size="md"
-        h="$12"
-        rounded="$lg"
-        borderColor={error ? "$red500" : "$trueGray500"}
+        h="$14"
+        rounded="$xl"
+        borderColor={error ? "$red500" : "$purple700"}
       >
         <SelectInput
           placeholder="Escolha a peça"
@@ -43,7 +43,7 @@ export function DropdownSelector({
             width="100%"
             borderRadius="$lg"
           >
-            <SelectDragIndicatorWrapper />
+            <SelectDragIndicatorWrapper alignItems="center" />
             {pieces.map((p) => (
               <SelectItem
                 key={p}

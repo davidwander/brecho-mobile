@@ -167,7 +167,7 @@ export function NewRegister() {
             <VStack space="md">
               <Text 
                 color="$white" 
-                fontSize="$lg" 
+                fontSize="$2xl" 
                 fontFamily="$heading" 
                 lineHeight="$xl"
               >
