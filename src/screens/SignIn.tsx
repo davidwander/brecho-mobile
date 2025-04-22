@@ -112,7 +112,7 @@ export function SignIn() {
             />
           </Center>
 
-          <Center flex={1} justifyContent="flex-end" mt="$4">
+          <Center                   >
             <Text
               color="$textLight400"
               mb="$3"
