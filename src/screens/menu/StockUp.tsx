@@ -18,7 +18,9 @@ export function StockUp() {
 
   const filteredProducts = useMemo(() => {
     if (!selectedType) return products;  
-    return products.filter(p => p.type === selectedType); 
+    return products.filter(
+      p => p.type?.toLowerCase().trim() === selectedType.toLowerCase().trim()
+    ); 
   }, [products, selectedType]);
 
   return (
