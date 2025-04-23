@@ -27,7 +27,7 @@ export function Button({
     >
       {
         isLoading ? (
-          <ButtonSpinner color="$textLight400" size="small" />
+          <ButtonSpinner color="$textLight400" size="large" />
         ) : (
           <Text 
           color={variant === "outline" ? "$purple500" : "$textLight400" }

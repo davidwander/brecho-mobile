@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useProduct } from '@contexts/ProductContext';
 import { Text, VStack } from '@gluestack-ui/themed';
+
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
+
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { DropdownSelector, PIECES } from '@components/DropdownSelector';
 import { ActionSheetMenu } from '@components/ActionSheetMenu';
+import { ButtonSpinner } from '@gluestack-ui/themed';
+
 
 const generateRegisterId = (type: string) => {
   const prefix = type.trim().toUpperCase().slice(0, 3);
@@ -51,34 +55,42 @@ export function NewRegister() {
   const [dropdownReady, setDropdownReady] = useState(false);
   const [sheetReady, setSheetReady] = useState(false);
 
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+
   const handleRegister = (data: FormDataProps) => {
-    const cost = parseFloat(data.costPrice
-      .replace("R$", "")
-      .replace(",", ".")
-      .trim());
-    const margin = parseFloat(data.profitMargin.replace("%", ""));
-    const sale = cost + (cost * (margin / 100));
+    setIsRegistering(true);
+    setTimeout(() => {
+      const cost = parseFloat(data.costPrice
+        .replace("R$", "")
+        .replace(",", ".")
+        .trim());
+      const margin = parseFloat(data.profitMargin.replace("%", ""));
+      const sale = cost + (cost * (margin / 100));
+  
+      const newId = generateRegisterId(data.selectedPiece);
+  
+      const product = {
+        id: newId,
+        name: data.selectedPiece,
+        type: data.selectedPiece,
+        description: data.description,
+        costPrice: cost,
+        profitMargin: margin,
+        salePrice: sale,
+        createdAt: new Date().toISOString()
+      };
+  
+      addProduct(product);
+  
+      setRegisterId(newId);
+      reset();
+      setRawCostPrice("");
+      setRawProfitMargin("");
+      setSalePrice("");
 
-    const newId = generateRegisterId(data.selectedPiece);
-
-    const product = {
-      id: newId,
-      name: data.selectedPiece,
-      type: data.selectedPiece,
-      description: data.description,
-      costPrice: cost,
-      profitMargin: margin,
-      salePrice: sale,
-      createdAt: new Date().toISOString()
-    };
-
-    addProduct(product);
-
-    setRegisterId(newId);
-    reset();
-    setRawCostPrice("");
-    setRawProfitMargin("");
-    setSalePrice("");
+      setIsRegistering(false);
+    }, 700);
   };
 
   const handleProfitMarginChange = (text: string) => {
@@ -113,12 +125,16 @@ export function NewRegister() {
   };
 
   const calculateSalePrice = () => {
-    const cost = parseFloat(rawCostPrice);
-    const margin = parseFloat(rawProfitMargin);
-    if (!isNaN(cost) && !isNaN(margin)) {
-      const sale = cost + (cost * (margin / 100));
-      setSalePrice(`R$ ${sale.toFixed(2).replace(".", ",")}`);
-    }
+    setIsCalculating(true);
+    setTimeout(() => {
+      const cost = parseFloat(rawCostPrice);
+      const margin = parseFloat(rawProfitMargin);
+      if (!isNaN(cost) && !isNaN(margin)) {
+        const sale = cost + (cost * (margin / 100));
+        setSalePrice(`R$ ${sale.toFixed(2).replace(".", ",")}`);
+      }
+      setIsCalculating(false);
+    }, 500);
   };
 
   const handleOpenDropdown = () => {
@@ -227,8 +243,9 @@ export function NewRegister() {
               />
 
               <Button 
-                title="Calcular Preço de Venda" 
+                title="Calcular valor de venda"
                 onPress={calculateSalePrice} 
+                isLoading={isCalculating}
               />
               <Input 
                 placeholder="Preço de Venda" 
@@ -241,6 +258,7 @@ export function NewRegister() {
               <Button 
                 title="Gerar Novo Registro" 
                 onPress={handleSubmit(handleRegister)} 
+                isLoading={isRegistering}
               />
               <Button 
                 title="Abrir Menu" 
