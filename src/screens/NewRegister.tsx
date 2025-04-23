@@ -244,7 +244,7 @@ export function NewRegister() {
 
               <Button 
                 title="Calcular valor de venda"
-                onPress={calculateSalePrice} 
+                onPress={handleSubmit(() => calculateSalePrice())} 
                 isLoading={isCalculating}
               />
               <Input 
