@@ -1,6 +1,8 @@
 import { useForm, Controller } from 'react-hook-form';
 import { ScrollView } from 'react-native';
 import { VStack, Text, Center, Box } from '@gluestack-ui/themed';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,24 +12,27 @@ import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
-type ClientFormData = {
-  name: string;
+type FormDataProps = {
+  nameClient: string;
   cpf: string;
   address: string;
 };
 
+const exitsSchema = yup.object({
+  nameClient: yup.string().required("Informe o nome do(a) cliente"),
+  cpf: yup.string().required("Informe o CPF").min(11, "CFP invalido!"),
+  address: yup.string().required("Informe o endereço")
+})
+
 export function Exits() {
-  const { control, handleSubmit } = useForm<ClientFormData>({
-    defaultValues: {
-      name: '',
-      cpf: '',
-      address: '',
-    },
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>
+  ({
+    resolver: yupResolver(exitsSchema)
   });
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const onSubmit = (data: ClientFormData) => {
+  const handleFormSubmit = (data: FormDataProps) => {
     console.log('Dados do cliente:', data);
     navigation.navigate('stockUp');
   };
@@ -42,32 +47,56 @@ export function Exits() {
 
         <VStack space="md" w="100%">
           <Controller
+            name="nameClient"
             control={control}
-            name="name"
-            render={({ field: { onChange, value } }) => (
-              <Input placeholder="Nome do Cliente" value={value} onChangeText={onChange} />
-            )}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Input 
+                  placeholder="Nome do(a) Cliente" 
+                  autoCapitalize="none"
+                  value={value} 
+                  onChangeText=  {onChange} 
+                  errorMessage={errors.nameClient?.message}
+                />
+              )
+            }}
           />
           <Controller
-            control={control}
             name="cpf"
-            render={({ field: { onChange, value } }) => (
-              <Input placeholder="CPF" keyboardType="numeric" value={value} onChangeText={onChange} />
-            )}
+            control={control}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Input 
+                  placeholder="CPF" 
+                  keyboardType="numeric" 
+                  value={value} 
+                  onChangeText={onChange} 
+                  errorMessage={errors.cpf?.message}
+                />
+              )
+            }}
           />
           <Controller
-            control={control}
             name="address"
-            render={({ field: { onChange, value } }) => (
-              <Input placeholder="Endereço" value={value} onChangeText={onChange} />
-            )}
+            control={control}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Input 
+                  placeholder="Endereço" 
+                  autoCapitalize="none"
+                  value={value} 
+                  onChangeText={onChange} 
+                  errorMessage={errors.address?.message}
+                />
+              )
+            }}
           />
 
           <Center mt="$4">
             <Button
               title="Adicionar peças"
               variant="solid"
-              onPress={() => navigation.navigate("stockUp")}
+              onPress={handleSubmit(handleFormSubmit)}
             />
           </Center>
         </VStack>
