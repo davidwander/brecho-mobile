@@ -112,13 +112,13 @@ export function StockUp() {
             <HStack justifyContent="space-between" alignItems="center" mb="$3">
               <HStack alignItems="center" space="md" flex={1}>
                 <Checkbox
-                  value={item.type}
-                  isChecked={selectedProducts.includes(item.type)}
+                  value={item.id}
+                  isChecked={selectedProducts.includes(item.id)}
                   onChange={() => {
                     setSelectedProducts((prev) =>
-                      prev.includes(item.type)
-                        ? prev.filter(id => id !== item.type)
-                        : [...prev, item.type]
+                      prev.includes(item.id)
+                        ? prev.filter(id => id !== item.id)
+                        : [...prev, item.id]
                     );
                   }}
                   aria-label="Selecionar peça"
@@ -159,10 +159,8 @@ export function StockUp() {
               </Box>
             </HStack>
         
-            {/* Linha separadora */}
             <Box my="$3" h={1} bg="$trueGray500" borderRadius={2} />
         
-            {/* Parte inferior: descrição, preços, botão */}
             <HStack
               mt="$3"
               alignItems="center"
@@ -170,10 +168,6 @@ export function StockUp() {
               flexWrap="wrap"
               gap="$4"
             >
-              {/* Descrição */}
-             
-
-              {/* Preço de custo */}
               <HStack alignItems="center" gap="$1">
                 <DollarSign size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
@@ -181,7 +175,6 @@ export function StockUp() {
                 </Text>
               </HStack>
 
-              {/* Preço de venda */}
               <HStack alignItems="center" gap="$1">
                 <Tag size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
@@ -189,7 +182,6 @@ export function StockUp() {
                 </Text>
               </HStack>
 
-              {/* Botão de visualizar */}
               <Button
                 w="$16"
                 bg="$purple700"
