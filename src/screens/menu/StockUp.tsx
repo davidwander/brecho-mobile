@@ -154,7 +154,7 @@ export function StockUp() {
                   COD:
                 </Text>
                 <Text color="$trueGray100" fontSize="$xl">
-                  {item.type}
+                  {item.id}
                 </Text>
               </Box>
             </HStack>
