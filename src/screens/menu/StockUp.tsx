@@ -95,18 +95,18 @@ export function StockUp() {
         contentContainerStyle={{ paddingBottom: 50, flexGrow: 1 }}
         renderItem={({ item }) => (
           <Box
-            bg="$backgroundDark800"
+            bg="$backgroundDark900"
             p="$5"
             borderRadius="$3xl"
             mb="$4"
             borderWidth={1}
             borderColor="$trueGray800"
             style={{
-              elevation: 8,
+              elevation: 10,
               shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 28,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 12,
             }}
           >
             <HStack justifyContent="space-between" alignItems="center" mb="$3">
