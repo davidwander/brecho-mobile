@@ -2,14 +2,16 @@ import { useProduct } from '@contexts/ProductContext';
 import { useState, useMemo } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { VStack, HStack, Text, Box, Button } from '@gluestack-ui/themed';
-import { Eye,Tag, DollarSign } from 'lucide-react-native';
+import { Eye,Tag, DollarSign, Check } from 'lucide-react-native';
 import BackButton from '@components/BackButton';
 import ProductDetailsModal from '@components/ProductDetailsModal';
+import { Checkbox } from '@gluestack-ui/themed';
 
 export function StockUp() {
   const { products } = useProduct(); 
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   const allTypes = [
     "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
@@ -112,14 +114,45 @@ export function StockUp() {
               mb="$6"
             >
               <VStack flex={1}>
-                <Text
-                  color="$white"
-                  fontSize="$2xl"
-                  fontFamily="$heading"
-                  lineHeight="$lg"
-                >
-                  {item.type}
-                </Text>
+                <HStack alignItems="center" space="md">
+                  <Checkbox
+                    value={item.id}
+                    isChecked={selectedProducts.includes(item.id)}
+                    onChange={() => {
+                      setSelectedProducts((prev) =>
+                        prev.includes(item.id)
+                          ? prev.filter(id => id !== item.id)
+                          : [...prev, item.id]
+                      );
+                    }}
+                    aria-label="Selecionar peça" 
+                    size="lg"
+                    borderWidth={2}
+                    borderColor="$purple700"
+                    borderRadius="$md"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Checkbox.Indicator 
+                      bg="$purple600"
+                      borderWidth={0}
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Checkbox.Icon as={Check} color="white" size="lg" />
+                    </Checkbox.Indicator>
+                  </Checkbox>
+
+                  <Text
+                    color="$white"
+                    fontSize="$2xl"
+                    fontFamily="$heading"
+                    lineHeight="$lg"
+                  >
+                    {item.type}
+                  </Text>
+                </HStack>
+
                 <Text 
                   fontSize="$md" 
                   color="$green500" 
@@ -133,11 +166,7 @@ export function StockUp() {
                 </Text>
               </VStack>
 
-              <Box
-                px="$1"
-                py="$0"
-                alignItems="flex-end"
-              >
+              <Box px="$1" py="$0" alignItems="flex-end">
                 <Text color="$trueGray300" fontSize="$sm">
                   COD:
                 </Text>
