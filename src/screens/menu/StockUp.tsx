@@ -30,11 +30,12 @@ export function StockUp() {
       <BackButton />
       <Text
         color="$white"
-        fontSize="$xl"
+        fontSize="$2xl"
         fontFamily="$heading"
         mt="$4"
         mb="$4"
         lineHeight="$lg"
+        alignSelf="center"
       >
         Estoque de Peças
       </Text>
@@ -101,112 +102,109 @@ export function StockUp() {
             borderWidth={1}
             borderColor="$trueGray800"
             style={{
-              elevation: 3,
+              elevation: 8,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.1,
-              shadowRadius: 12,
+              shadowRadius: 28,
             }}
           >
-            <HStack 
-              justifyContent="space-between" 
-              alignItems="flex-start" 
-              mb="$6"
-            >
-              <VStack flex={1}>
-                <HStack alignItems="center" space="md">
-                  <Checkbox
-                    value={item.id}
-                    isChecked={selectedProducts.includes(item.id)}
-                    onChange={() => {
-                      setSelectedProducts((prev) =>
-                        prev.includes(item.id)
-                          ? prev.filter(id => id !== item.id)
-                          : [...prev, item.id]
-                      );
-                    }}
-                    aria-label="Selecionar peça" 
-                    size="lg"
-                    borderWidth={2}
-                    borderColor="$purple700"
-                    borderRadius="$md"
+            <HStack justifyContent="space-between" alignItems="center" mb="$3">
+              <HStack alignItems="center" space="md" flex={1}>
+                <Checkbox
+                  value={item.type}
+                  isChecked={selectedProducts.includes(item.type)}
+                  onChange={() => {
+                    setSelectedProducts((prev) =>
+                      prev.includes(item.type)
+                        ? prev.filter(id => id !== item.type)
+                        : [...prev, item.type]
+                    );
+                  }}
+                  aria-label="Selecionar peça"
+                  size="lg"
+                  borderWidth={2}
+                  borderColor="$purple700"
+                  borderRadius="$md"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Checkbox.Indicator
+                    bg="$purple600"
+                    borderWidth={0}
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <Checkbox.Indicator 
-                      bg="$purple600"
-                      borderWidth={0}
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Checkbox.Icon as={Check} color="white" size="lg" />
-                    </Checkbox.Indicator>
-                  </Checkbox>
-
-                  <Text
-                    color="$white"
-                    fontSize="$2xl"
-                    fontFamily="$heading"
-                    lineHeight="$lg"
-                  >
-                    {item.type}
-                  </Text>
-                </HStack>
-
-                <Text 
-                  fontSize="$md" 
-                  color="$green500" 
-                  fontFamily="$body"
-                  mt="$2"
-                  lineHeight="$md"
-                  numberOfLines={2}
-                  style={{ maxWidth: 180 }}
+                    <Checkbox.Icon as={Check} color="white" size="lg" />
+                  </Checkbox.Indicator>
+                </Checkbox>
+        
+                <Text
+                  color="$white"
+                  fontSize="$2xl"
+                  fontFamily="$heading"
+                  lineHeight="$lg"
                 >
-                  {item.description}
+                  {item.type}
                 </Text>
-              </VStack>
-
+              </HStack>
+        
               <Box px="$1" py="$0" alignItems="flex-end">
                 <Text color="$trueGray300" fontSize="$sm">
                   COD:
                 </Text>
                 <Text color="$trueGray100" fontSize="$xl">
-                  {item.id}
+                  {item.type}
                 </Text>
               </Box>
             </HStack>
+        
+            {/* Linha separadora */}
+            <Box my="$3" h={1} bg="$trueGray500" borderRadius={2} />
+        
+            {/* Parte inferior: descrição, preços, botão */}
+            <HStack
+              mt="$3"
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              gap="$4"
+            >
+              {/* Descrição */}
+             
 
-            <VStack gap="$2" mb="$1">
-              <HStack alignItems="center" gap="$2">
-                <DollarSign size={22} color="#888" />
+              {/* Preço de custo */}
+              <HStack alignItems="center" gap="$1">
+                <DollarSign size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
                   Custo: R$ {item.costPrice}
                 </Text>
               </HStack>
-              <HStack alignItems="center" gap="$2">
-                <Tag size={22} color="#888" />
+
+              {/* Preço de venda */}
+              <HStack alignItems="center" gap="$1">
+                <Tag size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
                   Venda: R$ {item.salePrice}
                 </Text>
               </HStack>
-            </VStack>
 
-            <Button 
-              w="$16"
-              alignSelf="flex-end"
-              bg="$purple700"
-              rounded="$xl"
-              onPress={() => setSelectedItem(item)}
-              style={{
-                transform: [{ scale: 1 }],
-              }}
-            >
-              <HStack alignItems="center" justifyContent="center" gap="$2">
-                <Eye color="white" size={28} />
-              </HStack>
-            </Button>
+              {/* Botão de visualizar */}
+              <Button
+                w="$16"
+                bg="$purple700"
+                rounded="$xl"
+                onPress={() => setSelectedItem(item)}
+              >
+                <HStack alignItems="center" justifyContent="center">
+                  <Eye color="white" size={24} />
+                </HStack>
+              </Button>
+            </HStack>
+
           </Box>
         )}
+        
         ListEmptyComponent={
           <Text
             color="$gray400"
