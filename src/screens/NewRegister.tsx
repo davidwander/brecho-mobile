@@ -243,7 +243,7 @@ export function NewRegister() {
               />
 
               <Button 
-                title="Calcular valor de venda"
+                title="Calcular preço de venda"
                 onPress={handleSubmit(() => calculateSalePrice())} 
                 isLoading={isCalculating}
               />

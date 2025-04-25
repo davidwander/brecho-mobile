@@ -18,7 +18,7 @@ import {
   Center 
 } from '@gluestack-ui/themed';
 import { PieChart, LineChart } from 'react-native-chart-kit';
-import { CircleCheckBig, CircleDollarSign, ShoppingBag, ChartColumnBig, Banknote, ArrowDownToLine, ArrowUpToLine } from 'lucide-react-native';
+import { CircleCheckBig, CircleDollarSign, ShoppingBag, ChartColumnBig, Banknote, ArrowDownToLine, ArrowUpToLine, BanknoteArrowDown, TrendingUp, CalendarSearch } from 'lucide-react-native';
 
 export function Home() {
   const products = [
@@ -53,13 +53,13 @@ export function Home() {
 
   return (
     <VStack flex={1} bg="$backgroundDark900" px="$4" pt="$16">
-      <Text color="$textLight400" fontSize="$xl" mb="$4">
+      <Text color="$textLight400" fontSize="$2xl" mb="$4" fontFamily="$heading">
         Dashboard
       </Text>
 
-      <Box bg="$cyan600" p="$4" rounded="$lg" mb="$4">
+      <Box bg="$purple700" p="$4" rounded="$xl" mb="$4">
         <HStack alignItems="center" gap="$2">
-          <Icon as={CircleCheckBig} size="sm" color="$white" />
+          <Icon as={TrendingUp} size="md" color="$white" />
           <Text color="$white" lineHeight="$xl" fontFamily="$heading">
             Você ultrapassou sua meta de vendas este mês!
           </Text>
@@ -67,7 +67,7 @@ export function Home() {
       </Box>
 
       <ScrollView flex={1} showsVerticalScrollIndicator={false}>
-        <Box bg="$backgroundDark800" p="$4" rounded="$lg" mb="$4">
+        <Box bg="$backgroundDark800" p="$4" rounded="$xl" mb="$4">
           <Text 
             color="$textLight400" 
             fontSize="$lg"
@@ -83,11 +83,11 @@ export function Home() {
           >
             <SelectTrigger>
               <SelectInput placeholder="Selecione um período" color="$textLight400" />
-              <SelectIcon as={CircleCheckBig} size="sm" color="$white" px="$4" />
+              <SelectIcon as={CalendarSearch} size="md" color="$white" px="$4" />
             </SelectTrigger>
             <SelectPortal>
               <SelectBackdrop />
-              <SelectContent bg="$backgroundDark800" rounded="$lg" p="$4">
+              <SelectContent bg="$backgroundDark800" rounded="$xl" p="$4">
                 <SelectItem label="Diário" value="Diário" />
                 <SelectItem label="Semanal" value="Semanal" />
                 <SelectItem label="Mensal" value="Mensal" />
@@ -96,23 +96,23 @@ export function Home() {
           </Select>
         </Box>
 
-        <Box bg="$backgroundDark800" p="$4" rounded="$lg" mb="$4">
+        <Box bg="$backgroundDark800" p="$4" rounded="$xl" mb="$4">
           <Text color="$textLight400" fontSize="$lg" mb="$2">
             Métricas:
           </Text>
           <HStack justifyContent="space-between">
             <Center>
-              <Icon as={ArrowDownToLine} size="md" color="$blue500" />
+              <Icon as={Banknote} size="lg" color="$blue500" />
               <Text color="$textLight400">Entradas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalSales.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Icon as={ArrowUpToLine} size="md" color="$red500" />
+              <Icon as={ArrowDownToLine} size="lg" color="$red500" />
               <Text color="$textLight400">Saídas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalCost.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Icon as={ChartColumnBig} size="md" color="$green500" />
+              <Icon as={ChartColumnBig} size="lg" color="$green500" />
               <Text color="$textLight400">Lucro:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalProfit.toFixed(2)}</Text>
             </Center>
@@ -145,7 +145,7 @@ export function Home() {
             labelColor: () => "#FFFFFF",
           }}
           bezier
-          style={{ borderRadius: 8 }}
+          style={{ borderRadius: 22, paddingBottom: 8 }}
         />
       </ScrollView>
     </VStack>

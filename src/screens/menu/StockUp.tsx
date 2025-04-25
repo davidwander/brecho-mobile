@@ -199,12 +199,12 @@ export function StockUp() {
         
         ListEmptyComponent={
           <Text
-            color="$gray400"
+            color="$white"
             mt="$6"
             textAlign="center"
             lineHeight="$lg"
           >
-            Nenhuma peça encontrada para esse tipo.
+            Nenhuma peça encontrada.
           </Text>
         }
       />

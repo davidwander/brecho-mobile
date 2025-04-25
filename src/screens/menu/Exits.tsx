@@ -47,7 +47,13 @@ export function Exits() {
     <Box flex={1} bg="$backgroundDark900" px="$4" pt="$16">
       <BackButton />
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-        <Text size="2xl" color="$textLight0" mt="$4" mb="$4" fontFamily="$heading">
+        <Text 
+          size="2xl" 
+          color="$textLight0" 
+          mt="$4" 
+          mb="$4" fontFamily="$heading"
+          alignSelf="center"
+        >
           Nova Venda
         </Text>
 
