@@ -2,7 +2,7 @@ import { useProduct } from '@contexts/ProductContext';
 import { useState, useMemo } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { VStack, HStack, Text, Box, Button } from '@gluestack-ui/themed';
-import { Eye,Tag, DollarSign, Check } from 'lucide-react-native';
+import { Eye,Tag, DollarSign, Check, ShoppingBag } from 'lucide-react-native';
 import BackButton from '@components/BackButton';
 import ProductDetailsModal from '@components/ProductDetailsModal';
 import { Checkbox } from '@gluestack-ui/themed';
@@ -135,7 +135,7 @@ export function StockUp() {
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <Checkbox.Icon as={Check} color="white" size="lg" />
+                    <Checkbox.Icon as={ShoppingBag} color="white" size="lg" />
                   </Checkbox.Indicator>
                 </Checkbox>
         
