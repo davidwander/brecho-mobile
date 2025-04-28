@@ -7,7 +7,7 @@ import {
   ActionsheetItem,
   HStack,
 } from '@gluestack-ui/themed';
-import { ClipboardList, DollarSign, Calendar } from 'lucide-react-native';
+import { ClipboardList, DollarSign, ShoppingBag } from 'lucide-react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
 import { Animated, Pressable } from 'react-native';
@@ -24,7 +24,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
   const icons = [
     { icon: ClipboardList, route: "stockUp" },
     { icon: DollarSign, route: "exits" },
-    { icon: Calendar, route: "calendar" },
+    { icon: ShoppingBag, route: "openSales" },
   ];
 
   const scales = [
@@ -91,7 +91,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                     onPressOut={onPressOut}
                     onPress={() => {
                       onClose();
-                      navigation.navigate(route as "calendar" | "stockUp" | "exits");
+                      navigation.navigate(route as "openSales" | "stockUp" | "exits");
                     }}
                   >
                     <Animated.View

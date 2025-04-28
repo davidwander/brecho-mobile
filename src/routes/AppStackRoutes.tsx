@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppRoutes } from './app.routes';
 import { StockUp } from '@screens/menu/StockUp';
 import { Exits } from '@screens/menu/Exits';
-import { Calendar } from '@screens/menu/Calendar';
+import { OpenSales } from '@screens/menu/OpenSales';
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type AppRoutes = {
@@ -16,7 +16,7 @@ export type RootStackParamList = {
   tabs: NavigatorScreenParams<AppRoutes>;
   stockUp: undefined;
   exits: undefined;
-  calendar: undefined;
+  openSales: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,7 +27,7 @@ export function AppStackRoutes() {
       <Stack.Screen name="tabs" component={AppRoutes} />
       <Stack.Screen name="stockUp" component={StockUp} />
       <Stack.Screen name="exits" component={Exits} />
-      <Stack.Screen name="calendar" component={Calendar} />
+      <Stack.Screen name="openSales" component={OpenSales} />
     </Stack.Navigator>
   );
 }
