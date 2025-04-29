@@ -11,6 +11,7 @@ import { config } from './config/gluestack-ui.config';
 import { Routes } from './src/routes';
 import { Loading } from './src/components/Loading';
 import { ProductProvider } from '@contexts/ProductContext';
+import { SalesProvider } from '@contexts/SalesContext';
 //import { SignIn } from './src/screens/SignIn';
 //import { SignUp } from './src/screens/SignUp';
 
@@ -19,15 +20,17 @@ export default function App() {
 
   return (
     <GluestackUIProvider config={config}>
-      <ProductProvider>
-        <StatusBar 
-          barStyle="light-content" 
-          backgroundColor="transparent" 
-          translucent
-        />
+      <SalesProvider>
+        <ProductProvider>
+          <StatusBar 
+            barStyle="light-content" 
+            backgroundColor="transparent" 
+            translucent
+          />
 
-        {fontsLoaded ? <Routes /> : <Loading /> }
-      </ProductProvider>
+          {fontsLoaded ? <Routes /> : <Loading /> }
+        </ProductProvider>
+      </SalesProvider>
     </GluestackUIProvider>
   );
 }

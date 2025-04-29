@@ -12,6 +12,7 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { useSales } from '@contexts/SalesContext'; // Importando o contexto de vendas
 
 type FormDataProps = {
   nameClient: string;
@@ -31,6 +32,7 @@ export function Exits() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setClientData } = useSales(); // Usando o contexto de vendas
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -38,6 +40,10 @@ export function Exits() {
     setIsSubmitting(true);
     setTimeout(() => {
       console.log('Dados do cliente:', data);
+      
+      // Salvando os dados do cliente no contexto
+      setClientData(data);
+      
       setIsSubmitting(false);
       navigation.navigate("stockUp");
     }, 800);

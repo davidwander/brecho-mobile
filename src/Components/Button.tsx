@@ -1,18 +1,22 @@
-import { ComponentProps } from 'react';
-import { Button as GluestackButton, Text, ButtonSpinner } from '@gluestack-ui/themed';
+import React, { ComponentProps, ReactElement } from 'react';
+import { Button as GluestackButton, Text, ButtonSpinner, HStack } from '@gluestack-ui/themed';
 
 type Props = ComponentProps<typeof GluestackButton> & {
-  title: string
-  variant?: "solid" | "outline" 
-  isLoading?: boolean
+  title?: string; // Tornando o título opcional
+  variant?: "solid" | "outline";
+  isLoading?: boolean;
+  icon?: ReactElement; // Nova prop para o ícone
 }
 
 export function Button({ 
-  title, 
+  title,
   variant = "solid", 
   isLoading = false, 
+  icon, // Recebendo o ícone
   ...rest 
 }: Props) {
+  const textColor = variant === "outline" ? "$purple500" : "$textLight400";
+
   return (
     <GluestackButton 
       w="$full"
@@ -27,17 +31,28 @@ export function Button({
     >
       {
         isLoading ? (
-          <ButtonSpinner color="$textLight400" size="large" />
+          <ButtonSpinner color={textColor} size="large" />
         ) : (
-          <Text 
-          color={variant === "outline" ? "$purple500" : "$textLight400" }
-          fontSize="$lg" 
-          fontFamily="$heading"
-          lineHeight="$xl"
-        >
-          {title}
-      </Text>
-    )}
+          <HStack alignItems="center" justifyContent="center" space="sm"> 
+            {/* Renderiza o ícone se ele for fornecido */}
+            {icon && React.cloneElement(icon, { 
+              color: textColor, // Tenta aplicar a cor do texto ao ícone
+              size: 20 // Define um tamanho padrão, pode ser ajustado
+            })}
+            {/* Renderiza o título se ele for fornecido */}
+            {title && (
+              <Text 
+                color={textColor}
+                fontSize="$lg" 
+                fontFamily="$heading"
+                lineHeight="$xl"
+              >
+                {title}
+              </Text>
+            )}
+          </HStack>
+        )
+      }
     </GluestackButton>
   )
 }
