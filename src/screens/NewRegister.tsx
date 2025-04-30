@@ -78,7 +78,8 @@ export function NewRegister() {
         costPrice: cost,
         profitMargin: margin,
         salePrice: sale,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        quantity: 1,
       };
   
       addProduct(product);
@@ -237,6 +238,7 @@ export function NewRegister() {
                       handleProfitMarginBlur();
                     }}
                     keyboardType="numeric"
+                    returnKeyType="send"
                     errorMessage={errors.profitMargin?.message}
                   />
                 )}

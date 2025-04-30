@@ -35,7 +35,7 @@ export default function ProductDetailsModal({
         >
           <Text 
             textAlign="center"
-            fontSize="$xl" 
+            fontSize="$2xl" 
             fontFamily="$heading" 
             color="$white" 
             mb="$4"
@@ -44,10 +44,7 @@ export default function ProductDetailsModal({
             Detalhes da Peça
           </Text>
 
-          <Text color="$white" mb="$2" lineHeight="$md">
-            Nome: {item?.name}
-          </Text>
-          <Text color="$white" mb="$2" lineHeight="$md">
+          <Text color="$white" mb="$2" lineHeight="$md" fontSize="$md">
             Tipo: {item?.type}
           </Text>
           <Text color="$white" mb="$2" lineHeight="$md">

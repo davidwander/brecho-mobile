@@ -1,17 +1,20 @@
-import { useProduct } from "@contexts/ProductContext";
-import { useSales, ClientData, ProductItem } from "@contexts/SalesContext"; // Importando tipos do contexto
 import { useState, useMemo } from "react";
+
 import { FlatList, TouchableOpacity } from "react-native";
-import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
-import { Eye, Tag, DollarSign, Check, ShoppingBag } from "lucide-react-native";
+
 import BackButton from "@components/BackButton";
-import ProductDetailsModal from "@components/ProductDetailsModal";
-import SaleDetailsModal from "@components/SaleDetailsModal"; // Importando o novo modal
+import { Button } from "@components/Button";
+import { useProduct } from "@contexts/ProductContext";
+import { useSales, ProductItem } from "@contexts/SalesContext"; 
+import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
 import { Checkbox } from "@gluestack-ui/themed";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import SaleDetailsModal from "@components/SaleDetailsModal";
 import { RootStackParamList } from "@routes/AppStackRoutes";
-import { Button } from "@components/Button"; // Importando o componente Button personalizado
+import ProductDetailsModal from "@components/ProductDetailsModal";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+import { Eye, Tag, DollarSign, ShoppingBag } from "lucide-react-native";
 
 export function StockUp() {
   const { products } = useProduct();
@@ -19,10 +22,10 @@ export function StockUp() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<any>(null); // Para ProductDetailsModal
+  const [selectedItem, setSelectedItem] = useState<any>(null); 
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); // Estado para o novo modal
-  const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); // Estado para guardar produtos selecionados para o modal
+  const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); 
+  const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); 
 
   const allTypes = [
     "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
@@ -36,33 +39,36 @@ export function StockUp() {
     );
   }, [products, selectedType]);
 
-  // Função para ABRIR o modal de confirmação
   const handleOpenSaleModal = () => {
     if (selectedProductIds.length === 0) {
       return;
-    }
+  }
 
-    // Filtrar os produtos completos com base nos IDs selecionados
-    const selectedProductsData = products.filter(product =>
-      selectedProductIds.includes(product.id)
-    );
-    setCurrentSelectedProducts(selectedProductsData); // Guarda os produtos para passar ao modal
+  const selectedProductsData = products.filter(product =>
+    selectedProductIds.includes(product.id)
+  );
 
-    // Salvar os produtos selecionados no contexto (pode ser feito aqui ou na confirmação final)
-    if (salesContext && typeof salesContext.setSelectedProducts === "function") {
-      salesContext.setSelectedProducts(selectedProductsData);
-    } else {
-      console.error("Contexto de vendas não está disponível ou setSelectedProducts não é uma função");
-      return; // Não abre o modal se o contexto falhar
-    }
+  const convertedProducts: ProductItem[] = selectedProductsData.map(product => ({
+    ...product,
+    quantity: 0,
+    type: product.type === "entrada" || product.type === "saida" ? product.type : undefined 
+  }));
 
-    setIsSaleModalVisible(true); // Abre o modal
-  };
+  setCurrentSelectedProducts(convertedProducts);
 
-  // Função chamada ao CONFIRMAR dentro do SaleDetailsModal
+  if (salesContext && typeof salesContext.setSelectedProducts === "function") {
+    salesContext.setSelectedProducts(convertedProducts);
+  } else {
+    console.error("Contexto de vendas não está disponível ou setSelectedProducts não é uma função");
+    return; 
+  }
+
+  setIsSaleModalVisible(true); 
+};
+
+
   const handleModalConfirm = () => {
-    setIsSaleModalVisible(false); // Fecha o modal
-    // Navega para a tela de resumo de vendas
+    setIsSaleModalVisible(false); 
     navigation.navigate("openSales");
   };
 
@@ -81,7 +87,6 @@ export function StockUp() {
         Estoque de Peças
       </Text>
 
-      {/* Filtro de Tipos */}
       <FlatList
         horizontal
         data={["Todos", ...allTypes]}
@@ -130,7 +135,6 @@ export function StockUp() {
         }}
       />
 
-      {/* Lista de Produtos */}
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id}
@@ -158,6 +162,10 @@ export function StockUp() {
                   value={item.id}
                   isChecked={selectedProductIds.includes(item.id)}
                   onChange={() => {
+                    if (!salesContext.clientData) {
+                      alert("Selecione um cliente antes de adicionar produtos.");
+                      return;
+                    }
                     setSelectedProductIds((prev) =>
                       prev.includes(item.id)
                         ? prev.filter(id => id !== item.id)
@@ -225,7 +233,6 @@ export function StockUp() {
                 </Text>
               </HStack>
 
-              {/* Botão Ver Detalhes (Produto) */}
               <GluestackButton
                 w="$16"
                 bg="$purple700"
@@ -253,7 +260,6 @@ export function StockUp() {
         }
       />
 
-      {/* Botão para ABRIR o modal de confirmação */}
       {selectedProductIds.length > 0 && (
         <Box
           position="absolute"
@@ -265,28 +271,25 @@ export function StockUp() {
           <Button
             title={`Revisar Venda (${selectedProductIds.length} ${selectedProductIds.length === 1 ? 'peça' : 'peças'})`}
             variant="solid"
-            onPress={handleOpenSaleModal} // Chama a função para abrir o modal
+            onPress={handleOpenSaleModal}
             isDisabled={selectedProductIds.length === 0}
-            // isLoading não é mais necessário aqui, pois a confirmação é no modal
           />
         </Box>
       )}
 
-      {/* Modal de Detalhes do Produto (já existente) */}
       <ProductDetailsModal
         visible={!!selectedItem}
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
       />
 
-      {/* Modal de Detalhes/Confirmação da Venda (novo) */}
       <SaleDetailsModal
         visible={isSaleModalVisible}
-        clientData={salesContext.clientData} // Pega dados do cliente do contexto
-        selectedProducts={currentSelectedProducts} // Passa os produtos selecionados
-        onClose={() => setIsSaleModalVisible(false)} // Função para fechar
-        onConfirm={handleModalConfirm} // Função para confirmar e navegar
-        isConfirmMode={true} // Define que este é o modal de confirmação
+        clientData={salesContext.clientData}
+        selectedProducts={currentSelectedProducts}
+        onClose={() => setIsSaleModalVisible(false)}
+        onConfirm={handleModalConfirm}
+        isConfirmMode={true}
       />
     </VStack>
   );

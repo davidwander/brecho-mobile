@@ -12,10 +12,11 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
-import { useSales } from '@contexts/SalesContext'; // Importando o contexto de vendas
+import { ClientData, useSales } from '@contexts/SalesContext'; 
 
 type FormDataProps = {
   nameClient: string;
+  phone: string;
   cpf: string;
   address: string;
 };
@@ -23,6 +24,7 @@ type FormDataProps = {
 const exitsSchema = yup.object({
   nameClient: yup.string().required("Informe o nome do(a) cliente"),
   cpf: yup.string().required("Informe o CPF").min(11, "CPF inválido!"),
+  phone: yup.string().required("Informe o telefone"),
   address: yup.string().required("Informe o endereço")
 });
 
@@ -32,17 +34,22 @@ export function Exits() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setClientData } = useSales(); // Usando o contexto de vendas
+  const { setClientData } = useSales();
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleFormSubmit = (data: FormDataProps) => {
     setIsSubmitting(true);
     setTimeout(() => {
-      console.log('Dados do cliente:', data);
+      console.log("Dados do cliente:", data);
+
+      const clientData: ClientData = {
+        nameClient: data.nameClient,
+        phone: "",
+        address: data.address,
+      };
       
-      // Salvando os dados do cliente no contexto
-      setClientData(data);
+      setClientData(clientData);
       
       setIsSubmitting(false);
       navigation.navigate("stockUp");
@@ -77,6 +84,21 @@ export function Exits() {
               />
             )}
           />
+
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input 
+                placeholder="Telefone" 
+                keyboardType="numeric" 
+                value={value} 
+                onChangeText={onChange} 
+                errorMessage={errors.phone?.message}
+              />
+            )}
+          />
+
           <Controller
             name="cpf"
             control={control}
@@ -90,6 +112,7 @@ export function Exits() {
               />
             )}
           />
+
           <Controller
             name="address"
             control={control}
@@ -106,7 +129,7 @@ export function Exits() {
 
           <Center mt="$4">
             <Button
-              title="Adicionar peças"
+              title="Confirmar"
               variant="solid"
               onPress={handleSubmit(handleFormSubmit)}
               isLoading={isSubmitting}

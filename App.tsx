@@ -20,8 +20,8 @@ export default function App() {
 
   return (
     <GluestackUIProvider config={config}>
-      <SalesProvider>
-        <ProductProvider>
+      <ProductProvider>
+        <SalesProvider>
           <StatusBar 
             barStyle="light-content" 
             backgroundColor="transparent" 
@@ -29,8 +29,8 @@ export default function App() {
           />
 
           {fontsLoaded ? <Routes /> : <Loading /> }
-        </ProductProvider>
-      </SalesProvider>
+        </SalesProvider>
+      </ProductProvider>
     </GluestackUIProvider>
   );
 }

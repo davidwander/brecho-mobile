@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import BackButton from '@components/BackButton';
+
 import { FlatList } from 'react-native';
+import BackButton from '@components/BackButton';
 import { Box, Center, Text, VStack, HStack, Button as GluestackButton, Divider } from '@gluestack-ui/themed';
 import { useSales } from '@contexts/SalesContext';
 import SaleDetailsModal from '@components/SaleDetailsModal';
+import { OpenSaleItem } from '@contexts/SalesContext'; 
+
 import { ShoppingBag, DollarSign, Eye } from 'lucide-react-native';
-import { OpenSaleItem } from '@contexts/SalesContext'; // ✅ Importa do contexto, sem duplicação
 
 export function OpenSales() {
   const { openSales } = useSales();

@@ -1,8 +1,15 @@
 import React, { useMemo } from 'react';
 import { Modal, FlatList } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@routes/AppStackRoutes';
+import { ClientData, ProductItem, useSales } from '@contexts/SalesContext';
 import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
+
 import { Check, X, Tag, DollarSign } from 'lucide-react-native';
-import { ClientData, ProductItem } from '@contexts/SalesContext'; // Importando os tipos do contexto de vendas
+
+import uuid from 'react-native-uuid';
 
 interface SaleDetailsModalProps {
   visible: boolean;
@@ -21,12 +28,29 @@ export default function SaleDetailsModal({
   onConfirm,
   isConfirmMode = true,
 }: SaleDetailsModalProps) {
-  // Calcular o valor total da venda
+  const { addSale, clearSaleData } = useSales();
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleConfirmSale = () => {
+    const total = selectedProducts.reduce((sum, p) => sum + p.salePrice, 0);
+    const sale = {
+      id: String(uuid.v4()),
+      client: clientData!,
+      products: selectedProducts,
+      total,
+      date: new Date().toISOString(),
+    };
+  
+    addSale(sale); 
+    clearSaleData(); 
+    navigation.navigate("openSales");
+  };
+
   const totalValue = useMemo(() => {
     return selectedProducts.reduce((total, product) => total + product.salePrice, 0);
   }, [selectedProducts]);
 
-  // Renderizar cada item de produto
   const renderProductItem = ({ item }: { item: ProductItem }) => (
     <Box 
       bg="$backgroundDark800"
@@ -57,6 +81,30 @@ export default function SaleDetailsModal({
       </HStack>
     </Box>
   );
+
+  const handleConfirm = () => {
+    if (clientData && selectedProducts.length > 0) {
+      const isValidSale = selectedProducts.every(item => item.salePrice > 0);
+      if (!isValidSale) {
+        return;
+      }
+
+      const saleId = String(uuid.v4());
+      const dateNow = new Date().toISOString();
+
+      addSale({
+        id: saleId,
+        client: clientData,
+        products: selectedProducts,
+        total: totalValue,
+        date: dateNow,
+      });
+
+      clearSaleData();
+      onConfirm();
+      navigation.navigate("openSales") 
+    }
+  };
 
   return (
     <Modal
@@ -89,7 +137,6 @@ export default function SaleDetailsModal({
             {isConfirmMode ? "Confirmar Venda" : "Detalhes da Venda"}
           </Text>
 
-          {/* Dados do Cliente */}
           {clientData && (
             <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$lg">
               <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
@@ -97,13 +144,12 @@ export default function SaleDetailsModal({
               </Text>
               <VStack space="sm">
                 <Text color="$textLight200">Nome: {clientData.nameClient}</Text>
-                <Text color="$textLight200">CPF: {clientData.cpf}</Text>
+                <Text color="$textLight200">Tel: {clientData.phone}</Text>
                 <Text color="$textLight200">Endereço: {clientData.address}</Text>
               </VStack>
             </Box>
           )}
 
-          {/* Lista de Produtos */}
           <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
             Peças Selecionadas ({selectedProducts.length})
           </Text>
@@ -116,7 +162,6 @@ export default function SaleDetailsModal({
             />
           </Box>
 
-          {/* Valor Total */}
           <Box 
             bg="$backgroundDark800" 
             p="$3" 
@@ -133,7 +178,6 @@ export default function SaleDetailsModal({
             </HStack>
           </Box>
 
-          {/* Botões */}
           <HStack justifyContent="space-between" mt="$2">
             <Button
               w="48%"
@@ -154,7 +198,7 @@ export default function SaleDetailsModal({
                 w="48%"
                 bg="$green600"
                 rounded="$xl"
-                onPress={onConfirm}
+                onPress={handleConfirm}
               >
                 <HStack alignItems="center" space="sm">
                   <Check color="white" size={20} />

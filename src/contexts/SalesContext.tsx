@@ -1,81 +1,125 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { 
+  createContext, 
+  useContext, 
+  useState, 
+  ReactNode 
+} from 'react';
 
-// Definindo os tipos
-export type ClientData = {
-  nameClient: string;
-  cpf: string;
-  address: string;
-};
+import { useProduct } from '@contexts/ProductContext';
 
 export type ProductItem = {
   id: string;
-  type: string;
   costPrice: number;
   salePrice: number;
-  // Outros campos que possam existir no produto
+  quantity: number;
+  type?: "entrada" | "saida";
+};
+
+export type ClientData = {
+  nameClient: string;
+  phone: string;
+  address: string;
+};
+
+export type SaleData = {
+  id: string;
+  client: ClientData;
+  products: ProductItem[];
+  total: number;
+  date: string;
+};
+
+export type SalesContextType = {
+  openSales: OpenSaleItem[];
+  addSale: (sale: SaleData) => void;
+  finalizeSale: (index: number) => void;
+  clientData: ClientData | null;
+  setClientData: (client: ClientData) => void;
+  selectedProducts: ProductItem[];
+  setSelectedProducts: (products: ProductItem[]) => void;
+  clearSaleData: () => void;
+};
+
+const SalesContext = createContext<SalesContextType | undefined>(undefined);
+
+type Props = {
+  children: ReactNode;
+};
+
+export const SalesProvider = ({ children }: Props) => {
+  const [clientData, setClientDataState] = useState<ClientData | null>(null);
+  const [selectedProducts, setSelectedProductsState] = useState<ProductItem[]>([]);
+  const { removeProduct, addProduct } = useProduct();
+  const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]);
+
+  const setClientData = (client: ClientData) => {
+    setClientDataState(client);
+  };
+
+  const setSelectedProducts = (products: ProductItem[]) => {
+    setSelectedProductsState(products);
+    products.forEach(p => removeProduct(p.id));
+  };
+
+  const addSale = (sale: SaleData) => {
+    console.log("Venda registrada:", sale);
+    setOpenSales(prev => [...prev, { clientData: sale.client, selectedProducts: sale.products }]);
+  };
+
+  const finalizeSale = (index: number) => {
+    setOpenSales(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const returnProductsToStock = (products: ProductItem[]) => {
+    products.forEach(p => {
+      addProduct({
+        id: p.id,
+        name: '',
+        costPrice: p.costPrice,
+        salePrice: p.salePrice,
+        profitMargin: 0,
+        quantity: p.quantity,
+        description: '',
+        createdAt: new Date().toISOString(),
+      });
+    });
+  };
+
+  const clearSaleData = () => {
+    if (selectedProducts.length > 0) {
+      returnProductsToStock(selectedProducts);
+    }
+    setClientDataState(null);
+    setSelectedProductsState([]);
+  };
+
+  return (
+    <SalesContext.Provider
+      value={{ 
+        openSales, 
+        addSale, 
+        finalizeSale,
+        clientData, 
+        setClientData, 
+        selectedProducts, 
+        setSelectedProducts, 
+        clearSaleData 
+      }}
+    >
+      {children}
+    </SalesContext.Provider>
+  );
+};
+
+export const useSales = () => {
+  const context = useContext(SalesContext);
+  if (!context) {
+    throw new Error("useSales deve ser usado dentro de um SalesProvider");
+  }
+  return context;
 };
 
 export type OpenSaleItem = {
   clientData: ClientData;
   selectedProducts: ProductItem[];
 };
-
-type SalesContextData = {
-  clientData: ClientData | null;
-  selectedProducts: ProductItem[];
-  setClientData: (data: ClientData) => void;
-  setSelectedProducts: (products: ProductItem[]) => void;
-  clearSaleData: () => void;
-  openSales: OpenSaleItem[];
-  addSale: (newSale: OpenSaleItem) => void; 
-  removeSale: (index: number) => void; // Adicionando a função de remover venda
-};
-
-const SalesContext = createContext<SalesContextData>({} as SalesContextData);
-
-export function SalesProvider({ children }: { children: ReactNode }) {
-  const [clientData, setClientData] = useState<ClientData | null>(null);
-  const [selectedProducts, setSelectedProducts] = useState<ProductItem[]>([]);
-  const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]); 
-
-  const addSale = (newSale: OpenSaleItem) => {
-    setOpenSales((prevSales) => [...prevSales, newSale]);
-  };
-
-  const removeSale = (index: number) => {
-    setOpenSales((prevSales) => prevSales.filter((_, i) => i !== index));
-  };
-
-  const clearSaleData = () => {
-    setClientData(null);
-    setSelectedProducts([]);
-  };
-
-  return (
-    <SalesContext.Provider
-      value={{
-        clientData,
-        selectedProducts,
-        setClientData,
-        setSelectedProducts,
-        clearSaleData,
-        openSales,
-        addSale,
-        removeSale, // Passando a função de remover venda
-      }}
-    >
-      {children}
-    </SalesContext.Provider>
-  );
-}
-
-// Hook personalizado para usar o contexto
-export function useSales() {
-  const context = useContext(SalesContext);
-
-  if (!context) {
-    throw new Error('useSales deve ser usado dentro de um SalesProvider');
-  }
-
-  return context;
-}
