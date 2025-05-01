@@ -8,14 +8,17 @@ export type Product = {
   quantity: number;
   description?: string;
   createdAt: string;
-  type?: string;         // Adicionei caso utilize filtro por tipo
-  salePrice: number;     // Adicionei caso esteja calculando o preço de venda
+  type?: string;        
+  salePrice: number;
+  reserved?: boolean;    
 };
 
 type ProductContextType = {
   products: Product[];
   addProduct: (product: Product) => void;
   removeProduct: (id: string) => void;
+  reserveProduct: (id: string) => void;
+  releaseProduct: (id: string) => void;
 };
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -35,8 +38,32 @@ export const ProductProvider = ({ children }: Props) => {
     setProducts(prev => prev.filter(product => product.id !== id));
   };
 
+  const reserveProduct = (id: string) => {
+    setProducts(prev =>
+      prev.map(product =>
+        product.id === id ? { ...product, reserved: true } : product
+      )
+    );
+  };
+
+  const releaseProduct = (id: string) => {
+    setProducts(prev =>
+      prev.map(product =>
+        product.id === id ? { ...product, reserved: false } : product
+      )
+    );
+  };
+
   return (
-    <ProductContext.Provider value={{ products, addProduct, removeProduct }}>
+    <ProductContext.Provider 
+      value={{ 
+        products, 
+        addProduct, 
+        removeProduct,
+        reserveProduct,
+        releaseProduct
+      }}
+    >
       {children}
     </ProductContext.Provider>
   );
