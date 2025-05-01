@@ -238,7 +238,6 @@ export function NewRegister() {
                       handleProfitMarginBlur();
                     }}
                     keyboardType="numeric"
-                    returnKeyType="send"
                     errorMessage={errors.profitMargin?.message}
                   />
                 )}
@@ -252,7 +251,7 @@ export function NewRegister() {
               <Input 
                 placeholder="Preço de Venda" 
                 value={salePrice} 
-                editable={false} color="$white" 
+                editable={false}
               />
 
               <Input editable={false} value={`Cod: ${registerId.slice(0, 7)}`} />

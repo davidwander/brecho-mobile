@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ScrollView } from 'react-native';
+import MaskInput, { Masks } from 'react-native-mask-input';
+
 import { VStack, Text, Center, Box } from '@gluestack-ui/themed';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -22,15 +24,27 @@ type FormDataProps = {
 };
 
 const exitsSchema = yup.object({
-  nameClient: yup.string().required("Informe o nome do(a) cliente"),
-  cpf: yup.string().required("Informe o CPF").min(11, "CPF inválido!"),
-  phone: yup.string().required("Informe o telefone"),
-  address: yup.string().required("Informe o endereço")
+  nameClient: yup
+    .string()
+    .required("Informe o nome da cliente"),
+  phone: yup
+    .string()
+    .required("Informe o telefone")
+    .min(10, "Telefone inválido!")
+    .max(11, "Telefone inválido!"),
+  cpf: yup
+    .string()
+    .required("Informe o CPF")
+    .min(11, "CPF inválido!")
+    .max(11, "CPF inválido!"),
+  address: yup
+    .string()
+    .required("Informe o endereço")
 });
 
 export function Exits() {
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
-    resolver: yupResolver(exitsSchema)
+    resolver: yupResolver(exitsSchema),
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,22 +53,25 @@ export function Exits() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleFormSubmit = (data: FormDataProps) => {
+    console.log("Formulário enviado com dados:", data);
     setIsSubmitting(true);
     setTimeout(() => {
       console.log("Dados do cliente:", data);
 
       const clientData: ClientData = {
         nameClient: data.nameClient,
-        phone: "",
+        phone: data.phone,
         address: data.address,
       };
-      
+
       setClientData(clientData);
-      
+
       setIsSubmitting(false);
       navigation.navigate("stockUp");
     }, 800);
   };
+
+  console.log("Erros de formulário:", errors);
 
   return (
     <Box flex={1} bg="$backgroundDark900" px="$4" pt="$16">
@@ -64,10 +81,11 @@ export function Exits() {
           size="2xl" 
           color="$textLight0" 
           mt="$4" 
-          mb="$4" fontFamily="$heading"
+          mb="$4" 
+          fontFamily="$heading"
           alignSelf="center"
         >
-          Nova Venda
+          Criar sacola
         </Text>
 
         <VStack space="md" w="100%">
@@ -76,10 +94,10 @@ export function Exits() {
             control={control}
             render={({ field: { onChange, value } }) => (
               <Input 
-                placeholder="Nome do(a) Cliente" 
-                autoCapitalize="none"
+                placeholder="Nome da Cliente" 
+                autoCapitalize="words"
                 value={value} 
-                onChangeText={onChange} 
+                onChangeText={(text) => onChange(text)} 
                 errorMessage={errors.nameClient?.message}
               />
             )}
@@ -89,11 +107,14 @@ export function Exits() {
             name="phone"
             control={control}
             render={({ field: { onChange, value } }) => (
-              <Input 
-                placeholder="Telefone" 
-                keyboardType="numeric" 
-                value={value} 
-                onChangeText={onChange} 
+              <Input
+                value={value}
+                mask={Masks.BRL_PHONE}
+                onMaskedTextChanged={(masked, unmasked) => {
+                  if (unmasked.length <= 11) {
+                    onChange(unmasked);
+                  }
+                }}
                 errorMessage={errors.phone?.message}
               />
             )}
@@ -103,11 +124,14 @@ export function Exits() {
             name="cpf"
             control={control}
             render={({ field: { onChange, value } }) => (
-              <Input 
-                placeholder="CPF" 
-                keyboardType="numeric" 
-                value={value} 
-                onChangeText={onChange} 
+              <Input
+                value={value}
+                mask={Masks.BRL_CPF_CNPJ}
+                onMaskedTextChanged={(masked, unmasked) => {
+                  if (unmasked.length <= 11) {
+                    onChange(unmasked);
+                  }
+                }}
                 errorMessage={errors.cpf?.message}
               />
             )}
@@ -119,9 +143,10 @@ export function Exits() {
             render={({ field: { onChange, value } }) => (
               <Input 
                 placeholder="Endereço" 
-                autoCapitalize="none"
+                autoCapitalize="words"
+                multiline
                 value={value} 
-                onChangeText={onChange} 
+                onChangeText={(text) => onChange(text)} 
                 errorMessage={errors.address?.message}
               />
             )}
@@ -140,3 +165,4 @@ export function Exits() {
     </Box>
   );
 }
+
