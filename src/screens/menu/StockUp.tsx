@@ -32,12 +32,22 @@ export function StockUp() {
     "Calça", "Vestido", "Calçados", "Acessórios"
   ];
 
+  const reservedProductIds = useMemo(() => {
+    if (!salesContext?.openSales) return [];
+    return salesContext.openSales.flatMap(sale => sale.selectedProducts.map   (product => product.id)
+    );
+  }, [salesContext?.openSales]);
+
   const filteredProducts = useMemo(() => {
-    if (!selectedType) return products;
-    return products.filter(
+    const availableProducts = products.filter(
+      product => !reservedProductIds.includes(product.id)
+    );
+    if (!selectedType) return availableProducts;
+
+    return availableProducts.filter(
       p => p.type?.toLowerCase().trim() === selectedType.toLowerCase().trim()
     );
-  }, [products, selectedType]);
+  }, [products, selectedType, reservedProductIds]);
 
   const handleOpenSaleModal = () => {
     if (selectedProductIds.length === 0) {
@@ -50,7 +60,7 @@ export function StockUp() {
 
   const convertedProducts: ProductItem[] = selectedProductsData.map(product => ({
     ...product,
-    quantity: 0,
+    quantity: 1,
     type: product.type === "entrada" || product.type === "saida" ? product.type : undefined 
   }));
 
@@ -66,7 +76,6 @@ export function StockUp() {
   setIsSaleModalVisible(true); 
 };
 
-
   const handleModalConfirm = () => {
     setIsSaleModalVisible(false); 
     navigation.navigate("openSales");
@@ -77,7 +86,7 @@ export function StockUp() {
       <BackButton />
       <Text
         color="$white"
-        fontSize="$2xl"
+        fontSize="$2xl"                                        
         fontFamily="$heading"
         mt="$4"
         mb="$4"
