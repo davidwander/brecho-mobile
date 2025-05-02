@@ -71,7 +71,9 @@ export function Exits() {
     }, 800);
   };
 
-  console.log("Erros de formulário:", errors);
+  const onError = (error: any) => {
+    console.log("Erros de formulário:", errors);
+  };
 
   return (
     <Box flex={1} bg="$backgroundDark900" px="$4" pt="$16">
@@ -156,7 +158,7 @@ export function Exits() {
             <Button
               title="Confirmar"
               variant="solid"
-              onPress={handleSubmit(handleFormSubmit)}
+              onPress={handleSubmit(handleFormSubmit, onError)}
               isLoading={isSubmitting}
             />
           </Center>
