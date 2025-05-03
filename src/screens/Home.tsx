@@ -1,24 +1,23 @@
 import { useState } from 'react';
 import { Dimensions, Alert } from 'react-native';
-import { 
-  VStack, 
-  Text, 
-  ScrollView, 
-  Select, 
-  SelectTrigger, 
-  SelectInput, 
-  SelectIcon, 
-  SelectPortal, 
-  SelectBackdrop, 
-  SelectContent, 
-  SelectItem, 
-  Icon, 
-  Box, 
-  HStack, 
-  Center 
+import {
+  VStack,
+  Text,
+  ScrollView,
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectItem,
+  Box,
+  HStack,
+  Center
 } from '@gluestack-ui/themed';
+import Feather from 'react-native-vector-icons/Feather';
 import { PieChart, LineChart } from 'react-native-chart-kit';
-import { CircleCheckBig, CircleDollarSign, ShoppingBag, ChartColumnBig, Banknote, ArrowDownToLine, ArrowUpToLine, BanknoteArrowDown, TrendingUp, CalendarSearch } from 'lucide-react-native';
 
 export function Home() {
   const products = [
@@ -29,7 +28,7 @@ export function Home() {
 
   const [selectedPeriod, setSelectedPeriod] = useState("Mensal");
 
-  const totalCost: number = 500;  // Valor fixo temporário
+  const totalCost: number = 500;
   const totalSales: number = 1200;
   const totalSold: number = 10;
   const totalInStock: number = 20;
@@ -59,7 +58,7 @@ export function Home() {
 
       <Box bg="$purple700" p="$4" rounded="$xl" mb="$4">
         <HStack alignItems="center" gap="$2">
-          <Icon as={TrendingUp} size="md" color="$white" />
+          <Feather name="trending-up" size={24} color="#FFF" />
           <Text color="$white" lineHeight="$xl" fontFamily="$heading">
             Você ultrapassou sua meta de vendas este mês!
           </Text>
@@ -68,22 +67,13 @@ export function Home() {
 
       <ScrollView flex={1} showsVerticalScrollIndicator={false}>
         <Box bg="$backgroundDark800" p="$4" rounded="$xl" mb="$4">
-          <Text 
-            color="$textLight400" 
-            fontSize="$lg"
-            mb="$2" 
-            lineHeight="$xl" 
-            fontFamily="$heading"
-          >
+          <Text color="$textLight400" fontSize="$lg" mb="$2" lineHeight="$xl" fontFamily="$heading">
             Filtrar por Período:
           </Text>
-          <Select 
-            selectedValue={selectedPeriod} 
-            onValueChange={setSelectedPeriod}
-          >
+          <Select selectedValue={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger>
               <SelectInput placeholder="Selecione um período" color="$textLight400" />
-              <SelectIcon as={CalendarSearch} size="md" color="$white" px="$4" />
+              <SelectIcon as={() => <Feather name="calendar" size={20} color="#FFF" />} px="$4" />
             </SelectTrigger>
             <SelectPortal>
               <SelectBackdrop />
@@ -97,22 +87,20 @@ export function Home() {
         </Box>
 
         <Box bg="$backgroundDark800" p="$4" rounded="$xl" mb="$4">
-          <Text color="$textLight400" fontSize="$lg" mb="$2">
-            Métricas:
-          </Text>
+          <Text color="$textLight400" fontSize="$lg" mb="$2">Métricas:</Text>
           <HStack justifyContent="space-between">
             <Center>
-              <Icon as={Banknote} size="lg" color="$blue500" />
+              <Feather name="dollar-sign" size={28} color="#3B82F6" />
               <Text color="$textLight400">Entradas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalSales.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Icon as={ArrowDownToLine} size="lg" color="$red500" />
+              <Feather name="arrow-down" size={28} color="#EF4444" />
               <Text color="$textLight400">Saídas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalCost.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Icon as={ChartColumnBig} size="lg" color="$green500" />
+              <Feather name="bar-chart-2" size={28} color="#10B981" />
               <Text color="$textLight400">Lucro:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalProfit.toFixed(2)}</Text>
             </Center>

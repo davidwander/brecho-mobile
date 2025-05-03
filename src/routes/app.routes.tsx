@@ -7,12 +7,7 @@ import { NewRegister } from '@screens/NewRegister';
 import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
-import {
-  Home as HomeIcon,
-  BadgePlus,
-  Truck,
-  User,
-} from 'lucide-react-native';
+import Feather from 'react-native-vector-icons/Feather';
 
 type AppRoutes = {
   home: undefined;
@@ -48,7 +43,7 @@ export function AppRoutes() {
         component={Home}
         options={{
           tabBarIcon: ({ color }) => (
-            <HomeIcon color={color} width={iconSize} height={iconSize} />
+            <Feather name="home" color={color} size={iconSize} />
           ),
         }}
       />
@@ -57,7 +52,7 @@ export function AppRoutes() {
         component={NewRegister}
         options={{
           tabBarIcon: ({ color }) => (
-            <BadgePlus color={color} width={iconSize} height={iconSize} />
+            <Feather name="plus-circle" color={color} size={iconSize} />
           ),
         }}
       />
@@ -66,7 +61,7 @@ export function AppRoutes() {
         component={Shipments}
         options={{
           tabBarIcon: ({ color }) => (
-            <Truck color={color} width={iconSize} height={iconSize} />
+            <Feather name="truck" color={color} size={iconSize} />
           ),
         }}
       />
@@ -75,7 +70,7 @@ export function AppRoutes() {
         component={Profile}
         options={{
           tabBarIcon: ({ color }) => (
-            <User color={color} width={iconSize} height={iconSize} />
+            <Feather name="user" color={color} size={iconSize} />
           ),
         }}
       />

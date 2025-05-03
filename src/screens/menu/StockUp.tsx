@@ -14,8 +14,8 @@ import { RootStackParamList } from "@routes/AppStackRoutes";
 import ProductDetailsModal from "@components/ProductDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { Eye, Tag, DollarSign, ShoppingBag } from "lucide-react-native";
-
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 export function StockUp() {
   const { products } = useProduct();
   const salesContext = useSales();
@@ -195,7 +195,10 @@ export function StockUp() {
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <Checkbox.Icon as={ShoppingBag} color="white" size="lg" />
+                    <Checkbox.Icon>
+                      <Feather name="shopping-bag" color="white" size={24} />
+                    </Checkbox.Icon>
+
                   </Checkbox.Indicator>
                 </Checkbox>
 
@@ -229,14 +232,14 @@ export function StockUp() {
               gap="$4"
             >
               <HStack alignItems="center" gap="$1">
-                <DollarSign size={20} color="#888" />
+                <Feather name="dollar-sign" size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
                   Custo: R$ {item.costPrice.toFixed(2).replace(".", ",")}
                 </Text>
               </HStack>
 
               <HStack alignItems="center" gap="$1">
-                <Tag size={20} color="#888" />
+                <Feather name="tag" size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
                   Venda: R$ {item.salePrice.toFixed(2).replace(".", ",")}
                 </Text>
@@ -249,7 +252,7 @@ export function StockUp() {
                 onPress={() => setSelectedItem(item)}
               >
                 <HStack alignItems="center" justifyContent="center">
-                  <Eye color="white" size={24} />
+                  <Feather name="eye" size={20} color="#fff" />
                 </HStack>
               </GluestackButton>
             </HStack>

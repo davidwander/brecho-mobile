@@ -2,7 +2,7 @@ import React from 'react';
 import { ViewStyle } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Pressable, Icon } from '@gluestack-ui/themed';
-import { ChartNoAxesGantt } from 'lucide-react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../routes/AppStackRoutes'; 
 
@@ -46,7 +46,7 @@ const BackButton: React.FC<BackButtonProps> = ({
       }}
       onPress={handleGoRegister}
     >
-      <Icon as={ChartNoAxesGantt} size="xl" color={iconColor} />
+      <Feather name="arrow-left" size={iconSize} color={iconColor} />
     </Pressable>
   );
 };

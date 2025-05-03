@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import { FlatList } from 'react-native';
 import BackButton from '@components/BackButton';
 import { Box, Center, Text, VStack, HStack, Button as GluestackButton, Divider } from '@gluestack-ui/themed';
@@ -7,7 +6,7 @@ import { useSales } from '@contexts/SalesContext';
 import SaleDetailsModal from '@components/SaleDetailsModal';
 import { OpenSaleItem } from '@contexts/SalesContext'; 
 
-import { ShoppingBag, DollarSign, Eye } from 'lucide-react-native';
+import Feather from 'react-native-vector-icons/Feather'; 
 
 export function OpenSales() {
   const { openSales } = useSales();
@@ -43,7 +42,7 @@ export function OpenSales() {
             onPress={() => handleOpenDetails(item)}
           >
             <HStack alignItems="center" space="sm" px="$2">
-              <Eye color="white" size={18} />
+              <Feather name="eye" color="white" size={18} />
               <Text color="$white" fontSize="$sm">Ver Detalhes</Text>
             </HStack>
           </GluestackButton>
@@ -53,13 +52,13 @@ export function OpenSales() {
 
         <HStack justifyContent="space-around" alignItems="center" mt="$3">
           <VStack alignItems="center">
-            <ShoppingBag color="#888" size={24} />
+            <Feather name="shopping-bag" color="#888" size={24} />
             <Text color="$textLight200" mt="$1">
               {itemCount} {itemCount === 1 ? 'item' : 'itens'}
             </Text>
           </VStack>
           <VStack alignItems="center">
-            <DollarSign color="#888" size={24} />
+            <Feather name="dollar-sign" color="#888" size={24} />
             <Text color="$green400" mt="$1" fontFamily="$heading">
               R$ {totalValue.toFixed(2).replace(".", ",")}
             </Text>

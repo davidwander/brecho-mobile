@@ -7,7 +7,7 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import { ClientData, ProductItem, useSales } from '@contexts/SalesContext';
 import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
 
-import { Check, X, Tag, DollarSign } from 'lucide-react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Importando Ionicons
 
 import uuid from 'react-native-uuid';
 
@@ -67,13 +67,13 @@ export default function SaleDetailsModal({
       <Divider my="$2" bg="$trueGray700" />
       <HStack mt="$2" alignItems="center" justifyContent="space-between">
         <HStack alignItems="center" gap="$1">
-          <DollarSign size={16} color="#888" />
+          <Ionicons name="cash-outline" size={16} color="#888" /> {/* Substituído o ícone de preço de custo */}
           <Text color="$white" fontSize="$sm">
             Custo: R$ {item.costPrice.toFixed(2).replace(".", ",")}
           </Text>
         </HStack>
         <HStack alignItems="center" gap="$1">
-          <Tag size={16} color="#888" />
+          <Ionicons name="cash-sharp" size={16} color="#888" /> {/* Substituído o ícone de preço de venda */}
           <Text color="$white" fontSize="$sm">
             Venda: R$ {item.salePrice.toFixed(2).replace(".", ",")}
           </Text>
@@ -186,7 +186,7 @@ export default function SaleDetailsModal({
               onPress={onClose}
             >
               <HStack alignItems="center" space="sm">
-                <X color="white" size={20} />
+                <Ionicons name="close-circle-outline" color="white" size={20} /> {/* Ícone de fechar */}
                 <Text color="$white" fontSize="$md" fontFamily="$heading">
                   {isConfirmMode ? "Cancelar" : "Fechar"}
                 </Text>
@@ -201,7 +201,7 @@ export default function SaleDetailsModal({
                 onPress={handleConfirm}
               >
                 <HStack alignItems="center" space="sm">
-                  <Check color="white" size={20} />
+                  <Ionicons name="checkmark-circle-outline" color="white" size={20} /> {/* Ícone de confirmar */}
                   <Text color="$white" fontSize="$md" fontFamily="$heading">
                     Confirmar
                   </Text>

@@ -7,7 +7,7 @@ import {
   ActionsheetItem,
   HStack,
 } from '@gluestack-ui/themed';
-import { ClipboardList, DollarSign, ShoppingBag } from 'lucide-react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
 import { Animated, Pressable } from 'react-native';
@@ -22,9 +22,9 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const icons = [
-    { icon: ClipboardList, route: "stockUp" },
-    { icon: DollarSign, route: "exits" },
-    { icon: ShoppingBag, route: "openSales" },
+    { name: "list", route: "stockUp" },
+    { name: "dollar-sign", route: "exits" },
+    { name: "shopping-bag", route: "openSales" },
   ];
 
   const scales = [
@@ -51,7 +51,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
             opacity={sheetReady ? 1 : 0}
             pointerEvents={sheetReady ? "auto" : "none"}
           >
-            {icons.map(({ icon: Icon, route }, index) => {
+            {icons.map(({ name, route }, index) => {
               const scale = scales[index];
 
               const onPressIn = () => {
@@ -110,7 +110,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                         elevation: 6,
                       }}
                     >
-                      <Icon color="#fff" size={36} />
+                    <Feather name={name} color="#fff" size={36} />
                     </Animated.View>
                   </Pressable>
                 </ActionsheetItem>

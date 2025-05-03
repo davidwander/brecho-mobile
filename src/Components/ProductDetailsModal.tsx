@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal } from 'react-native';
 import { Box, Text, Button } from '@gluestack-ui/themed';
-import { EyeOff } from 'lucide-react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Importando o Ionicons
 
 interface ProductDetailsModalProps {
   visible: boolean;
@@ -32,6 +32,13 @@ export default function ProductDetailsModal({
           p="$6"
           borderRadius="$2xl"
           width="90%"
+          style={{
+            elevation: 5, // Para Android
+            shadowColor: '#000', // Para iOS
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.8,
+            shadowRadius: 3, // Ajuste conforme necessário
+          }}
         >
           <Text 
             textAlign="center"
@@ -67,7 +74,7 @@ export default function ProductDetailsModal({
             rounded="$xl"
             onPress={onClose}
           >
-            <EyeOff color="white" size={28} />
+            <Ionicons name="close" color="white" size={28} /> {/* Ícone de fechar usando Ionicons */}
           </Button>
         </Box>
       </Box>
