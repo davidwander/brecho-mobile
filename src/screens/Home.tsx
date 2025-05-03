@@ -17,6 +17,9 @@ import {
   Center
 } from '@gluestack-ui/themed';
 import Feather from 'react-native-vector-icons/Feather';
+import Foundation from 'react-native-vector-icons/Foundation';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
 import { PieChart, LineChart } from 'react-native-chart-kit';
 
 export function Home() {
@@ -52,13 +55,19 @@ export function Home() {
 
   return (
     <VStack flex={1} bg="$backgroundDark900" px="$4" pt="$16">
-      <Text color="$textLight400" fontSize="$2xl" mb="$4" fontFamily="$heading">
+      <Text 
+        color="$textLight400" 
+        fontSize="$2xl" 
+        mb="$4" 
+        fontFamily="$heading"
+        lineHeight="$xl"
+      >
         Dashboard
       </Text>
 
-      <Box bg="$purple700" p="$4" rounded="$xl" mb="$4">
+      <Box bg="$purple700" p="$4" rounded="$xl" mb="$4" px="$2">
         <HStack alignItems="center" gap="$2">
-          <Feather name="trending-up" size={24} color="#FFF" />
+          <Feather name="trending-up" size={20} color="#FFF" />
           <Text color="$white" lineHeight="$xl" fontFamily="$heading">
             Você ultrapassou sua meta de vendas este mês!
           </Text>
@@ -71,9 +80,10 @@ export function Home() {
             Filtrar por Período:
           </Text>
           <Select selectedValue={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger>
-              <SelectInput placeholder="Selecione um período" color="$textLight400" />
-              <SelectIcon as={() => <Feather name="calendar" size={20} color="#FFF" />} px="$4" />
+            <SelectTrigger px="$2">
+              <SelectInput placeholder="Selecione um período" color="$textLight400" px="$2"  />
+              <SelectIcon as={() => <Feather name="calendar" size={20} color="#FFF" />} 
+            />
             </SelectTrigger>
             <SelectPortal>
               <SelectBackdrop />
@@ -90,7 +100,7 @@ export function Home() {
           <Text color="$textLight400" fontSize="$lg" mb="$2">Métricas:</Text>
           <HStack justifyContent="space-between">
             <Center>
-              <Feather name="dollar-sign" size={28} color="#3B82F6" />
+              <Foundation name="dollar-bill" size={28} color="#3B82F6" />
               <Text color="$textLight400">Entradas:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalSales.toFixed(2)}</Text>
             </Center>
@@ -100,7 +110,7 @@ export function Home() {
               <Text color="$textLight400" fontWeight="$bold">R$ {totalCost.toFixed(2)}</Text>
             </Center>
             <Center>
-              <Feather name="bar-chart-2" size={28} color="#10B981" />
+              <AntDesign name="barschart" size={28} color="#10B981" />
               <Text color="$textLight400">Lucro:</Text>
               <Text color="$textLight400" fontWeight="$bold">R$ {totalProfit.toFixed(2)}</Text>
             </Center>

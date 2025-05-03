@@ -8,6 +8,7 @@ import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
 import Feather from 'react-native-vector-icons/Feather';
+import LineChart from 'react-native-chart-kit';
 
 type AppRoutes = {
   home: undefined;
@@ -43,7 +44,12 @@ export function AppRoutes() {
         component={Home}
         options={{
           tabBarIcon: ({ color }) => (
-            <Feather name="home" color={color} size={iconSize} />
+            <Feather 
+            name="home" 
+            color={color} 
+            size={iconSize} 
+            style={{ marginTop: -4 }} 
+          />
           ),
         }}
       />
@@ -52,7 +58,12 @@ export function AppRoutes() {
         component={NewRegister}
         options={{
           tabBarIcon: ({ color }) => (
-            <Feather name="plus-circle" color={color} size={iconSize} />
+            <Feather 
+              name="plus-circle" 
+              color={color} 
+              size={iconSize} 
+              style={{ marginTop: -4 }} 
+            />
           ),
         }}
       />
@@ -61,7 +72,12 @@ export function AppRoutes() {
         component={Shipments}
         options={{
           tabBarIcon: ({ color }) => (
-            <Feather name="truck" color={color} size={iconSize} />
+            <Feather 
+              name="truck" 
+              color={color} 
+              size={iconSize} 
+              style={{ marginTop: -4 }} 
+            />
           ),
         }}
       />
@@ -70,7 +86,12 @@ export function AppRoutes() {
         component={Profile}
         options={{
           tabBarIcon: ({ color }) => (
-            <Feather name="user" color={color} size={iconSize} />
+            <Feather 
+              name="user" 
+              color={color} 
+              size={iconSize} 
+              style={{ marginTop: -4 }} 
+            />
           ),
         }}
       />
