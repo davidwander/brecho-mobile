@@ -100,7 +100,7 @@ export function Exits() {
                 autoCapitalize="words"
                 value={value} 
                 onChangeText={(text) => onChange(text)} 
-                errorMessage={errors.nameClient?.message}
+                errorMessage={errors.nameClient?.message || ""}
               />
             )}
           />
@@ -117,7 +117,7 @@ export function Exits() {
                     onChange(unmasked);
                   }
                 }}
-                errorMessage={errors.phone?.message}
+                errorMessage={errors.phone?.message || ""}
               />
             )}
           />
@@ -134,7 +134,7 @@ export function Exits() {
                     onChange(unmasked);
                   }
                 }}
-                errorMessage={errors.cpf?.message}
+                errorMessage={errors.cpf?.message || ""}
               />
             )}
           />
@@ -149,7 +149,7 @@ export function Exits() {
                 multiline
                 value={value} 
                 onChangeText={(text) => onChange(text)} 
-                errorMessage={errors.address?.message}
+                errorMessage={errors.address?.message || ""}
               />
             )}
           />

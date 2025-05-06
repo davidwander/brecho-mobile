@@ -7,7 +7,9 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import { ClientData, ProductItem, useSales } from '@contexts/SalesContext';
 import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
 
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Importando Ionicons
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
 
 import uuid from 'react-native-uuid';
 
@@ -23,39 +25,23 @@ interface SaleDetailsModalProps {
 export default function SaleDetailsModal({
   visible,
   clientData,
-  selectedProducts,
+  selectedProducts = [], 
   onClose,
   onConfirm,
   isConfirmMode = true,
 }: SaleDetailsModalProps) {
-  const { addSale, clearSaleData } = useSales();
-
+  const { addSale, clearSaleData, cancelSale } = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const handleConfirmSale = () => {
-    const total = selectedProducts.reduce((sum, p) => sum + p.salePrice, 0);
-    const sale = {
-      id: String(uuid.v4()),
-      client: clientData!,
-      products: selectedProducts,
-      total,
-      date: new Date().toISOString(),
-    };
-  
-    addSale(sale); 
-    clearSaleData(); 
-    navigation.navigate("openSales");
-  };
 
   const totalValue = useMemo(() => {
     return selectedProducts.reduce((total, product) => total + product.salePrice, 0);
   }, [selectedProducts]);
 
   const renderProductItem = ({ item }: { item: ProductItem }) => (
-    <Box 
+    <Box
       bg="$backgroundDark800"
       p="$3"
-      borderRadius="$lg"
+      borderRadius="$xl"
       mb="$2"
       borderWidth={1}
       borderColor="$trueGray800"
@@ -67,13 +53,13 @@ export default function SaleDetailsModal({
       <Divider my="$2" bg="$trueGray700" />
       <HStack mt="$2" alignItems="center" justifyContent="space-between">
         <HStack alignItems="center" gap="$1">
-          <Ionicons name="cash-outline" size={16} color="#888" /> {/* Substituído o ícone de preço de custo */}
+          <Feather name="dollar-sign" size={16} color="#888" />
           <Text color="$white" fontSize="$sm">
             Custo: R$ {item.costPrice.toFixed(2).replace(".", ",")}
           </Text>
         </HStack>
         <HStack alignItems="center" gap="$1">
-          <Ionicons name="cash-sharp" size={16} color="#888" /> {/* Substituído o ícone de preço de venda */}
+          <Entypo name="price-tag" size={16} color="#888" />
           <Text color="$white" fontSize="$sm">
             Venda: R$ {item.salePrice.toFixed(2).replace(".", ",")}
           </Text>
@@ -85,9 +71,7 @@ export default function SaleDetailsModal({
   const handleConfirm = () => {
     if (clientData && selectedProducts.length > 0) {
       const isValidSale = selectedProducts.every(item => item.salePrice > 0);
-      if (!isValidSale) {
-        return;
-      }
+      if (!isValidSale) return;
 
       const saleId = String(uuid.v4());
       const dateNow = new Date().toISOString();
@@ -102,8 +86,13 @@ export default function SaleDetailsModal({
 
       clearSaleData();
       onConfirm();
-      navigation.navigate("openSales") 
+      navigation.navigate("openSales");
     }
+  };
+
+  const handleCancel = () => {
+    cancelSale(); 
+    onClose();
   };
 
   return (
@@ -117,7 +106,7 @@ export default function SaleDetailsModal({
         flex={1}
         justifyContent="center"
         alignItems="center"
-        bg="rgba(0,0,0,0.6)"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       >
         <Box
           bg="$backgroundDark900"
@@ -126,11 +115,11 @@ export default function SaleDetailsModal({
           width="90%"
           maxHeight="80%"
         >
-          <Text 
+          <Text
             textAlign="center"
-            fontSize="$xl" 
-            fontFamily="$heading" 
-            color="$white" 
+            fontSize="$xl"
+            fontFamily="$heading"
+            color="$white"
             mb="$4"
             lineHeight="$md"
           >
@@ -138,7 +127,7 @@ export default function SaleDetailsModal({
           </Text>
 
           {clientData && (
-            <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$lg">
+            <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$xl">
               <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
                 Dados do Cliente
               </Text>
@@ -153,21 +142,23 @@ export default function SaleDetailsModal({
           <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
             Peças Selecionadas ({selectedProducts.length})
           </Text>
-          <Box height="45%" mb="$4">
-            <FlatList
-              data={selectedProducts}
-              renderItem={renderProductItem}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={true}
-            />
-          </Box>
 
-          <Box 
-            bg="$backgroundDark800" 
-            p="$3" 
-            borderRadius="$lg" 
-            mb="$4"
-          >
+          {selectedProducts.length === 0 ? (
+            <Text color="$textLight400" mb="$4" textAlign="center">
+              Nenhuma peça selecionada.
+            </Text>
+          ) : (
+            <Box height="45%" mb="$4">
+              <FlatList
+                data={selectedProducts}
+                renderItem={renderProductItem}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={true}
+              />
+            </Box>
+          )}
+
+          <Box bg="$backgroundDark800" p="$3" borderRadius="$lg" mb="$4">
             <HStack justifyContent="space-between" alignItems="center">
               <Text color="$white" fontSize="$lg" fontFamily="$heading">
                 Valor Total:
@@ -183,16 +174,16 @@ export default function SaleDetailsModal({
               w="48%"
               bg="$red600"
               rounded="$xl"
-              onPress={onClose}
+              onPress={handleCancel}
             >
               <HStack alignItems="center" space="sm">
-                <Ionicons name="close-circle-outline" color="white" size={20} /> {/* Ícone de fechar */}
+                <Ionicons name="close-circle-outline" color="white" size={20} />
                 <Text color="$white" fontSize="$md" fontFamily="$heading">
                   {isConfirmMode ? "Cancelar" : "Fechar"}
                 </Text>
               </HStack>
             </Button>
-            
+
             {isConfirmMode && (
               <Button
                 w="48%"
@@ -201,7 +192,7 @@ export default function SaleDetailsModal({
                 onPress={handleConfirm}
               >
                 <HStack alignItems="center" space="sm">
-                  <Ionicons name="checkmark-circle-outline" color="white" size={20} /> {/* Ícone de confirmar */}
+                  <Ionicons name="checkmark-circle-outline" color="white" size={20} />
                   <Text color="$white" fontSize="$md" fontFamily="$heading">
                     Confirmar
                   </Text>

@@ -1,19 +1,18 @@
 import React, { ComponentProps, ReactElement } from 'react';
 import { Button as GluestackButton, Text, ButtonSpinner, HStack } from '@gluestack-ui/themed';
-import { Icon as GluestackIcon } from '@gluestack-ui/themed';
 
 type Props = ComponentProps<typeof GluestackButton> & {
   title?: string;
   variant?: "solid" | "outline";
   isLoading?: boolean;
-  icon?: ReactElement | string; // Permitindo ícones como string ou elemento React
+  icon?: ReactElement | string; 
 }
 
 export function Button({ 
   title,
   variant = "solid", 
   isLoading = false, 
-  icon, // Recebendo o ícone
+  icon, 
   ...rest 
 }: Props) {
   const textColor = variant === "outline" ? "$purple500" : "$textLight400";
@@ -35,15 +34,7 @@ export function Button({
           <ButtonSpinner color={textColor} size="large" />
         ) : (
           <HStack alignItems="center" justifyContent="center" space="sm">
-            {/* Renderiza o ícone se ele for fornecido */}
-            {icon && (
-              <GluestackIcon
-                as={icon}
-                color={textColor}
-                //size="$lg"
-              />
-            )}
-            {/* Renderiza o título se ele for fornecido */}
+            {icon}
             {title && (
               <Text 
                 color={textColor}

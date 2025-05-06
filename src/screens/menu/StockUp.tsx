@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-
 import { FlatList, TouchableOpacity } from "react-native";
 
 import BackButton from "@components/BackButton";
@@ -15,7 +14,9 @@ import ProductDetailsModal from "@components/ProductDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import Feather from 'react-native-vector-icons/Feather';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Entypo from 'react-native-vector-icons/Entypo';
+
 export function StockUp() {
   const { products } = useProduct();
   const salesContext = useSales();
@@ -23,7 +24,7 @@ export function StockUp() {
 
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null); 
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]); 
   const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); 
   const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); 
 
@@ -34,8 +35,7 @@ export function StockUp() {
 
   const reservedProductIds = useMemo(() => {
     if (!salesContext?.openSales) return [];
-    return salesContext.openSales.flatMap(sale => sale.selectedProducts.map   (product => product.id)
-    );
+    return salesContext.openSales.flatMap(sale => sale.selectedProducts.map(product => product.id));
   }, [salesContext?.openSales]);
 
   const filteredProducts = useMemo(() => {
@@ -50,31 +50,31 @@ export function StockUp() {
   }, [products, selectedType, reservedProductIds]);
 
   const handleOpenSaleModal = () => {
-    if (selectedProductIds.length === 0) {
-      return;
-  }
+    if (selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))) {
+      return; 
+    };
 
-  const selectedProductsData = products.filter(product =>
-    selectedProductIds.includes(product.id)
-  );
+    const selectedProductsData = products.filter(product =>
+      selectedProductIds.includes(product.id)
+    );
 
-  const convertedProducts: ProductItem[] = selectedProductsData.map(product => ({
-    ...product,
-    quantity: 1,
-    type: product.type === "entrada" || product.type === "saida" ? product.type : undefined 
-  }));
+    const convertedProducts: ProductItem[] = selectedProductsData.map(product => ({
+      ...product,
+      quantity: 1,
+      type: product.type === "entrada" || product.type === "saida" ? product.type : undefined 
+    }));
 
-  setCurrentSelectedProducts(convertedProducts);
+    setCurrentSelectedProducts(convertedProducts);
 
-  if (salesContext && typeof salesContext.setSelectedProducts === "function") {
-    salesContext.setSelectedProducts(convertedProducts);
-  } else {
-    console.error("Contexto de vendas não está disponível ou setSelectedProducts não é uma função");
-    return; 
-  }
+    if (salesContext && typeof salesContext.setSelectedProducts === "function") {
+      salesContext.setSelectedProducts(convertedProducts);
+    } else {
+      console.error("Contexto de vendas não está disponível ou setSelectedProducts não é uma função");
+      return; 
+    }
 
-  setIsSaleModalVisible(true); 
-};
+    setIsSaleModalVisible(true); 
+  };
 
   const handleModalConfirm = () => {
     setIsSaleModalVisible(false); 
@@ -86,7 +86,7 @@ export function StockUp() {
       <BackButton />
       <Text
         color="$white"
-        fontSize="$2xl"                                        
+        fontSize="$2xl"                                      
         fontFamily="$heading"
         mt="$4"
         mb="$4"
@@ -121,16 +121,16 @@ export function StockUp() {
               <Box
                 px="$8"
                 py="$2"
-                bg={isSelected ? "$purple700" : "$backgroundDark700"}
+                bg={isSelected ? "$purple700" : "$transparent"}
                 borderRadius="$lg"
                 borderWidth={1}
                 justifyContent="center"
                 alignItems="center"
                 height={44}
-                borderColor={isSelected ? "$purple700" : "$backgroundDark500"}
+                borderColor={isSelected ? "$purple700" : "$purple700"}
               >
                 <Text
-                  color={isSelected ? "$white" : "$gray300"}
+                  color={isSelected ? "$white" : "$black"}
                   fontSize="$md"
                   fontFamily="$heading"
                   lineHeight="$2xl"
@@ -172,7 +172,7 @@ export function StockUp() {
                   isChecked={selectedProductIds.includes(item.id)}
                   onChange={() => {
                     if (!salesContext.clientData) {
-                      alert("Selecione um cliente antes de adicionar produtos.");
+                      alert("Crie uma sacola antes de adicionar as peças.");
                       return;
                     }
                     setSelectedProductIds((prev) =>
@@ -196,9 +196,8 @@ export function StockUp() {
                     alignItems="center"
                   >
                     <Checkbox.Icon>
-                      <Feather name="shopping-bag" color="white" size={24} />
+                      <Feather name="shopping-bag" color="white" size={20} />
                     </Checkbox.Icon>
-
                   </Checkbox.Indicator>
                 </Checkbox>
 
@@ -239,7 +238,7 @@ export function StockUp() {
               </HStack>
 
               <HStack alignItems="center" gap="$1">
-                <Feather name="tag" size={20} color="#888" />
+                <Entypo name="price-tag" size={20} color="#888" />
                 <Text color="$white" fontSize="$sm">
                   Venda: R$ {item.salePrice.toFixed(2).replace(".", ",")}
                 </Text>
@@ -252,11 +251,10 @@ export function StockUp() {
                 onPress={() => setSelectedItem(item)}
               >
                 <HStack alignItems="center" justifyContent="center">
-                  <Feather name="eye" size={20} color="#fff" />
+                  <FontAwesome name="eye" size={24} color="#fff" />
                 </HStack>
               </GluestackButton>
             </HStack>
-
           </Box>
         )}
 
@@ -284,7 +282,7 @@ export function StockUp() {
             title={`Revisar Venda (${selectedProductIds.length} ${selectedProductIds.length === 1 ? 'peça' : 'peças'})`}
             variant="solid"
             onPress={handleOpenSaleModal}
-            isDisabled={selectedProductIds.length === 0}
+            isDisabled={selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))}
           />
         </Box>
       )}
@@ -298,8 +296,11 @@ export function StockUp() {
       <SaleDetailsModal
         visible={isSaleModalVisible}
         clientData={salesContext.clientData}
-        selectedProducts={currentSelectedProducts}
-        onClose={() => setIsSaleModalVisible(false)}
+        selectedProducts={currentSelectedProducts ?? []}
+        onClose={() => {
+          setIsSaleModalVisible(false);
+          setSelectedType(null);
+        }}
         onConfirm={handleModalConfirm}
         isConfirmMode={true}
       />

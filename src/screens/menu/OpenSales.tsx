@@ -32,9 +32,10 @@ export function OpenSales() {
         borderColor="$trueGray800"
       >
         <HStack justifyContent="space-between" alignItems="center" mb="$3">
-          <Text size="lg" color="$textLight0" fontFamily="$heading">
-            {item.clientData.nameClient}
-          </Text>
+        <Text size="lg" color="$textLight0" fontFamily="$heading">
+          {selectedSale?.clientData?.nameClient || 'Cliente desconhecido'}
+        </Text>
+
           <GluestackButton
             size="sm"
             bg="$purple700"

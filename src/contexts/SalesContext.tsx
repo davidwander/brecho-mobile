@@ -27,7 +27,7 @@ export type SalesContextType = {
   openSales: OpenSaleItem[];
   addSale: (sale: SaleData) => void;
   finalizeSale: (index: number) => void;
-  cancelSale: () => void;  // Adicionando função para cancelar a venda
+  cancelSale: () => void;  // Função para cancelar a venda
   clientData: ClientData | null;
   setClientData: (client: ClientData) => void;
   selectedProducts: ProductItem[];
@@ -55,8 +55,7 @@ export const SalesProvider = ({ children }: Props) => {
   const setSelectedProducts = (products: ProductItem[]) => {
     setSelectedProductsState(products);
     products.forEach(p => {
-      reserveProduct(p.id);  // Reserva o produto
-      removeProduct(p.id);    // Remove o produto do estoque
+      reserveProduct(p.id); // Marca o produto como reservado
     });
   };
 
@@ -88,17 +87,20 @@ export const SalesProvider = ({ children }: Props) => {
     setOpenSales(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Cancela a venda e devolve os produtos ao estoque
+  // Cancela a venda e devolve os produtos ao estoque sem removê-los permanentemente
   const cancelSale = () => {
-    returnProductsToStock(selectedProducts);
-    setSelectedProductsState([]);
-    setClientDataState(null);
+    // Apenas liberar a reserva, sem afetar o estoque
+    selectedProducts.forEach(p => {
+      releaseProduct(p.id); // Libera a reserva do produto
+    });
+    setSelectedProductsState([]); // Limpa os produtos selecionados
+    setClientDataState(null); // Limpa as informações do cliente
   };
 
   // Devolve os produtos ao estoque
   const returnProductsToStock = (products: ProductItem[]) => {
     products.forEach(p => {
-      releaseProduct(p.id); // Libera a reserva
+      releaseProduct(p.id); // Libera a reserva do produto
       addProduct({
         id: p.id,
         name: '',
@@ -115,10 +117,10 @@ export const SalesProvider = ({ children }: Props) => {
   // Limpa os dados de venda em andamento
   const clearSaleData = () => {
     if (selectedProducts.length > 0) {
-      returnProductsToStock(selectedProducts);
+      returnProductsToStock(selectedProducts); // Retorna os produtos ao estoque, caso haja
     }
     setClientDataState(null);
-    setSelectedProductsState([]);
+    setSelectedProductsState([]); // Limpa os produtos selecionados
   };
 
   return (

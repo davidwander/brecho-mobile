@@ -8,7 +8,6 @@ import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
 import Feather from 'react-native-vector-icons/Feather';
-import LineChart from 'react-native-chart-kit';
 
 type AppRoutes = {
   home: undefined;

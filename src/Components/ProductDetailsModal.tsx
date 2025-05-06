@@ -1,8 +1,8 @@
 import React from 'react';
 import { Modal } from 'react-native';
 import { Box, Text, Button } from '@gluestack-ui/themed';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Importando o Ionicons
 
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 interface ProductDetailsModalProps {
   visible: boolean;
   item: any;
@@ -25,7 +25,7 @@ export default function ProductDetailsModal({
         flex={1}
         justifyContent="center"
         alignItems="center"
-        bg="rgba(0,0,0,0.6)"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
       >
         <Box
           bg="$backgroundDark900"
@@ -33,11 +33,11 @@ export default function ProductDetailsModal({
           borderRadius="$2xl"
           width="90%"
           style={{
-            elevation: 5, // Para Android
-            shadowColor: '#000', // Para iOS
+            elevation: 5, 
+            shadowColor: '#000', 
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.8,
-            shadowRadius: 3, // Ajuste conforme necessário
+            shadowRadius: 3, 
           }}
         >
           <Text 
@@ -74,7 +74,7 @@ export default function ProductDetailsModal({
             rounded="$xl"
             onPress={onClose}
           >
-            <Ionicons name="close" color="white" size={28} /> {/* Ícone de fechar usando Ionicons */}
+            <FontAwesome name="eye-slash" color="white" size={24} /> 
           </Button>
         </Box>
       </Box>
