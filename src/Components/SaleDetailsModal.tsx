@@ -134,6 +134,7 @@ export default function SaleDetailsModal({
               <VStack space="sm">
                 <Text color="$textLight200">Nome: {clientData.nameClient}</Text>
                 <Text color="$textLight200">Tel: {clientData.phone}</Text>
+                <Text color="$textLight200">CPF: {clientData.cpf}</Text>
                 <Text color="$textLight200">Endereço: {clientData.address}</Text>
               </VStack>
             </Box>

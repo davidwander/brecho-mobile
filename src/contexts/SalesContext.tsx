@@ -12,6 +12,7 @@ export type ProductItem = {
 export type ClientData = {
   nameClient: string;
   phone: string;
+  cpf: string;
   address: string;
 };
 

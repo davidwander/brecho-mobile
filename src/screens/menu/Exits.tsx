@@ -61,6 +61,7 @@ export function Exits() {
       const clientData: ClientData = {
         nameClient: data.nameClient,
         phone: data.phone,
+        cpf: data.cpf,
         address: data.address,
       };
 
