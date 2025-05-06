@@ -28,6 +28,8 @@ export function StockUp() {
   const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); 
   const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); 
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const allTypes = [
     "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
     "Calça", "Vestido", "Calçados", "Acessórios"
@@ -52,7 +54,9 @@ export function StockUp() {
   const handleOpenSaleModal = () => {
     if (selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))) {
       return; 
-    };
+    }
+
+    setIsLoading(true);
 
     const selectedProductsData = products.filter(product =>
       selectedProductIds.includes(product.id)
@@ -73,7 +77,10 @@ export function StockUp() {
       return; 
     }
 
-    setIsSaleModalVisible(true); 
+    setTimeout(() => {
+      setIsSaleModalVisible(true);
+      setIsLoading(false);
+    }, 500);
   };
 
   const handleModalConfirm = () => {
@@ -279,10 +286,11 @@ export function StockUp() {
           px="$4"
         >
           <Button
-            title={`Revisar Venda (${selectedProductIds.length} ${selectedProductIds.length === 1 ? 'peça' : 'peças'})`}
+            title={isLoading ? "Carregando..." : `Revisar Venda (${selectedProductIds.length} ${selectedProductIds.length === 1 ? 'peça' : 'peças'})`}
             variant="solid"
             onPress={handleOpenSaleModal}
-            isDisabled={selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))}
+            isDisabled={isLoading || selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))}
+            isLoading={isLoading}
           />
         </Box>
       )}
