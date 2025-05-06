@@ -27,7 +27,7 @@ export type SalesContextType = {
   openSales: OpenSaleItem[];
   addSale: (sale: SaleData) => void;
   finalizeSale: (index: number) => void;
-  cancelSale: () => void;  // Função para cancelar a venda
+  cancelSale: () => void;  
   clientData: ClientData | null;
   setClientData: (client: ClientData) => void;
   selectedProducts: ProductItem[];
@@ -51,11 +51,10 @@ export const SalesProvider = ({ children }: Props) => {
     setClientDataState(client);
   };
 
-  // Seleciona produtos e os marca como reservados
   const setSelectedProducts = (products: ProductItem[]) => {
     setSelectedProductsState(products);
     products.forEach(p => {
-      reserveProduct(p.id); // Marca o produto como reservado
+      reserveProduct(p.id); 
     });
   };
 
@@ -69,7 +68,6 @@ export const SalesProvider = ({ children }: Props) => {
     ]);
   };
 
-  // Finaliza a venda e move os produtos para a venda
   const finalizeSale = (index: number) => {
     const sale = openSales[index];
     sale.selectedProducts.forEach(p => {
@@ -87,20 +85,17 @@ export const SalesProvider = ({ children }: Props) => {
     setOpenSales(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Cancela a venda e devolve os produtos ao estoque sem removê-los permanentemente
   const cancelSale = () => {
-    // Apenas liberar a reserva, sem afetar o estoque
     selectedProducts.forEach(p => {
-      releaseProduct(p.id); // Libera a reserva do produto
+      releaseProduct(p.id);
     });
-    setSelectedProductsState([]); // Limpa os produtos selecionados
-    setClientDataState(null); // Limpa as informações do cliente
+    setSelectedProductsState([]); 
+    setClientDataState(null); 
   };
 
-  // Devolve os produtos ao estoque
   const returnProductsToStock = (products: ProductItem[]) => {
     products.forEach(p => {
-      releaseProduct(p.id); // Libera a reserva do produto
+      releaseProduct(p.id); 
       addProduct({
         id: p.id,
         name: '',
@@ -114,13 +109,12 @@ export const SalesProvider = ({ children }: Props) => {
     });
   };
 
-  // Limpa os dados de venda em andamento
   const clearSaleData = () => {
     if (selectedProducts.length > 0) {
-      returnProductsToStock(selectedProducts); // Retorna os produtos ao estoque, caso haja
+      returnProductsToStock(selectedProducts);
     }
     setClientDataState(null);
-    setSelectedProductsState([]); // Limpa os produtos selecionados
+    setSelectedProductsState([]); 
   };
 
   return (
@@ -129,7 +123,7 @@ export const SalesProvider = ({ children }: Props) => {
         openSales,
         addSale,
         finalizeSale,
-        cancelSale,  // Expondo a função para cancelar a venda
+        cancelSale,  
         clientData,
         setClientData,
         selectedProducts,

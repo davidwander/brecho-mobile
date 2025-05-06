@@ -33,7 +33,7 @@ export function OpenSales() {
       >
         <HStack justifyContent="space-between" alignItems="center" mb="$3">
         <Text size="lg" color="$textLight0" fontFamily="$heading">
-          {selectedSale?.clientData?.nameClient || 'Cliente desconhecido'}
+          {item.clientData.nameClient || 'Cliente desconhecido'}
         </Text>
 
           <GluestackButton
