@@ -8,6 +8,7 @@ import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
 import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 type AppRoutes = {
   home: undefined;
@@ -71,11 +72,11 @@ export function AppRoutes() {
         component={Shipments}
         options={{
           tabBarIcon: ({ color }) => (
-            <Feather 
-              name="truck" 
+            <FontAwesome5 
+              name="people-carry" 
               color={color} 
-              size={iconSize} 
-              style={{ marginTop: -4 }} 
+              size={26} 
+              style={{ marginTop: -4, marginLeft: -2 }} 
             />
           ),
         }}

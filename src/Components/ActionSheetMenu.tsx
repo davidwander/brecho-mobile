@@ -7,7 +7,9 @@ import {
   ActionsheetItem,
   HStack,
 } from '@gluestack-ui/themed';
+
 import Feather from 'react-native-vector-icons/Feather';
+
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
 import { Animated, Pressable } from 'react-native';
@@ -23,8 +25,8 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
 
   const icons = [
     { name: "list", route: "stockUp" },
-    { name: "dollar-sign", route: "exits" },
-    { name: "shopping-bag", route: "openSales" },
+    { name: "shopping-bag", route: "exits" },
+    { name: "file-text", route: "openSales" },
   ];
 
   const scales = [

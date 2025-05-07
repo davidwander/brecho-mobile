@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import { FlatList } from 'react-native';
 import BackButton from '@components/BackButton';
-import { Box, Center, Text, VStack, HStack, Button as GluestackButton, Divider } from '@gluestack-ui/themed';
+import {
+  Box,
+  Center,
+  Text,
+  VStack,
+  HStack,
+  Button as GluestackButton,
+  Divider,
+} from '@gluestack-ui/themed';
 import { useSales } from '@contexts/SalesContext';
 import SaleDetailsModal from '@components/SaleDetailsModal';
-import { OpenSaleItem } from '@contexts/SalesContext'; 
+import { OpenSaleItem } from '@contexts/SalesContext';
 
-import Feather from 'react-native-vector-icons/Feather'; 
+import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export function OpenSales() {
   const { openSales } = useSales();
@@ -19,52 +28,67 @@ export function OpenSales() {
   };
 
   const renderSaleCard = ({ item }: { item: OpenSaleItem }) => {
-    const totalValue = item.selectedProducts.reduce((total, product) => total + product.salePrice, 0);
+    const totalValue = item.selectedProducts.reduce(
+      (total, product) => total + product.salePrice,
+      0
+    );
     const itemCount = item.selectedProducts.length;
 
     return (
       <Box
-        mb="$4"
+        mb="$5"
         p="$5"
         bg="$backgroundDark800"
-        borderRadius="$xl"
+        borderRadius="$2xl"
         borderWidth={1}
-        borderColor="$trueGray800"
+        borderColor="$trueGray700"
+        shadowColor="black"
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowOpacity={0.2}
+        shadowRadius={4}
       >
-        <HStack justifyContent="space-between" alignItems="center" mb="$3">
-        <Text size="lg" color="$textLight0" fontFamily="$heading">
-          {item.clientData.nameClient || 'Cliente desconhecido'}
-        </Text>
-
-          <GluestackButton
-            size="sm"
-            bg="$purple700"
-            rounded="$lg"
-            onPress={() => handleOpenDetails(item)}
-          >
-            <HStack alignItems="center" space="sm" px="$2">
-              <Feather name="eye" color="white" size={18} />
-              <Text color="$white" fontSize="$sm">Ver Detalhes</Text>
+        <VStack space="md">
+          <HStack justifyContent="space-between" alignItems="center">
+            <HStack space="sm" alignItems="center">
+              <Feather name="user" size={20} color="#a78bfa" />
+              <Text size="lg" color="$textLight0" fontFamily="$heading">
+                {item.clientData.nameClient || 'Cliente desconhecido'}
+              </Text>
             </HStack>
-          </GluestackButton>
-        </HStack>
 
-        <Divider my="$3" bg="$trueGray700" />
+            <GluestackButton
+              size="sm"
+              bg="$purple700"
+              rounded="$xl"
+              onPress={() => handleOpenDetails(item)}
+            >
+              <HStack alignItems="center" space="xs" px="$2">
+                <FontAwesome name="eye" color="white" size={16} />
+                <Text color="$white" fontSize="$sm">
+                  Detalhes
+                </Text>
+              </HStack>
+            </GluestackButton>
+          </HStack>
 
-        <HStack justifyContent="space-around" alignItems="center" mt="$3">
-          <VStack alignItems="center">
-            <Feather name="shopping-bag" color="#888" size={24} />
-            <Text color="$textLight200" mt="$1">
-              {itemCount} {itemCount === 1 ? 'item' : 'itens'}
-            </Text>
-          </VStack>
-          <VStack alignItems="center">
-            <Feather name="dollar-sign" color="#888" size={24} />
-            <Text color="$green400" mt="$1" fontFamily="$heading">
-              R$ {totalValue.toFixed(2).replace(".", ",")}
-            </Text>
-          </VStack>
-        </HStack>
+          <Divider bg="$trueGray700" />
+
+          <HStack justifyContent="space-between" mt="$2">
+            <HStack space="sm" alignItems="center">
+              <Feather name="shopping-bag" color="#60a5fa" size={20} />
+              <Text color="$textLight200">
+                {itemCount} {itemCount === 1 ? 'item' : 'itens'}
+              </Text>
+            </HStack>
+
+            <HStack space="sm" alignItems="center">
+              <Feather name="dollar-sign" color="#34d399" size={20} />
+              <Text color="$green400" fontFamily="$heading" size="md">
+                R$ {totalValue.toFixed(2).replace('.', ',')}
+              </Text>
+            </HStack>
+          </HStack>
+        </VStack>
       </Box>
     );
   };
