@@ -293,7 +293,7 @@ export function StockUp() {
             textAlign="center"
             lineHeight="$lg"
           >
-            Nenhuma peça encontrada.
+            Seu estoque está vazio.
           </Text>
         }
       />

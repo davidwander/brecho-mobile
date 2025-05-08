@@ -257,7 +257,7 @@ export function NewRegister() {
               <Input editable={false} value={`Cod: ${registerId.slice(0, 7)}`} />
 
               <Button 
-                title="Gerar Novo Registro" 
+                title="Adicionar no Estoque" 
                 onPress={handleSubmit(handleRegister)} 
                 isLoading={isRegistering}
               />
