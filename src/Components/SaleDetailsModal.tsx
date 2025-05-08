@@ -20,15 +20,17 @@ interface SaleDetailsModalProps {
   onClose: () => void;
   onConfirm: () => void;
   isConfirmMode?: boolean;
+  fromStockScreen?: boolean;
 }
 
-export default function SaleDetailsModal({
+export function SaleDetailsModal({
   visible,
   clientData,
   selectedProducts = [], 
   onClose,
   onConfirm,
   isConfirmMode = true,
+  fromStockScreen = false,
 }: SaleDetailsModalProps) {
   const { addSale, clearSaleData, cancelSale } = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -88,6 +90,11 @@ export default function SaleDetailsModal({
       onConfirm();
       navigation.navigate("openSales");
     }
+  };
+
+  const handleAddMoreProducts = () => {
+    onClose();
+    navigation.navigate("stockUp");
   };
 
   const handleCancel = () => {
@@ -170,24 +177,41 @@ export default function SaleDetailsModal({
             </HStack>
           </Box>
 
-          <HStack justifyContent="space-between" mt="$2">
-            <Button
-              w="48%"
-              bg="$red600"
-              rounded="$xl"
-              onPress={handleCancel}
-            >
-              <HStack alignItems="center" space="sm">
-                <Ionicons name="close-circle-outline" color="white" size={20} />
-                <Text color="$white" fontSize="$md" fontFamily="$heading">
-                  {isConfirmMode ? "Cancelar" : "Fechar"}
-                </Text>
-              </HStack>
-            </Button>
-
-            {isConfirmMode && (
+          {isConfirmMode ? (
+            // Modo de confirmação com os botões apropriados (usado na tela StockUp)
+            <HStack justifyContent="space-between" mt="$2">
               <Button
-                w="48%"
+                w={fromStockScreen ? "48%" : "32%"}
+                bg="$red600"
+                rounded="$xl"
+                onPress={handleCancel}
+              >
+                <HStack alignItems="center" space="sm">
+                  <Ionicons name="close-circle-outline" color="white" size={20} />
+                  <Text color="$white" fontSize="$md" fontFamily="$heading">
+                    Cancelar
+                  </Text>
+                </HStack>
+              </Button>
+
+              {!fromStockScreen && (
+                <Button
+                  w="32%"
+                  bg="$blue600"
+                  rounded="$xl"
+                  onPress={handleAddMoreProducts}
+                >
+                  <HStack alignItems="center" space="sm">
+                    <Ionicons name="add-circle-outline" color="white" size={20} />
+                    <Text color="$white" fontSize="$md" fontFamily="$heading">
+                      Mais Peças
+                    </Text>
+                  </HStack>
+                </Button>
+              )}
+
+              <Button
+                w={fromStockScreen ? "48%" : "32%"}
                 bg="$green600"
                 rounded="$xl"
                 onPress={handleConfirm}
@@ -199,8 +223,49 @@ export default function SaleDetailsModal({
                   </Text>
                 </HStack>
               </Button>
-            )}
-          </HStack>
+            </HStack>
+          ) : (
+            // Modo de visualização (usado na tela OpenSales)
+            <HStack justifyContent="space-between" mt="$2">
+              <Button
+                w="48%"
+                bg="$red600"
+                rounded="$xl"
+                onPress={onClose}
+              >
+                <HStack alignItems="center" space="sm">
+                  <Ionicons name="close-circle-outline" color="white" size={20} />
+                  <Text 
+                    color="$white" 
+                    fontSize="$md" 
+                    fontFamily="$heading"
+                    lineHeight="$md"
+                  >
+                    Fechar
+                  </Text>
+                </HStack>
+              </Button>
+              
+              <Button
+                w="48%"
+                bg="$purple600"
+                rounded="$xl"
+                onPress={handleAddMoreProducts}
+              >
+                <HStack alignItems="center" space="sm">
+                  <Ionicons name="add-circle-outline" color="white" size={20} />
+                  <Text 
+                    color="$white" 
+                    fontSize="$md" 
+                    fontFamily="$heading"
+                    lineHeight="$md"
+                  >
+                    Mais Peças
+                  </Text>
+                </HStack>
+              </Button>
+            </HStack>
+          )}
         </Box>
       </Box>
     </Modal>

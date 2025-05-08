@@ -8,7 +8,7 @@ import { useSales, ProductItem } from "@contexts/SalesContext";
 import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
 import { Checkbox } from "@gluestack-ui/themed";
 import { useNavigation } from "@react-navigation/native";
-import SaleDetailsModal from "@components/SaleDetailsModal";
+import { SaleDetailsModal } from "@components/SaleDetailsModal";
 import { RootStackParamList } from "@routes/AppStackRoutes";
 import ProductDetailsModal from "@components/ProductDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -137,7 +137,7 @@ export function StockUp() {
                 borderColor={isSelected ? "$purple700" : "$purple700"}
               >
                 <Text
-                  color={isSelected ? "$white" : "$black"}
+                  color={isSelected ? "$white" : "$white"}
                   fontSize="$md"
                   fontFamily="$heading"
                   lineHeight="$2xl"
@@ -306,10 +306,11 @@ export function StockUp() {
         clientData={salesContext.clientData}
         selectedProducts={currentSelectedProducts ?? []}
         onClose={() => {
-          setIsSaleModalVisible(false);
+          setIsSaleModalVisible(false); // <-- CORREÇÃO: Agora corretamente definido como false
           setSelectedType(null);
         }}
         onConfirm={handleModalConfirm}
+        fromStockScreen={true}
         isConfirmMode={true}
       />
     </VStack>

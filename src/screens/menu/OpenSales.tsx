@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { FlatList } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@routes/AppStackRoutes';
+
 import BackButton from '@components/BackButton';
-import {
-  Box,
-  Center,
-  Text,
-  VStack,
-  HStack,
-  Button as GluestackButton,
-  Divider,
+import { Box, Center, Text, VStack, HStack, Button as GluestackButton, Divider,
 } from '@gluestack-ui/themed';
 import { useSales } from '@contexts/SalesContext';
-import SaleDetailsModal from '@components/SaleDetailsModal';
+import { SaleDetailsModal } from '@components/SaleDetailsModal';
 import { OpenSaleItem } from '@contexts/SalesContext';
 
 import Feather from 'react-native-vector-icons/Feather';
@@ -21,6 +18,7 @@ export function OpenSales() {
   const { openSales } = useSales();
   const [selectedSale, setSelectedSale] = useState<OpenSaleItem | null>(null);
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleOpenDetails = (sale: OpenSaleItem) => {
     setSelectedSale(sale);
@@ -130,6 +128,7 @@ export function OpenSales() {
             setSelectedSale(null);
           }}
           isConfirmMode={false}
+          fromStockScreen={false} // <- Mudei para false para mostrar o botão de "Mais Peças"
         />
       )}
     </Box>
