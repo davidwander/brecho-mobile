@@ -128,7 +128,7 @@ export function OpenSales() {
             setSelectedSale(null);
           }}
           isConfirmMode={false}
-          fromStockScreen={false} // <- Mudei para false para mostrar o botão de "Mais Peças"
+          fromStockScreen={false} 
         />
       )}
     </Box>

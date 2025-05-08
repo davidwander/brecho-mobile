@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { FlatList, TouchableOpacity } from "react-native";
 
 import BackButton from "@components/BackButton";
@@ -7,11 +7,12 @@ import { useProduct } from "@contexts/ProductContext";
 import { useSales, ProductItem } from "@contexts/SalesContext"; 
 import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
 import { Checkbox } from "@gluestack-ui/themed";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { SaleDetailsModal } from "@components/SaleDetailsModal";
 import { RootStackParamList } from "@routes/AppStackRoutes";
 import ProductDetailsModal from "@components/ProductDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCallback } from "react";
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -27,6 +28,7 @@ export function StockUp() {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]); 
   const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); 
   const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); 
+  const [hasCreatedBag, setHasCreatedBag] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,6 +36,21 @@ export function StockUp() {
     "Blusa", "Camisa", "Camiseta", "T-Shirt", "Top", "Saia", "Short",
     "Calça", "Vestido", "Calçados", "Acessórios"
   ];
+
+  useEffect(() => {
+    if (salesContext?.clientData) {
+      setHasCreatedBag(true);
+    }
+  }, [salesContext?.clientData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (salesContext?.clientData) {
+        setHasCreatedBag(true);
+      }
+      return () => {};
+    }, [salesContext?.clientData])
+  );
 
   const reservedProductIds = useMemo(() => {
     if (!salesContext?.openSales) return [];
@@ -84,8 +101,22 @@ export function StockUp() {
   };
 
   const handleModalConfirm = () => {
-    setIsSaleModalVisible(false); 
+    setIsSaleModalVisible(false);
+    setSelectedProductIds([]);
     navigation.navigate("openSales");
+  };
+
+  const handleCheckboxChange = (itemId: string) => {
+    if (!salesContext.clientData && !hasCreatedBag) {
+      alert("Crie uma sacola antes de adicionar as peças.");
+      return;
+    }
+    
+    setSelectedProductIds((prev) =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
   return (
@@ -177,17 +208,7 @@ export function StockUp() {
                 <Checkbox
                   value={item.id}
                   isChecked={selectedProductIds.includes(item.id)}
-                  onChange={() => {
-                    if (!salesContext.clientData) {
-                      alert("Crie uma sacola antes de adicionar as peças.");
-                      return;
-                    }
-                    setSelectedProductIds((prev) =>
-                      prev.includes(item.id)
-                        ? prev.filter(id => id !== item.id)
-                        : [...prev, item.id]
-                    );
-                  }}
+                  onChange={() => handleCheckboxChange(item.id)}
                   aria-label="Selecionar peça"
                   size="lg"
                   borderWidth={2}
@@ -306,7 +327,7 @@ export function StockUp() {
         clientData={salesContext.clientData}
         selectedProducts={currentSelectedProducts ?? []}
         onClose={() => {
-          setIsSaleModalVisible(false); // <-- CORREÇÃO: Agora corretamente definido como false
+          setIsSaleModalVisible(false);
           setSelectedType(null);
         }}
         onConfirm={handleModalConfirm}

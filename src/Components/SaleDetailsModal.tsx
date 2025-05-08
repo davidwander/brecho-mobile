@@ -178,7 +178,6 @@ export function SaleDetailsModal({
           </Box>
 
           {isConfirmMode ? (
-            // Modo de confirmação com os botões apropriados (usado na tela StockUp)
             <HStack justifyContent="space-between" mt="$2">
               <Button
                 w={fromStockScreen ? "48%" : "32%"}
@@ -225,7 +224,6 @@ export function SaleDetailsModal({
               </Button>
             </HStack>
           ) : (
-            // Modo de visualização (usado na tela OpenSales)
             <HStack justifyContent="space-between" mt="$2">
               <Button
                 w="48%"
