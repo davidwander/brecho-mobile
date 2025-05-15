@@ -1,28 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useProduct } from '@contexts/ProductContext';
-
-export type ProductItem = {
-  id: string;
-  costPrice: number;
-  salePrice: number;
-  quantity: number;
-  type?: "entrada" | "saida";
-};
-
-export type ClientData = {
-  nameClient: string;
-  phone: string;
-  cpf: string;
-  address: string;
-};
-
-export type SaleData = {
-  id: string;
-  client: ClientData;
-  products: ProductItem[];
-  total: number;
-  date: string;
-};
+import { ProductItem, ClientData, SaleData, OpenSale } from '../types/SaleTypes';
 
 export type SalesContextType = {
   openSales: OpenSaleItem[];
@@ -48,7 +26,7 @@ export const SalesProvider = ({ children }: Props) => {
   const [clientData, setClientDataState] = useState<ClientData | null>(null);
   const [selectedProducts, setSelectedProductsState] = useState<ProductItem[]>([]);
   const { removeProduct, addProduct, reserveProduct, releaseProduct } = useProduct();
-  const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]);
+  const [openSales, setOpenSales] = useState<OpenSale[]>([]);
 
   const setClientData = (client: ClientData) => {
     setClientDataState(client);
@@ -56,9 +34,6 @@ export const SalesProvider = ({ children }: Props) => {
 
   const setSelectedProducts = (products: ProductItem[]) => {
     setSelectedProductsState(products);
-    products.forEach(p => {
-      reserveProduct(p.id); 
-    });
   };
 
   const addSale = (sale: SaleData) => {
@@ -71,7 +46,6 @@ export const SalesProvider = ({ children }: Props) => {
       },
     ]);
   };
-
 
   const finalizeSale = (index: number) => {
     const sale = openSales[index];

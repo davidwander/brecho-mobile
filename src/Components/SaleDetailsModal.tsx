@@ -4,8 +4,10 @@ import { Modal, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
-import { ClientData, ProductItem, useSales } from '@contexts/SalesContext';
+import { useSales } from '@contexts/SalesContext';
+import { ClientData, ProductItem } from '../types/SaleTypes';
 import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
+import { useProduct } from '@contexts/ProductContext';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -34,8 +36,10 @@ export function SaleDetailsModal({
   fromStockScreen = false,
   saleId,
 }: SaleDetailsModalProps) {
-  const { addSale, clearSaleData, cancelSale } = useSales();
+  const { addSale, clearSaleData, cancelSale, addProductsToSale } = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const { reserveProduct } = useProduct();
 
   const totalValue = useMemo(() => {
     return selectedProducts.reduce((total, product) => total + product.salePrice, 0);
@@ -73,19 +77,22 @@ export function SaleDetailsModal({
   );
 
   const handleConfirm = () => {
+    console.log("Confirmar clicado");
+    console.log("clientData", clientData);
+    console.log("selectedProducts", selectedProducts);
+
     if (clientData && selectedProducts.length > 0) {
       const isValidSale = selectedProducts.every(item => item.salePrice > 0);
-      if (!isValidSale) return;
+      if (!isValidSale) {
+        console.log("Produto com preço de venda inválido");
+        return;
+      }
 
       if (saleId) {
-        // Estamos adicionando produtos a uma venda já existente
-        // Chame uma função que atualize a venda existente no contexto
         addProductsToSale(saleId, selectedProducts);
       } else {
-        // Nova venda
         const newSaleId = String(uuid.v4());
         const dateNow = new Date().toISOString();
-
         addSale({
           id: newSaleId,
           client: clientData,
@@ -98,6 +105,8 @@ export function SaleDetailsModal({
       clearSaleData();
       onConfirm();
       navigation.navigate("openSales");
+    } else {
+      console.log("Dados incompletos para confirmar a venda");
     }
   };
 
@@ -283,6 +292,3 @@ export function SaleDetailsModal({
   );
 }
 
-function addProductsToSale(saleId: string, selectedProducts: ProductItem[]) {
-  throw new Error('Function not implemented.');
-}

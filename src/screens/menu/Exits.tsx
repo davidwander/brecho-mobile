@@ -14,9 +14,10 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
-import { ClientData, useSales } from '@contexts/SalesContext';
+import { useSales } from '@contexts/SalesContext';
+import { ClientData, OpenSale } from '../../types/SaleTypes';
 
-import { v4 as uuidv4 } from 'uuid'; // ✅ Importa uuid
+import uuid from 'react-native-uuid';
 
 type FormDataProps = {
   nameClient: string;
@@ -54,28 +55,34 @@ export function Exits() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleFormSubmit = (data: FormDataProps) => {
+    console.log("Formulário enviado com dados:", data);
     setIsSubmitting(true);
 
     setTimeout(() => {
-      const clientData: ClientData = {
+      const saleId = uuid.v4() as string; 
+
+      const ClientData: ClientData = {
         nameClient: data.nameClient,
         phone: data.phone,
         cpf: data.cpf,
         address: data.address,
       };
 
-      const saleId = uuidv4(); // ✅ Gera ID único da venda
-
-      setClientData(clientData);
-
-      addOpenSale({
+      const newSale: OpenSale = {
         id: saleId,
-        client: clientData,
-        selectedProducts: [], // vazia por enquanto
-      });
+        clientData: {
+          nameClient: data.nameClient,
+          phone: data.phone,
+          cpf: data.cpf,
+          address: data.address,
+        },
+        selectedProducts: [], 
+      };
 
+      setClientData(ClientData);
+      addOpenSale(newSale); 
       setIsSubmitting(false);
-      navigation.navigate("stockUp", { saleId }); // ✅ passa o id para a próxima tela
+      navigation.navigate("stockUp", { saleId }); 
     }, 800);
   };
 

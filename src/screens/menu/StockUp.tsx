@@ -4,7 +4,8 @@ import { FlatList, TouchableOpacity } from "react-native";
 import BackButton from "@components/BackButton";
 import { Button } from "@components/Button";
 import { useProduct } from "@contexts/ProductContext";
-import { useSales, ProductItem } from "@contexts/SalesContext"; 
+import { useSales } from "@contexts/SalesContext";
+import {  ProductItem } from '../../types/SaleTypes'; 
 import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
 import { Checkbox } from "@gluestack-ui/themed";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -320,7 +321,11 @@ export function StockUp() {
             title={isLoading ? "Carregando..." : `Revisar Venda (${selectedProductIds.length} ${selectedProductIds.length === 1 ? 'peça' : 'peças'})`}
             variant="solid"
             onPress={handleOpenSaleModal}
-            isDisabled={isLoading || selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))}
+            isDisabled={
+              isLoading ||
+              selectedProductIds.length === 0 ||
+              (!saleId && selectedProductIds.every(id => reservedProductIds.includes(id)))
+            }
             isLoading={isLoading}
           />
         </Box>
