@@ -77,6 +77,7 @@ export function Exits() {
           address: data.address,
         },
         selectedProducts: [], 
+        total: 0,
       };
 
       setClientData(ClientData);

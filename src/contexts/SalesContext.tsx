@@ -43,6 +43,7 @@ export const SalesProvider = ({ children }: Props) => {
         id: sale.id, 
         clientData: sale.client,
         selectedProducts: sale.products,
+        total: sale.total,
       },
     ]);
   };
@@ -97,14 +98,25 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   function addProductsToSale(saleId: string, newProducts: ProductItem[]) {
-    setOpenSales((prevSales) =>
-      prevSales.map((sale) =>
-        sale.id === saleId
-          ? { ...sale, selectedProducts: [...sale.selectedProducts, ...newProducts] }
-          : sale
-      )
+  // Reservar os novos produtos
+  newProducts.forEach(p => reserveProduct(p.id));
+
+  setOpenSales((prevSales) =>
+    prevSales.map((sale) => {
+      if (sale.id !== saleId) return sale;
+
+        const existingIds = sale.selectedProducts.map(p => p.id);
+        const uniqueNewProducts = newProducts.filter(p => !existingIds.includes(p.id));
+
+        return {
+          ...sale,
+          selectedProducts: [...sale.selectedProducts, ...uniqueNewProducts],
+          total: sale.total + uniqueNewProducts.reduce((acc, p) => acc + p.salePrice, 0),
+        };
+      })
     );
   }
+
 
   const addOpenSale = (sale: OpenSale) => {
     setOpenSales((prevSales) => [...prevSales, sale]);

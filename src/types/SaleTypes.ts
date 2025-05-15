@@ -3,6 +3,7 @@ export interface ClientData {
   phone: string;
   cpf: string;
   address: string;
+  total?: number;
 }
 
 export interface Product {
@@ -24,6 +25,7 @@ export interface OpenSale {
   id: string;
   clientData: ClientData;
   selectedProducts: ProductItem[];
+  total: number;
 }
 
 export interface SaleData {
