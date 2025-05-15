@@ -13,6 +13,7 @@ import { RootStackParamList } from "@routes/AppStackRoutes";
 import ProductDetailsModal from "@components/ProductDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback } from "react";
+import { useRoute, RouteProp } from '@react-navigation/native';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -22,6 +23,9 @@ export function StockUp() {
   const { products } = useProduct();
   const salesContext = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const route = useRoute<RouteProp<RootStackParamList, 'stockUp'>>();
+  const saleId = route.params?.saleId;
 
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null); 
@@ -101,17 +105,23 @@ export function StockUp() {
   };
 
   const handleModalConfirm = () => {
-    setIsSaleModalVisible(false);
-    setSelectedProductIds([]);
-    navigation.navigate("openSales");
-  };
+    if (saleId && salesContext?.addProductsToSale) {
+      salesContext.addProductsToSale(saleId, currentSelectedProducts);
+    } else {
+      console.error("ID da venda não definido ou função não encontrada");
+    }
+
+  setIsSaleModalVisible(false);
+  setSelectedProductIds([]);
+  navigation.navigate("openSales");
+};
 
   const handleCheckboxChange = (itemId: string) => {
-    if (!salesContext.clientData && !hasCreatedBag) {
+    if (!saleId && !salesContext.clientData && !hasCreatedBag) {
       alert("Crie uma sacola antes de adicionar as peças.");
       return;
     }
-    
+
     setSelectedProductIds((prev) =>
       prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
@@ -333,6 +343,7 @@ export function StockUp() {
         onConfirm={handleModalConfirm}
         fromStockScreen={true}
         isConfirmMode={true}
+        saleId={saleId}
       />
     </VStack>
   );

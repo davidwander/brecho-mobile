@@ -14,7 +14,7 @@ export type AppRoutes = {
 
 export type RootStackParamList = {
   tabs: NavigatorScreenParams<AppRoutes>;
-  stockUp: undefined;
+  stockUp: { saleId?: string };
   exits: undefined;
   openSales: undefined;
 };

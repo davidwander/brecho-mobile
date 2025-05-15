@@ -14,7 +14,9 @@ import { RootStackParamList } from '@routes/AppStackRoutes';
 import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
-import { ClientData, useSales } from '@contexts/SalesContext'; 
+import { ClientData, useSales } from '@contexts/SalesContext';
+
+import { v4 as uuidv4 } from 'uuid'; // ✅ Importa uuid
 
 type FormDataProps = {
   nameClient: string;
@@ -48,16 +50,13 @@ export function Exits() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setClientData } = useSales();
-
+  const { setClientData, addOpenSale } = useSales(); // ✅ usa addOpenSale
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleFormSubmit = (data: FormDataProps) => {
-    console.log("Formulário enviado com dados:", data);
     setIsSubmitting(true);
-    setTimeout(() => {
-      console.log("Dados do cliente:", data);
 
+    setTimeout(() => {
       const clientData: ClientData = {
         nameClient: data.nameClient,
         phone: data.phone,
@@ -65,10 +64,18 @@ export function Exits() {
         address: data.address,
       };
 
+      const saleId = uuidv4(); // ✅ Gera ID único da venda
+
       setClientData(clientData);
 
+      addOpenSale({
+        id: saleId,
+        client: clientData,
+        selectedProducts: [], // vazia por enquanto
+      });
+
       setIsSubmitting(false);
-      navigation.navigate("stockUp");
+      navigation.navigate("stockUp", { saleId }); // ✅ passa o id para a próxima tela
     }, 800);
   };
 
@@ -168,4 +175,3 @@ export function Exits() {
     </Box>
   );
 }
-

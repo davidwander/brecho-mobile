@@ -21,6 +21,7 @@ interface SaleDetailsModalProps {
   onConfirm: () => void;
   isConfirmMode?: boolean;
   fromStockScreen?: boolean;
+  saleId?: string;
 }
 
 export function SaleDetailsModal({
@@ -31,6 +32,7 @@ export function SaleDetailsModal({
   onConfirm,
   isConfirmMode = true,
   fromStockScreen = false,
+  saleId,
 }: SaleDetailsModalProps) {
   const { addSale, clearSaleData, cancelSale } = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -75,16 +77,23 @@ export function SaleDetailsModal({
       const isValidSale = selectedProducts.every(item => item.salePrice > 0);
       if (!isValidSale) return;
 
-      const saleId = String(uuid.v4());
-      const dateNow = new Date().toISOString();
+      if (saleId) {
+        // Estamos adicionando produtos a uma venda já existente
+        // Chame uma função que atualize a venda existente no contexto
+        addProductsToSale(saleId, selectedProducts);
+      } else {
+        // Nova venda
+        const newSaleId = String(uuid.v4());
+        const dateNow = new Date().toISOString();
 
-      addSale({
-        id: saleId,
-        client: clientData,
-        products: selectedProducts,
-        total: totalValue,
-        date: dateNow,
-      });
+        addSale({
+          id: newSaleId,
+          client: clientData,
+          products: selectedProducts,
+          total: totalValue,
+          date: dateNow,
+        });
+      }
 
       clearSaleData();
       onConfirm();
@@ -94,7 +103,11 @@ export function SaleDetailsModal({
 
   const handleAddMoreProducts = () => {
     onClose();
-    navigation.navigate("stockUp");
+    if (saleId) {
+      navigation.navigate("stockUp", { saleId });
+    } else {
+      console.warn("ID da venda não disponível")
+    }
   };
 
   const handleCancel = () => {
@@ -268,4 +281,8 @@ export function SaleDetailsModal({
       </Box>
     </Modal>
   );
+}
+
+function addProductsToSale(saleId: string, selectedProducts: ProductItem[]) {
+  throw new Error('Function not implemented.');
 }

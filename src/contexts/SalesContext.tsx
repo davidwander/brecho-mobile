@@ -34,6 +34,8 @@ export type SalesContextType = {
   selectedProducts: ProductItem[];
   setSelectedProducts: (products: ProductItem[]) => void;
   clearSaleData: () => void;
+  addProductsToSale: (saleId: string, newProducts: ProductItem[]) => void;
+  addOpenSale: (sale: OpenSale) => void;
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -63,11 +65,13 @@ export const SalesProvider = ({ children }: Props) => {
     setOpenSales(prev => [
       ...prev,
       {
+        id: sale.id, 
         clientData: sale.client,
         selectedProducts: sale.products,
       },
     ]);
   };
+
 
   const finalizeSale = (index: number) => {
     const sale = openSales[index];
@@ -118,6 +122,20 @@ export const SalesProvider = ({ children }: Props) => {
     setSelectedProductsState([]); 
   };
 
+  function addProductsToSale(saleId: string, newProducts: ProductItem[]) {
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) =>
+        sale.id === saleId
+          ? { ...sale, selectedProducts: [...sale.selectedProducts, ...newProducts] }
+          : sale
+      )
+    );
+  }
+
+  const addOpenSale = (sale: OpenSale) => {
+    setOpenSales((prevSales) => [...prevSales, sale]);
+  };
+
   return (
     <SalesContext.Provider
       value={{
@@ -129,7 +147,9 @@ export const SalesProvider = ({ children }: Props) => {
         setClientData,
         selectedProducts,
         setSelectedProducts,
-        clearSaleData
+        clearSaleData,
+        addProductsToSale,
+        addOpenSale,
       }}
     >
       {children}
@@ -146,6 +166,7 @@ export const useSales = () => {
 };
 
 export type OpenSaleItem = {
+  id: string;
   clientData: ClientData;
   selectedProducts: ProductItem[];
 };

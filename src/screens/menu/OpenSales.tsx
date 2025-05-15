@@ -129,6 +129,7 @@ export function OpenSales() {
           }}
           isConfirmMode={false}
           fromStockScreen={false} 
+          saleId={selectedSale.id}
         />
       )}
     </Box>
