@@ -98,7 +98,6 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   function addProductsToSale(saleId: string, newProducts: ProductItem[]) {
-  // Reservar os novos produtos
   newProducts.forEach(p => reserveProduct(p.id));
 
   setOpenSales((prevSales) =>
@@ -116,7 +115,6 @@ export const SalesProvider = ({ children }: Props) => {
       })
     );
   }
-
 
   const addOpenSale = (sale: OpenSale) => {
     setOpenSales((prevSales) => [...prevSales, sale]);

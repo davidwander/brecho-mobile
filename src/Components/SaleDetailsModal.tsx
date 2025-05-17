@@ -81,16 +81,23 @@ export function SaleDetailsModal({
     console.log("clientData", clientData);
     console.log("selectedProducts", selectedProducts);
 
-    if (clientData && selectedProducts.length > 0) {
-      const isValidSale = selectedProducts.every(item => item.salePrice > 0);
-      if (!isValidSale) {
-        console.log("Produto com preço de venda inválido");
-        return;
-      }
+    const isValidSale = selectedProducts.every(item => item.salePrice > 0);
+    if (!isValidSale) {
+      console.log("Produto com preço de venda inválido");
+      return;
+    }
 
-      if (saleId) {
+    if (saleId) {
+      if (selectedProducts.length > 0) {
         addProductsToSale(saleId, selectedProducts);
+        clearSaleData();
+        onConfirm();
+        navigation.navigate("openSales");
       } else {
+        console.log("Nenhum produto selecionado para adicionar");
+      }
+    } else {
+      if (clientData && selectedProducts.length > 0) {
         const newSaleId = String(uuid.v4());
         const dateNow = new Date().toISOString();
         addSale({
@@ -100,13 +107,12 @@ export function SaleDetailsModal({
           total: totalValue,
           date: dateNow,
         });
+        clearSaleData();
+        onConfirm();
+        navigation.navigate("openSales");
+      } else {
+        console.log("Dados incompletos para confirmar a venda");
       }
-
-      clearSaleData();
-      onConfirm();
-      navigation.navigate("openSales");
-    } else {
-      console.log("Dados incompletos para confirmar a venda");
     }
   };
 
