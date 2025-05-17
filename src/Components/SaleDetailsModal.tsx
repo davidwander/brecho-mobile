@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
 import { useSales } from '@contexts/SalesContext';
 import { ClientData, ProductItem } from '../types/SaleTypes';
-import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
+import { Box, Text, Button, HStack, VStack, Divider, AlertDialog, AlertDialogBackdrop, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogBody } from '@gluestack-ui/themed';
 import { useProduct } from '@contexts/ProductContext';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -38,6 +38,9 @@ export function SaleDetailsModal({
 }: SaleDetailsModalProps) {
   const { addSale, clearSaleData, cancelSale, addProductsToSale } = useSales();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
+  const cancelRef = React.useRef(null);
 
   const { reserveProduct } = useProduct();
 
@@ -131,170 +134,237 @@ export function SaleDetailsModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <Box
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+    <>
+      <AlertDialog
+        leastDestructiveRef={cancelRef}
+        isOpen={showPaymentDialog}
+        onClose={() => setShowPaymentDialog(false)}
       >
-        <Box
-          bg="$backgroundDark900"
-          p="$6"
-          borderRadius="$2xl"
-          width="90%"
-          maxHeight="80%"
-        >
-          <Text
-            textAlign="center"
-            fontSize="$xl"
-            fontFamily="$heading"
-            color="$white"
-            mb="$4"
-            lineHeight="$md"
-          >
-            {isConfirmMode ? "Confirmar Venda" : "Detalhes da Venda"}
-          </Text>
-
-          {clientData && (
-            <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$xl">
-              <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
-                Dados do Cliente
-              </Text>
-              <VStack space="sm">
-                <Text color="$textLight200">Nome: {clientData.nameClient}</Text>
-                <Text color="$textLight200">Tel: {clientData.phone}</Text>
-                <Text color="$textLight200">CPF: {clientData.cpf}</Text>
-                <Text color="$textLight200">Endereço: {clientData.address}</Text>
-              </VStack>
-            </Box>
-          )}
-
-          <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
-            Peças Selecionadas ({selectedProducts.length})
-          </Text>
-
-          {selectedProducts.length === 0 ? (
-            <Text color="$textLight400" mb="$4" textAlign="center">
-              Nenhuma peça selecionada.
+        <AlertDialogBackdrop />
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <Text fontSize="$lg" fontFamily="$heading" color="$white">
+              Confirmar Pagamento
             </Text>
-          ) : (
-            <Box height="45%" mb="$4">
-              <FlatList
-                data={selectedProducts}
-                renderItem={renderProductItem}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={true}
-              />
-            </Box>
-          )}
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            <Text color="$textLight200">
+              Tem certeza que deseja confirmar o pagamento desta venda?
+            </Text>
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button
+              variant="outline"
+              action="secondary"
+              mr="$3"
+              ref={cancelRef}
+              onPress={() => setShowPaymentDialog(false)} // CORRIGIDO
+            >
+              <Text>Cancelar</Text>
+            </Button>
+            <Button
+              bg="$green600"
+              action="positive"
+              onPress={() => {
+                handleConfirm();                    // CORRIGIDO
+                setShowPaymentDialog(false);
+              }}
+            >
+              <Text color="$white">Confirmar</Text>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-          <Box bg="$backgroundDark800" p="$3" borderRadius="$lg" mb="$4">
-            <HStack justifyContent="space-between" alignItems="center">
-              <Text color="$white" fontSize="$lg" fontFamily="$heading">
-                Valor Total:
-              </Text>
-              <Text color="$green400" fontSize="$xl" fontFamily="$heading">
-                R$ {totalValue.toFixed(2).replace(".", ",")}
-              </Text>
-            </HStack>
-          </Box>
-
-          {isConfirmMode ? (
-            <HStack justifyContent="space-between" mt="$2">
-              <Button
-                w={fromStockScreen ? "48%" : "32%"}
-                bg="$red600"
-                rounded="$xl"
-                onPress={handleCancel}
+      <Modal
+        visible={visible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+          <Box
+            flex={1}
+            justifyContent="center"
+            alignItems="center"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+          >
+            <Box
+              bg="$backgroundDark900"
+              p="$6"
+              borderRadius="$2xl"
+              width="90%"
+              maxHeight="80%"
+            >
+              <Text
+                textAlign="center"
+                fontSize="$xl"
+                fontFamily="$heading"
+                color="$white"
+                mb="$4"
+                lineHeight="$md"
               >
-                <HStack alignItems="center" space="sm">
-                  <Ionicons name="close-circle-outline" color="white" size={20} />
-                  <Text color="$white" fontSize="$md" fontFamily="$heading">
-                    Cancelar
+                {isConfirmMode ? "Confirmar Venda" : "Detalhes da Venda"}
+              </Text>
+
+              {clientData && (
+                <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$xl">
+                  <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
+                    Dados do Cliente
+                  </Text>
+                  <VStack space="sm">
+                    <Text color="$textLight200">Nome: {clientData.nameClient}</Text>
+                    <Text color="$textLight200">Tel: {clientData.phone}</Text>
+                    <Text color="$textLight200">CPF: {clientData.cpf}</Text>
+                    <Text color="$textLight200">Endereço: {clientData.address}</Text>
+                  </VStack>
+                </Box>
+              )}
+
+              <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
+                Peças Selecionadas ({selectedProducts.length})
+              </Text>
+
+              {selectedProducts.length === 0 ? (
+                <Text color="$textLight400" mb="$4" textAlign="center">
+                  Nenhuma peça selecionada.
+                </Text>
+              ) : (
+                <Box height="45%" mb="$4">
+                  <FlatList
+                    data={selectedProducts}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={true} />
+                </Box>
+              )}
+
+              <Box bg="$backgroundDark800" p="$3" borderRadius="$lg" mb="$4">
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Text color="$white" fontSize="$lg" fontFamily="$heading">
+                    Valor Total:
+                  </Text>
+                  <Text color="$green400" fontSize="$xl" fontFamily="$heading">
+                    R$ {totalValue.toFixed(2).replace(".", ",")}
                   </Text>
                 </HStack>
-              </Button>
+              </Box>
 
-              {!fromStockScreen && (
+              {isConfirmMode ? (
+                <HStack justifyContent="space-between" mt="$2">
+                  <Button
+                    w={fromStockScreen ? "48%" : "32%"}
+                    bg="$red600"
+                    rounded="$xl"
+                    onPress={handleCancel}
+                  >
+                    <HStack alignItems="center" space="sm">
+                      <Ionicons name="close-circle-outline" color="white" size={20} />
+                      <Text color="$white" fontSize="$md" fontFamily="$heading">
+                        Cancelar
+                      </Text>
+                    </HStack>
+                  </Button>
+
+                  {!fromStockScreen && (
+                    <Button
+                      w="32%"
+                      bg="$blue600"
+                      rounded="$xl"
+                      onPress={handleAddMoreProducts}
+                    >
+                      <HStack alignItems="center" space="sm">
+                        <Ionicons name="add-circle-outline" color="white" size={20} />
+                        <Text color="$white" fontSize="$md" fontFamily="$heading">
+                          Mais Peças
+                        </Text>
+                      </HStack>
+                    </Button>
+                  )}
+
+                  <Button
+                    w={fromStockScreen ? "48%" : "32%"}
+                    bg="$green600"
+                    rounded="$xl"
+                    onPress={handleConfirm}
+                  >
+                    <HStack alignItems="center" space="sm">
+                      <Ionicons name="checkmark-circle-outline" color="white" size={20} />
+                      <Text color="$white" fontSize="$md" fontFamily="$heading">
+                        Confirmar
+                      </Text>
+                    </HStack>
+                  </Button>
+                </HStack>
+              ) : (
+            <>
+              <HStack justifyContent="space-between" mt="$2">
                 <Button
-                  w="32%"
-                  bg="$blue600"
+                  w="48%"
+                  bg="$red600"
+                  rounded="$xl"
+                  onPress={onClose}
+                >
+                  <HStack alignItems="center" space="sm">
+                    <Ionicons name="close-circle-outline" color="white" size={20} />
+                    <Text
+                      color="$white"
+                      fontSize="$md"
+                      fontFamily="$heading"
+                      lineHeight="$md"
+                    >
+                      Fechar
+                    </Text>
+                  </HStack>
+                </Button>
+
+                <Button
+                  w="48%"
+                  bg="$purple600"
                   rounded="$xl"
                   onPress={handleAddMoreProducts}
                 >
                   <HStack alignItems="center" space="sm">
                     <Ionicons name="add-circle-outline" color="white" size={20} />
-                    <Text color="$white" fontSize="$md" fontFamily="$heading">
+                    <Text
+                      color="$white"
+                      fontSize="$md"
+                      fontFamily="$heading"
+                      lineHeight="$md"
+                    >
                       Mais Peças
                     </Text>
                   </HStack>
                 </Button>
-              )}
+                </HStack>
 
-              <Button
-                w={fromStockScreen ? "48%" : "32%"}
-                bg="$green600"
-                rounded="$xl"
-                onPress={handleConfirm}
-              >
-                <HStack alignItems="center" space="sm">
-                  <Ionicons name="checkmark-circle-outline" color="white" size={20} />
-                  <Text color="$white" fontSize="$md" fontFamily="$heading">
-                    Confirmar
-                  </Text>
-                </HStack>
-              </Button>
-            </HStack>
-          ) : (
-            <HStack justifyContent="space-between" mt="$2">
-              <Button
-                w="48%"
-                bg="$red600"
-                rounded="$xl"
-                onPress={onClose}
-              >
-                <HStack alignItems="center" space="sm">
-                  <Ionicons name="close-circle-outline" color="white" size={20} />
-                  <Text 
-                    color="$white" 
-                    fontSize="$md" 
-                    fontFamily="$heading"
-                    lineHeight="$md"
-                  >
-                    Fechar
-                  </Text>
-                </HStack>
-              </Button>
-              
-              <Button
-                w="48%"
-                bg="$purple600"
-                rounded="$xl"
-                onPress={handleAddMoreProducts}
-              >
-                <HStack alignItems="center" space="sm">
-                  <Ionicons name="add-circle-outline" color="white" size={20} />
-                  <Text 
-                    color="$white" 
-                    fontSize="$md" 
-                    fontFamily="$heading"
-                    lineHeight="$md"
-                  >
-                    Mais Peças
-                  </Text>
-                </HStack>
-              </Button>
-            </HStack>
-          )}
+                <Button
+                  mt="$2"
+                  h="$10"
+                  bg="$teal600"
+                  rounded="$xl"
+                  onPress={() => {
+                    setShowPaymentDialog(true);
+                    console.log("Pagamento confirmado (visual)");
+                  }}
+                >
+                  <HStack alignItems="center" space="sm" justifyContent="center">
+                    <Ionicons name="cash-outline" color="white" size={20} />
+                    <Text
+                      color="$white"
+                      fontSize="$md"
+                      fontFamily="$heading"
+                      lineHeight="$md"
+                    >
+                      Confirmar Pagamento
+                    </Text>
+                  </HStack>
+                </Button>
+              </>
+            )}
+          </Box>
         </Box>
-      </Box>
-    </Modal>
+      </Modal>
+    </>
   );
 }
 

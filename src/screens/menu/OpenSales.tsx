@@ -101,6 +101,7 @@ export function OpenSales() {
       </Center>
 
       <FlatList<OpenSaleItem>
+        showsVerticalScrollIndicator={false}
         data={openSales}
         keyExtractor={(_, index) => index.toString()}
         renderItem={renderSaleCard}
