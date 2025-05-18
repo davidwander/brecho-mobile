@@ -44,7 +44,19 @@ export function OpenSales() {
         shadowOffset={{ width: 0, height: 2 }}
         shadowOpacity={0.2}
         shadowRadius={4}
+        position="relative"
+        overflow="hidden"
       >
+        <Box
+          position="absolute"
+          top={0}
+          left={-1}
+          right={-1}
+          bottom={0}
+          width={6}
+          bg="$purple700"
+          zIndex={-1}
+        />
         <VStack space="md">
           <HStack justifyContent="space-between" alignItems="center">
             <HStack space="sm" alignItems="center">

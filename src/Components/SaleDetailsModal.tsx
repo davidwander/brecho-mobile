@@ -372,6 +372,7 @@ export function SaleDetailsModal({
                 flex={1}
                 variant="outline"
                 borderColor="$trueGray600"
+                rounded="$lg"
                 onPress={() => setShowPaymentDialog(false)}
               >
                 <Text>Cancelar</Text>
@@ -380,6 +381,7 @@ export function SaleDetailsModal({
               <Button
                 flex={1}
                 bg="$green600"
+                rounded="$lg"
                 onPress={handleConfirmPayment}
               >
                 <Text color="$white">Confirmar</Text>
