@@ -6,7 +6,7 @@ export type SalesContextType = {
   openSales: OpenSaleItem[];
   addSale: (sale: SaleData) => void;
   finalizeSale: (index: number) => void;
-  cancelSale: () => void;  
+  cancelSale: () => void;
   clientData: ClientData | null;
   setClientData: (client: ClientData) => void;
   selectedProducts: ProductItem[];
@@ -14,6 +14,8 @@ export type SalesContextType = {
   clearSaleData: () => void;
   addProductsToSale: (saleId: string, newProducts: ProductItem[]) => void;
   addOpenSale: (sale: OpenSale) => void;
+  removeProductFromSale: (saleId: string, productId: string) => void;
+  deleteSale: (saleId: string) => void;
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -40,7 +42,7 @@ export const SalesProvider = ({ children }: Props) => {
     setOpenSales(prev => [
       ...prev,
       {
-        id: sale.id, 
+        id: sale.id,
         clientData: sale.client,
         selectedProducts: sale.products,
         total: sale.total,
@@ -69,23 +71,13 @@ export const SalesProvider = ({ children }: Props) => {
     selectedProducts.forEach(p => {
       releaseProduct(p.id);
     });
-    setSelectedProductsState([]); 
-    setClientDataState(null); 
+    setSelectedProductsState([]);
+    setClientDataState(null);
   };
 
   const returnProductsToStock = (products: ProductItem[]) => {
     products.forEach(p => {
-      releaseProduct(p.id); 
-      addProduct({
-        id: p.id,
-        name: '',
-        costPrice: p.costPrice,
-        salePrice: p.salePrice,
-        profitMargin: 0,
-        quantity: p.quantity,
-        description: '',
-        createdAt: new Date().toISOString(),
-      });
+      releaseProduct(p.id);
     });
   };
 
@@ -94,15 +86,15 @@ export const SalesProvider = ({ children }: Props) => {
       returnProductsToStock(selectedProducts);
     }
     setClientDataState(null);
-    setSelectedProductsState([]); 
+    setSelectedProductsState([]);
   };
 
   function addProductsToSale(saleId: string, newProducts: ProductItem[]) {
-  newProducts.forEach(p => reserveProduct(p.id));
+    newProducts.forEach(p => reserveProduct(p.id));
 
-  setOpenSales((prevSales) =>
-    prevSales.map((sale) => {
-      if (sale.id !== saleId) return sale;
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) => {
+        if (sale.id !== saleId) return sale;
 
         const existingIds = sale.selectedProducts.map(p => p.id);
         const uniqueNewProducts = newProducts.filter(p => !existingIds.includes(p.id));
@@ -120,13 +112,53 @@ export const SalesProvider = ({ children }: Props) => {
     setOpenSales((prevSales) => [...prevSales, sale]);
   };
 
+  const removeProductFromSale = (saleId: string, productId: string) => {
+    let removedProduct: ProductItem | undefined;
+
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) => {
+        if (sale.id !== saleId) return sale;
+
+        const updatedProducts = sale.selectedProducts.filter(p => {
+          if (p.id === productId) {
+            removedProduct = p;
+            return false;
+          }
+          return true;
+        });
+
+        const updatedTotal = updatedProducts.reduce((acc, p) => acc + p.salePrice, 0);
+
+        return {
+          ...sale,
+          selectedProducts: updatedProducts,
+          total: updatedTotal,
+        };
+      })
+    );
+
+    if (removedProduct) {
+      releaseProduct(removedProduct.id);
+    }
+  };
+
+  const deleteSale = (saleId: string) => {
+    setOpenSales((prevSales) => {
+      const saleToDelete = prevSales.find((s) => s.id === saleId);
+      if (saleToDelete) {
+        returnProductsToStock(saleToDelete.selectedProducts);
+      }
+      return prevSales.filter((s) => s.id !== saleId);
+    });
+  };
+
   return (
     <SalesContext.Provider
       value={{
         openSales,
         addSale,
         finalizeSale,
-        cancelSale,  
+        cancelSale,
         clientData,
         setClientData,
         selectedProducts,
@@ -134,6 +166,8 @@ export const SalesProvider = ({ children }: Props) => {
         clearSaleData,
         addProductsToSale,
         addOpenSale,
+        removeProductFromSale,
+        deleteSale,
       }}
     >
       {children}

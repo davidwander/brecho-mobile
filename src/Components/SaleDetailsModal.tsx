@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Modal, FlatList, View, TouchableOpacity } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -40,17 +40,25 @@ export function SaleDetailsModal({
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
-  
+
+  const [localProducts, setLocalProducts] = useState<ProductItem[]>(selectedProducts);
+
+  const [removalFeedback, setRemovalFeedback] = useState<{message: string, type: "success" | "error"} | null>(null);
+
+    useEffect(() => {
+      setLocalProducts(selectedProducts);
+    }, [selectedProducts, visible]);
+
   const handleConfirmPayment = () => {
     setShowPaymentDialog(false);
-    // Adicione aqui a lógica para confirmar o pagamento
     console.log("Pagamento confirmado");
-    // Pode navegar para outra tela ou executar outra ação após confirmar o pagamento
+
     onConfirm();
     navigation.navigate("openSales");
   };
 
   const { reserveProduct } = useProduct();
+  const { removeProductFromSale, deleteSale } = useSales();
 
   const totalValue = useMemo(() => {
     return selectedProducts.reduce((total, product) => total + product.salePrice, 0);
@@ -66,10 +74,20 @@ export function SaleDetailsModal({
       borderColor="$trueGray800"
     >
       <HStack justifyContent="space-between" alignItems="center">
-        <Text color="$white" fontSize="$md" fontFamily="$heading">{item.type}</Text>
-        <Text color="$trueGray300" fontSize="$sm">COD: {item.id}</Text>
+        <VStack>
+          <Text color="$white" fontSize="$md" fontFamily="$heading">{item.type}</Text>
+          <Text color="$trueGray300" fontSize="$sm">COD: {item.id}</Text>
+        </VStack>
+
+        {!isConfirmMode && !fromStockScreen && (
+          <TouchableOpacity onPress={() => handleRemoveProduct(item.id)}>
+            <Ionicons name="trash-outline" size={22} color="red" />
+          </TouchableOpacity>
+        )}
       </HStack>
+
       <Divider my="$2" bg="$trueGray700" />
+
       <HStack mt="$2" alignItems="center" justifyContent="space-between">
         <HStack alignItems="center" gap="$1">
           <Feather name="dollar-sign" size={16} color="#888" />
@@ -141,10 +159,46 @@ export function SaleDetailsModal({
     onClose();
   };
 
-  // Log state para debug
+  const handleRemoveProduct = (productId: string) => {
+    if (!saleId) {
+      console.warn("ID da venda não fornecido");
+      setRemovalFeedback({
+        message: "Erro: ID da venda não encontrado",
+        type: "error"
+      });
+      return;
+    }
+
+    try {
+      const productToRemove = selectedProducts.find(p => p.id === productId);
+      const productInfo = productToRemove ? 
+        (productToRemove.type || `COD: ${productToRemove.id}`) : 
+        `Produto ${productId}`;
+      
+      removeProductFromSale(saleId, productId);
+      
+      setRemovalFeedback({
+        message: `Peça ${productInfo} removida com sucesso!`,
+        type: "success"
+      });
+      
+      setTimeout(() => {
+        setRemovalFeedback(null);
+      }, 3000);
+    } catch (error) {
+      console.error("Erro ao remover produto:", error);
+      setRemovalFeedback({
+        message: "Erro ao remover a peça",
+        type: "error"
+      });
+    }
+  };
+
   React.useEffect(() => {
     console.log("Estado do showPaymentDialog:", showPaymentDialog);
   }, [showPaymentDialog]);
+
+   const keyExtractor = (item: ProductItem) => item.id;
 
   return (
     <>
@@ -178,6 +232,25 @@ export function SaleDetailsModal({
               {isConfirmMode ? "Confirmar Venda" : "Detalhes da Venda"}
             </Text>
 
+            {removalFeedback && (
+              <Box 
+                bg={removalFeedback.type === "success" ? "$green600" : "$red600"} 
+                p="$3" 
+                borderRadius="$lg" 
+                mb="$4"
+                alignItems="center"
+              >
+                <HStack alignItems="center" space="sm">
+                  <Ionicons 
+                    name={removalFeedback.type === "success" ? "checkmark-circle" : "alert-circle"} 
+                    size={20} 
+                    color="white" 
+                  />
+                  <Text color="$white">{removalFeedback.message}</Text>
+                </HStack>
+              </Box>
+            )}
+
             {clientData && (
               <Box mb="$4" p="$3" bg="$backgroundDark800" borderRadius="$xl">
                 <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
@@ -205,7 +278,7 @@ export function SaleDetailsModal({
                 <FlatList
                   data={selectedProducts}
                   renderItem={renderProductItem}
-                  keyExtractor={(item) => item.id}
+                  keyExtractor={keyExtractor}
                   showsVerticalScrollIndicator={true}
                 />
               </Box>
@@ -280,7 +353,7 @@ export function SaleDetailsModal({
                     <HStack alignItems="center" space="sm">
                       <Ionicons name="close-circle-outline" color="white" size={20} />
                       <Text color="$white" fontSize="$md" fontFamily="$heading">
-                        Fechar
+                        {selectedProducts.length === 0 ? "Concluído" : "Fechar"}
                       </Text>
                     </HStack>
                   </Button>
@@ -328,7 +401,6 @@ export function SaleDetailsModal({
         </Box>
       </Modal>
 
-      {/* Modal personalizado para confirmação de pagamento */}
       <Modal
         visible={showPaymentDialog}
         transparent={true}
