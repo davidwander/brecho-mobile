@@ -61,8 +61,8 @@ export function SaleDetailsModal({
   const { removeProductFromSale, deleteSale } = useSales();
 
   const totalValue = useMemo(() => {
-    return selectedProducts.reduce((total, product) => total + product.salePrice, 0);
-  }, [selectedProducts]);
+    return localProducts.reduce((total, product) => total + product.salePrice, 0);
+  }, [localProducts]);
 
   const renderProductItem = ({ item }: { item: ProductItem }) => (
     <Box
@@ -170,12 +170,15 @@ export function SaleDetailsModal({
     }
 
     try {
-      const productToRemove = selectedProducts.find(p => p.id === productId);
+      const productToRemove = localProducts.find(p => p.id === productId);
       const productInfo = productToRemove ? 
         (productToRemove.type || `COD: ${productToRemove.id}`) : 
         `Produto ${productId}`;
       
       removeProductFromSale(saleId, productId);
+      
+      // Update localProducts state to remove the product
+      setLocalProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
       
       setRemovalFeedback({
         message: `Peça ${productInfo} removida com sucesso!`,
@@ -233,20 +236,43 @@ export function SaleDetailsModal({
             </Text>
 
             {removalFeedback && (
-              <Box 
-                bg={removalFeedback.type === "success" ? "$green600" : "$red600"} 
-                p="$3" 
-                borderRadius="$lg" 
-                mb="$4"
-                alignItems="center"
+              <Box
+                bg={removalFeedback.type === "success" ? "$green700" : "$red700"}
+                borderRadius="$lg"
+                mb="$3"
+                px="$3"
+                py="$2"
+                borderWidth={1}
+                borderColor={removalFeedback.type === "success" ? "$green800" : "$red800"}
+                softShadow="1" 
+                maxWidth="$full" 
+                mx="$2" 
+                role="alert"
+                aria-live="polite"
+                $base-animation={{
+                  initial: { opacity: 0, translateY: -10 },
+                  animate: { opacity: 1, translateY: 0 },
+                  transition: { duration: 600, easing: "ease-in-out" },
+                }}
               >
                 <HStack alignItems="center" space="sm">
-                  <Ionicons 
-                    name={removalFeedback.type === "success" ? "checkmark-circle" : "alert-circle"} 
-                    size={20} 
-                    color="white" 
+                  <Ionicons
+                    name={removalFeedback.type === "success" ? "checkmark-circle-outline" : "alert-circle-outline"}
+                    size={20}
+                    color="$white"
                   />
-                  <Text color="$white">{removalFeedback.message}</Text>
+                  <Text
+                    color="$white"
+                    fontSize="$sm"
+                    fontWeight="$normal"
+                    fontFamily="$body"
+                    lineHeight="$md"
+                    flex={1}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {removalFeedback.message}
+                  </Text>
                 </HStack>
               </Box>
             )}
@@ -257,26 +283,46 @@ export function SaleDetailsModal({
                   Dados do Cliente
                 </Text>
                 <VStack space="sm">
-                  <Text color="$textLight200">Nome: {clientData.nameClient}</Text>
-                  <Text color="$textLight200">Tel: {clientData.phone}</Text>
-                  <Text color="$textLight200">CPF: {clientData.cpf}</Text>
-                  <Text color="$textLight200">Endereço: {clientData.address}</Text>
+                  <Text 
+                    color="$textLight200" 
+                    lineHeight="$sm"
+                  >
+                    Nome: {clientData.nameClient}
+                  </Text>
+                  <Text 
+                    color="$textLight200"
+                    lineHeight="$sm"
+                  >
+                    Tel: {clientData.phone}
+                  </Text>
+                  <Text 
+                    color="$textLight200"
+                    lineHeight="$sm"
+                  >
+                    CPF: {clientData.cpf}
+                  </Text>
+                  <Text 
+                    color="$textLight200"
+                    lineHeight="$sm"
+                  >
+                    Endereço: {clientData.address}
+                  </Text>
                 </VStack>
               </Box>
             )}
 
             <Text size="lg" color="$textLight0" fontFamily="$heading" mb="$2">
-              Peças Selecionadas ({selectedProducts.length})
+              Peças Selecionadas ({localProducts.length})
             </Text>
 
-            {selectedProducts.length === 0 ? (
-              <Text color="$textLight400" mb="$4" textAlign="center">
+            {localProducts.length === 0 ? (
+              <Text color="$textLight200" mb="$4" textAlign="center">
                 Nenhuma peça selecionada.
               </Text>
             ) : (
               <Box height="45%" mb="$4">
                 <FlatList
-                  data={selectedProducts}
+                  data={localProducts}
                   renderItem={renderProductItem}
                   keyExtractor={keyExtractor}
                   showsVerticalScrollIndicator={true}
@@ -305,7 +351,12 @@ export function SaleDetailsModal({
                 >
                   <HStack alignItems="center" space="sm">
                     <Ionicons name="close-circle-outline" color="white" size={20} />
-                    <Text color="$white" fontSize="$md" fontFamily="$heading">
+                    <Text 
+                      color="$white" 
+                      fontSize="$md" 
+                      fontFamily="$heading"
+                      lineHeight="$sm"
+                    >
                       Cancelar
                     </Text>
                   </HStack>
@@ -320,7 +371,12 @@ export function SaleDetailsModal({
                   >
                     <HStack alignItems="center" space="sm">
                       <Ionicons name="add-circle-outline" color="white" size={20} />
-                      <Text color="$white" fontSize="$md" fontFamily="$heading">
+                      <Text 
+                        color="$white" 
+                        fontSize="$md" 
+                        fontFamily="$heading"
+                        lineHeight="$md"
+                      >
                         Mais Peças
                       </Text>
                     </HStack>
@@ -335,7 +391,12 @@ export function SaleDetailsModal({
                 >
                   <HStack alignItems="center" space="sm">
                     <Ionicons name="checkmark-circle-outline" color="white" size={20} />
-                    <Text color="$white" fontSize="$md" fontFamily="$heading">
+                    <Text 
+                      color="$white" 
+                      fontSize="$md" 
+                      fontFamily="$heading"
+                      lineHeight="$sm"
+                    >
                       Confirmar
                     </Text>
                   </HStack>
@@ -352,8 +413,13 @@ export function SaleDetailsModal({
                   >
                     <HStack alignItems="center" space="sm">
                       <Ionicons name="close-circle-outline" color="white" size={20} />
-                      <Text color="$white" fontSize="$md" fontFamily="$heading">
-                        {selectedProducts.length === 0 ? "Concluído" : "Fechar"}
+                      <Text 
+                        color="$white" 
+                        fontSize="$md" 
+                        fontFamily="$heading"
+                        lineHeight="$sm"
+                      >
+                        {localProducts.length === 0 ? "Concluído" : "Fechar"}
                       </Text>
                     </HStack>
                   </Button>
@@ -366,7 +432,12 @@ export function SaleDetailsModal({
                   >
                     <HStack alignItems="center" space="sm">
                       <Ionicons name="add-circle-outline" color="white" size={20} />
-                      <Text color="$white" fontSize="$md" fontFamily="$heading">
+                      <Text 
+                        color="$white" 
+                        fontSize="$md" 
+                        fontFamily="$heading"
+                        lineHeight="$sm"
+                      >
                         Mais Peças
                       </Text>
                     </HStack>
@@ -456,7 +527,12 @@ export function SaleDetailsModal({
                 rounded="$lg"
                 onPress={handleConfirmPayment}
               >
-                <Text color="$white">Confirmar</Text>
+                <Text 
+                  color="$white"
+                  lineHeight="$sm"
+                >
+                  Confirmar
+                </Text>
               </Button>
             </HStack>
           </View>
