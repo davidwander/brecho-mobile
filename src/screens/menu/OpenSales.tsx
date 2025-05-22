@@ -23,6 +23,7 @@ import {
 import { useSales } from '@contexts/SalesContext';
 import { SaleDetailsModal } from '@components/SaleDetailsModal';
 import { OpenSaleItem } from '@contexts/SalesContext';
+import { CustomToast } from '@components/CustomToast'; // Importar o novo componente
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -34,7 +35,6 @@ export function OpenSales() {
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [saleToDelete, setSaleToDelete] = useState<string | null>(null);
-  const [deleteFeedback, setDeleteFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleOpenDetails = (sale: OpenSaleItem) => {
@@ -52,25 +52,14 @@ export function OpenSales() {
 
     try {
       deleteSale(saleToDelete);
-      setDeleteFeedback({
-        message: 'Venda excluída com sucesso!',
-        type: 'success',
-      });
-      setTimeout(() => {
-        setDeleteFeedback(null);
-      }, 5000);
-    } catch (error) {
-      console.error('Erro ao excluir venda:', error);
-      setDeleteFeedback({
-        message: 'Erro ao excluir a venda',
-        type: 'error',
-      });
-      setTimeout(() => {
-        setDeleteFeedback(null);
-      }, 5000);
-    } finally {
       setIsDeleteModalVisible(false);
       setSaleToDelete(null);
+      return <CustomToast message="Venda excluída com sucesso!" type="success" />;
+    } catch (error) {
+      console.error('Erro ao excluir venda:', error);
+      setIsDeleteModalVisible(false);
+      setSaleToDelete(null);
+      return <CustomToast message="Erro ao excluir a venda" type="error" />;
     }
   };
 
@@ -103,7 +92,7 @@ export function OpenSales() {
           right={-1}
           bottom={0}
           width={6}
-          bg="$purple700"
+          bg={item.isPaid ? "$green600" : "$purple700"}
           zIndex={-1}
         />
         <VStack space="md">
@@ -125,11 +114,7 @@ export function OpenSales() {
               >
                 <HStack alignItems="center" space="xs" px="$2">
                   <FontAwesome name="eye" color="white" size={16} />
-                  <Text 
-                    color="$white" 
-                    fontSize="$sm"
-                    lineHeight="$sm"
-                  >
+                  <Text color="$white" fontSize="$sm">
                     Detalhes
                   </Text>
                 </HStack>
@@ -144,10 +129,7 @@ export function OpenSales() {
               >
                 <HStack alignItems="center" space="xs" px="$2">
                   <Feather name="trash" color="white" size={16} />
-                  <Text 
-                    color="$white" 
-                    fontSize="$sm"
-                    lineHeight="$sm">
+                  <Text color="$white" fontSize="$sm">
                     Excluir
                   </Text>
                 </HStack>
@@ -185,48 +167,6 @@ export function OpenSales() {
           Vendas em Aberto
         </Text>
       </Center>
-
-      {deleteFeedback && (
-        <Box
-          bg={deleteFeedback.type === 'success' ? '$green700' : '$red700'}
-          borderRadius="$lg"
-          mb="$3"
-          px="$3"
-          py="$2"
-          borderWidth={1}
-          borderColor={deleteFeedback.type === 'success' ? '$green800' : '$red800'}
-          softShadow="1"
-          maxWidth="$full"
-          mx="$2"
-          role="alert"
-          aria-live="polite"
-          $base-animation={{
-            initial: { opacity: 0, translateY: -10 },
-            animate: { opacity: 1, translateY: 0 },
-            transition: { duration: 600, easing: 'ease-in-out' },
-          }}
-        >
-          <HStack alignItems="center" space="sm">
-            <Ionicons
-              name={deleteFeedback.type === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'}
-              size={20}
-              color="$white"
-            />
-            <Text
-              color="$white"
-              fontSize="$sm"
-              fontWeight="$normal"
-              fontFamily="$body"
-              lineHeight="$sm"
-              flex={1}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {deleteFeedback.message}
-            </Text>
-          </HStack>
-        </Box>
-      )}
 
       <FlatList<OpenSaleItem>
         showsVerticalScrollIndicator={false}
@@ -267,14 +207,9 @@ export function OpenSales() {
         onClose={() => setIsDeleteModalVisible(false)}
       >
         <ModalBackdrop />
-        <ModalContent bg="$backgroundDark800" borderRadius="$lg" p="$6" width="80%">
-          <ModalHeader alignSelf="center">
-            <Text 
-              fontFamily="$heading" 
-              fontSize="$lg" 
-              color="$white" 
-              lineHeight="$md"
-            >
+        <ModalContent bg="$backgroundDark800" borderRadius="$xl" p="$6" width="80%">
+          <ModalHeader alignSelf='center'>
+            <Text fontFamily="$heading" fontSize="$lg" color="$white" lineHeight="$md">
               Confirmar Exclusão
             </Text>
           </ModalHeader>
@@ -292,7 +227,7 @@ export function OpenSales() {
                 rounded="$lg"
                 onPress={() => setIsDeleteModalVisible(false)}
               >
-                <Text color="$white">Cancelar</Text>
+                <Text color="$white" lineHeight="$sm">Cancelar</Text>
               </GluestackButton>
               <GluestackButton
                 flex={1}
@@ -300,7 +235,7 @@ export function OpenSales() {
                 rounded="$lg"
                 onPress={handleConfirmDelete}
               >
-                <Text color="$white">Excluir</Text>
+                <Text color="$white" lineHeight="$sm">Excluir</Text>
               </GluestackButton>
             </HStack>
           </ModalFooter>

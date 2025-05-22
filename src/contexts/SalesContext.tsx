@@ -16,6 +16,7 @@ export type SalesContextType = {
   addOpenSale: (sale: OpenSale) => void;
   removeProductFromSale: (saleId: string, productId: string) => void;
   deleteSale: (saleId: string) => void;
+  confirmPayment: (saleId: string) => void; // Nova função
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -24,11 +25,20 @@ type Props = {
   children: ReactNode;
 };
 
+export interface OpenSaleItem {
+  id: string;
+  clientData: ClientData;
+  selectedProducts: ProductItem[];
+  total: number;
+  date: string;
+  isPaid: boolean; // Novo campo
+}
+
 export const SalesProvider = ({ children }: Props) => {
   const [clientData, setClientDataState] = useState<ClientData | null>(null);
   const [selectedProducts, setSelectedProductsState] = useState<ProductItem[]>([]);
   const { removeProduct, addProduct, reserveProduct, releaseProduct } = useProduct();
-  const [openSales, setOpenSales] = useState<OpenSale[]>([]);
+  const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]);
 
   const setClientData = (client: ClientData) => {
     setClientDataState(client);
@@ -46,6 +56,8 @@ export const SalesProvider = ({ children }: Props) => {
         clientData: sale.client,
         selectedProducts: sale.products,
         total: sale.total,
+        date: new Date().toISOString(),
+        isPaid: false, // Inicializa como não pago
       },
     ]);
   };
@@ -109,7 +121,14 @@ export const SalesProvider = ({ children }: Props) => {
   }
 
   const addOpenSale = (sale: OpenSale) => {
-    setOpenSales((prevSales) => [...prevSales, sale]);
+    setOpenSales((prevSales) => [
+      ...prevSales,
+      {
+        ...sale,
+        isPaid: false, // Inicializa como não pago
+        date: new Date().toISOString(),
+      }
+    ]);
   };
 
   const removeProductFromSale = (saleId: string, productId: string) => {
@@ -152,6 +171,14 @@ export const SalesProvider = ({ children }: Props) => {
     });
   };
 
+  const confirmPayment = (saleId: string) => {
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) =>
+        sale.id === saleId ? { ...sale, isPaid: true } : sale
+      )
+    );
+  };
+
   return (
     <SalesContext.Provider
       value={{
@@ -168,6 +195,7 @@ export const SalesProvider = ({ children }: Props) => {
         addOpenSale,
         removeProductFromSale,
         deleteSale,
+        confirmPayment,
       }}
     >
       {children}
@@ -181,10 +209,4 @@ export const useSales = () => {
     throw new Error("useSales deve ser usado dentro de um SalesProvider");
   }
   return context;
-};
-
-export type OpenSaleItem = {
-  id: string;
-  clientData: ClientData;
-  selectedProducts: ProductItem[];
 };
