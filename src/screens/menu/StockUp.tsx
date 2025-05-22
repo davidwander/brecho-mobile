@@ -131,7 +131,7 @@ export function StockUp() {
   };
 
   return (
-    <VStack flex={1} px="$3" pt="$14" pb="$12" gap="$2">
+    <VStack flex={1} px="$3" pt="$14" pb="$12" gap="$2" bg="$backgroundDark900">
       <BackButton />
       <Text
         color="$white"
@@ -200,7 +200,7 @@ export function StockUp() {
         contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
         renderItem={({ item }) => (
           <Box
-            bg="$backgroundDark900"
+            bg="$backgroundDark800"
             p="$5"
             borderRadius="$3xl"
             mb="$4"
@@ -235,7 +235,7 @@ export function StockUp() {
                     alignItems="center"
                   >
                     <Checkbox.Icon>
-                      <Feather name="shopping-bag" color="white" size={20} />
+                      <Feather name="shopping-bag" color="white" size={20}/>
                     </Checkbox.Icon>
                   </Checkbox.Indicator>
                 </Checkbox>
