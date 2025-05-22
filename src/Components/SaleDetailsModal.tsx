@@ -237,33 +237,37 @@ export function SaleDetailsModal({
 
             {removalFeedback && (
               <Box
-                bg={removalFeedback.type === "success" ? "$green700" : "$red700"}
+                bg={removalFeedback.type === "success" ? "$green600" : "$red600"} 
                 borderRadius="$lg"
                 mb="$3"
-                px="$3"
-                py="$2"
+                px="$4" 
+                py="$3" 
                 borderWidth={1}
-                borderColor={removalFeedback.type === "success" ? "$green800" : "$red800"}
-                softShadow="1" 
-                maxWidth="$full" 
-                mx="$2" 
+                borderColor={removalFeedback.type === "success" ? "$green700" : "$red700"}
+                softShadow="1"
+                maxWidth="$full"
+                mx="$2"
                 role="alert"
                 aria-live="polite"
                 $base-animation={{
                   initial: { opacity: 0, translateY: -10 },
                   animate: { opacity: 1, translateY: 0 },
-                  transition: { duration: 600, easing: "ease-in-out" },
+                  exit: { opacity: 0, translateY: -10 },
+                  transition: {
+                    enter: { duration: 200, easing: "ease-in-out" }, 
+                    exit: { duration: 600, easing: "ease-in-out" }, 
+                  },
                 }}
               >
                 <HStack alignItems="center" space="sm">
                   <Ionicons
                     name={removalFeedback.type === "success" ? "checkmark-circle-outline" : "alert-circle-outline"}
-                    size={20}
+                    size={22}
                     color="$white"
                   />
                   <Text
                     color="$white"
-                    fontSize="$sm"
+                    fontSize="$md" 
                     fontWeight="$normal"
                     fontFamily="$body"
                     lineHeight="$md"
@@ -273,6 +277,12 @@ export function SaleDetailsModal({
                   >
                     {removalFeedback.message}
                   </Text>
+                  <TouchableOpacity
+                    onPress={() => setRemovalFeedback(null)}
+                    accessibilityLabel="Fechar mensagem de feedback"
+                  >
+                    <Ionicons name="close-outline" size={18} color="$white" />
+                  </TouchableOpacity>
                 </HStack>
               </Box>
             )}
