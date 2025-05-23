@@ -5,16 +5,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
 import { useSales } from '@contexts/SalesContext';
 import { ClientData, ProductItem } from '../types/SaleTypes';
-import {
-  Box,
-  Text,
-  Button,
-  HStack,
-  VStack,
-  Divider,
-} from '@gluestack-ui/themed';
+import { Box, Text, Button, HStack, VStack, Divider } from '@gluestack-ui/themed';
+
 import { useProduct } from '@contexts/ProductContext';
-import { CustomToast } from '@components/CustomToast'; // Importar o novo componente
+import { CustomToast } from '@components/CustomToast'; 
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';

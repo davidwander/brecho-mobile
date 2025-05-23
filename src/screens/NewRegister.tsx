@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useProduct } from '@contexts/ProductContext';
-import { Text, VStack } from '@gluestack-ui/themed';
-
+import { Text, VStack, useToast, Toast } from '@gluestack-ui/themed';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
-
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { DropdownSelector, PIECES } from '@components/DropdownSelector';
 import { ActionSheetMenu } from '@components/ActionSheetMenu';
 import { ButtonSpinner } from '@gluestack-ui/themed';
-
+import { CustomToast } from '@components/CustomToast'; 
 
 const generateRegisterId = (type: string) => {
   const prefix = type.trim().toUpperCase().slice(0, 3);
@@ -45,6 +43,7 @@ export function NewRegister() {
     },
   });
 
+  const toast = useToast();
   const [selectedType, setSelectedType] = useState('');
   const [registerId, setRegisterId] = useState(generateRegisterId("Peca"));
   const [rawCostPrice, setRawCostPrice] = useState('');
@@ -54,43 +53,95 @@ export function NewRegister() {
   const { addProduct } = useProduct();
   const [dropdownReady, setDropdownReady] = useState(false);
   const [sheetReady, setSheetReady] = useState(false);
-
   const [isCalculating, setIsCalculating] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleRegister = (data: FormDataProps) => {
     setIsRegistering(true);
     setTimeout(() => {
-      const cost = parseFloat(data.costPrice
-        .replace("R$", "")
-        .replace(",", ".")
-        .trim());
-      const margin = parseFloat(data.profitMargin.replace("%", ""));
-      const sale = cost + (cost * (margin / 100));
+      try {
+        const cost = parseFloat(data.costPrice
+          .replace("R$", "")
+          .replace(",", ".")
+          .trim());
+        const margin = parseFloat(data.profitMargin.replace("%", ""));
+        const sale = cost + (cost * (margin / 100));
   
-      const newId = generateRegisterId(data.selectedPiece);
+        const newId = generateRegisterId(data.selectedPiece);
   
-      const product = {
-        id: newId,
-        name: data.selectedPiece,
-        type: data.selectedPiece,
-        description: data.description,
-        costPrice: cost,
-        profitMargin: margin,
-        salePrice: sale,
-        createdAt: new Date().toISOString(),
-        quantity: 1,
-      };
+        const product = {
+          id: newId,
+          name: data.selectedPiece,
+          type: data.selectedPiece,
+          description: data.description,
+          costPrice: cost,
+          profitMargin: margin,
+          salePrice: sale,
+          createdAt: new Date().toISOString(),
+          quantity: 1,
+        };
   
-      addProduct(product);
+        addProduct(product);
   
-      setRegisterId(newId);
-      reset();
-      setRawCostPrice("");
-      setRawProfitMargin("");
-      setSalePrice("");
+        setRegisterId(newId);
+        reset();
+        setRawCostPrice("");
+        setRawProfitMargin("");
+        setSalePrice("");
+        setIsRegistering(false);
 
-      setIsRegistering(false);
+        console.log("Exibindo toast de sucesso");
+        toast.show({
+          placement: "bottom",
+          duration: 3000,
+          render: () => {
+            console.log("Renderizando toast");
+            return (
+              <Toast
+                action="success"
+                variant="solid"
+                bg="$green600"
+                borderRadius="$lg"
+                padding="$2"
+                mb="$24" 
+              >
+                <Text 
+                  color="$white" 
+                  fontSize="$md" 
+                  fontWeight="$medium"
+                  lineHeight="$sm"
+                >
+                  Peça adicionada ao estoque com sucesso!
+                </Text>
+              </Toast>
+            );
+          },
+        });
+      } catch (error) {
+        console.error("Erro ao registrar peça:", error);
+        setIsRegistering(false);
+        toast.show({
+          placement: "bottom",
+          duration: 3000,
+          render: () => {
+            console.log("Renderizando toast de erro");
+            return (
+              <Toast
+                action="error"
+                variant="solid"
+                bg="$red600"
+                borderRadius="$lg"
+                padding="$3"
+                mb="$24" 
+              >
+                <Text color="$white" fontSize="$sm" fontWeight="$medium">
+                  Erro ao adicionar peça ao estoque!
+                </Text>
+              </Toast>
+            );
+          },
+        });
+      }
     }, 700);
   };
 
@@ -171,7 +222,8 @@ export function NewRegister() {
               <Text 
                 color="$white" 
                 fontSize="$2xl" 
-                fontFamily="$heading" lineHeight="$xl"
+                fontFamily="$heading" 
+                lineHeight="$xl"
               >
                 Registrar Nova Peça
               </Text>
