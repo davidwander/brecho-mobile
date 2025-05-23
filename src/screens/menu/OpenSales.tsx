@@ -204,7 +204,7 @@ export function OpenSales() {
               </Text>
             </HStack>
 
-            <HStack space="sm" justifyContent="space-evenly">
+            <HStack gap="2" py="$2" justifyContent="space-evenly">
               <GluestackButton
                 size="sm"
                 bg="$purple700"
