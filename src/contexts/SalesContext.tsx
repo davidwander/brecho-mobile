@@ -16,7 +16,8 @@ export type SalesContextType = {
   addOpenSale: (sale: OpenSale) => void;
   removeProductFromSale: (saleId: string, productId: string) => void;
   deleteSale: (saleId: string) => void;
-  confirmPayment: (saleId: string) => void; // Nova função
+  confirmPayment: (saleId: string) => void;
+  updateFreight: (saleId: string, freightValue: number, isFreightPaid: boolean) => void; // Nova função
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -31,7 +32,9 @@ export interface OpenSaleItem {
   selectedProducts: ProductItem[];
   total: number;
   date: string;
-  isPaid: boolean; // Novo campo
+  isPaid: boolean;
+  freightValue?: number; // Novo campo para valor do frete
+  isFreightPaid?: boolean; // Novo campo para status do pagamento do frete
 }
 
 export const SalesProvider = ({ children }: Props) => {
@@ -57,7 +60,9 @@ export const SalesProvider = ({ children }: Props) => {
         selectedProducts: sale.products,
         total: sale.total,
         date: new Date().toISOString(),
-        isPaid: false, // Inicializa como não pago
+        isPaid: false,
+        freightValue: 0, // Inicializa com 0
+        isFreightPaid: false, // Inicializa como não pago
       },
     ]);
   };
@@ -125,8 +130,10 @@ export const SalesProvider = ({ children }: Props) => {
       ...prevSales,
       {
         ...sale,
-        isPaid: false, // Inicializa como não pago
+        isPaid: false,
         date: new Date().toISOString(),
+        freightValue: 0, // Inicializa com 0
+        isFreightPaid: false, // Inicializa como não pago
       }
     ]);
   };
@@ -179,6 +186,16 @@ export const SalesProvider = ({ children }: Props) => {
     );
   };
 
+  const updateFreight = (saleId: string, freightValue: number, isFreightPaid: boolean) => {
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) =>
+        sale.id === saleId
+          ? { ...sale, freightValue, isFreightPaid }
+          : sale
+      )
+    );
+  };
+
   return (
     <SalesContext.Provider
       value={{
@@ -196,6 +213,7 @@ export const SalesProvider = ({ children }: Props) => {
         removeProductFromSale,
         deleteSale,
         confirmPayment,
+        updateFreight,
       }}
     >
       {children}

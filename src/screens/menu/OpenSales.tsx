@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
-
 import BackButton from '@components/BackButton';
 import {
   Box,
@@ -19,23 +18,30 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Switch,
+  useToast,
+  Toast,
 } from '@gluestack-ui/themed';
 import { useSales } from '@contexts/SalesContext';
 import { SaleDetailsModal } from '@components/SaleDetailsModal';
 import { OpenSaleItem } from '@contexts/SalesContext';
-import { CustomToast } from '@components/CustomToast'; // Importar o novo componente
-
+import { CustomToast } from '@components/CustomToast';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export function OpenSales() {
-  const { openSales, deleteSale } = useSales();
+  const { openSales, deleteSale, updateFreight } = useSales();
   const [selectedSale, setSelectedSale] = useState<OpenSaleItem | null>(null);
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isFreightModalVisible, setIsFreightModalVisible] = useState(false);
   const [saleToDelete, setSaleToDelete] = useState<string | null>(null);
+  const [saleToEditFreight, setSaleToEditFreight] = useState<string | null>(null);
+  const [freightValue, setFreightValue] = useState('');
+  const [isFreightPaid, setIsFreightPaid] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const toast = useToast();
 
   const handleOpenDetails = (sale: OpenSaleItem) => {
     setSelectedSale(sale);
@@ -47,6 +53,13 @@ export function OpenSales() {
     setIsDeleteModalVisible(true);
   };
 
+  const handleOpenFreightModal = (sale: OpenSaleItem) => {
+    setSaleToEditFreight(sale.id);
+    setFreightValue(sale.freightValue ? sale.freightValue.toFixed(2).replace('.', ',') : '');
+    setIsFreightPaid(sale.isFreightPaid || false);
+    setIsFreightModalVisible(true);
+  };
+
   const handleConfirmDelete = () => {
     if (!saleToDelete) return;
 
@@ -54,12 +67,93 @@ export function OpenSales() {
       deleteSale(saleToDelete);
       setIsDeleteModalVisible(false);
       setSaleToDelete(null);
-      return <CustomToast message="Venda excluída com sucesso!" type="success" />;
+      toast.show({
+        placement: "bottom",
+        duration: 3000,
+        render: () => (
+          <Toast action="success" variant="solid" bg="$green600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Venda excluída com sucesso!
+            </Text>
+          </Toast>
+        ),
+      });
     } catch (error) {
       console.error('Erro ao excluir venda:', error);
       setIsDeleteModalVisible(false);
       setSaleToDelete(null);
-      return <CustomToast message="Erro ao excluir a venda" type="error" />;
+      toast.show({
+        placement: "bottom",
+        duration: 3000,
+        render: () => (
+          <Toast action="error" variant="solid" bg="$red600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Erro ao excluir a venda!
+            </Text>
+          </Toast>
+        ),
+      });
+    }
+  };
+
+  const handleConfirmFreight = () => {
+    if (!saleToEditFreight) return;
+
+    try {
+      const numericFreight = parseFloat(freightValue.replace(',', '.'));
+      if (isNaN(numericFreight) || numericFreight < 0) {
+        throw new Error('Valor do frete inválido');
+      }
+
+      updateFreight(saleToEditFreight, numericFreight, isFreightPaid);
+      setIsFreightModalVisible(false);
+      setSaleToEditFreight(null);
+      setFreightValue('');
+      setIsFreightPaid(false);
+      toast.show({
+        placement: "bottom",
+        duration: 3000,
+        render: () => (
+          <Toast action="success" variant="solid" bg="$green600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Frete atualizado com sucesso!
+            </Text>
+          </Toast>
+        ),
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar frete:', error);
+      setIsFreightModalVisible(false);
+      setSaleToEditFreight(null);
+      setFreightValue('');
+      setIsFreightPaid(false);
+      toast.show({
+        placement: "bottom",
+        duration: 3000,
+        render: () => (
+          <Toast action="error" variant="solid" bg="$red600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Erro ao atualizar o frete!
+            </Text>
+          </Toast>
+        ),
+      });
+    }
+  };
+
+  const handleFreightValueChange = (text: string) => {
+    const numeric = text.replace(/[^0-9,]/g, "").replace(",", ".");
+    setFreightValue(numeric);
+  };
+
+  const handleFreightValueBlur = () => {
+    if (freightValue) {
+      const formatted = parseFloat(freightValue)
+        .toFixed(2)
+        .replace(".", ",");
+      setFreightValue(formatted);
+    } else {
+      setFreightValue('');
     }
   };
 
@@ -69,6 +163,8 @@ export function OpenSales() {
       0
     );
     const itemCount = item.selectedProducts.length;
+    const freightValue = item.freightValue || 0;
+    const totalWithFreight = totalValue + freightValue;
 
     return (
       <Box
@@ -96,15 +192,19 @@ export function OpenSales() {
           zIndex={-1}
         />
         <VStack space="md">
-          <HStack justifyContent="space-between" alignItems="center">
+          <VStack justifyContent="space-between" alignItems="flex-start">
             <HStack space="sm" alignItems="center">
               <Feather name="user" size={20} color="#a78bfa" />
-              <Text size="lg" color="$textLight0" fontFamily="$heading">
+              <Text 
+                size="lg" 
+                color="$textLight0" 
+                fontFamily="$heading"
+              >
                 {item.clientData.nameClient || 'Cliente desconhecido'}
               </Text>
             </HStack>
 
-            <HStack space="sm">
+            <HStack space="sm" justifyContent="space-evenly">
               <GluestackButton
                 size="sm"
                 bg="$purple700"
@@ -114,8 +214,23 @@ export function OpenSales() {
               >
                 <HStack alignItems="center" space="xs" px="$2">
                   <FontAwesome name="eye" color="white" size={16} />
-                  <Text color="$white" fontSize="$sm">
+                  <Text color="$white" fontSize="$sm" lineHeight="$sm">
                     Detalhes
+                  </Text>
+                </HStack>
+              </GluestackButton>
+
+              <GluestackButton
+                size="sm"
+                bg="$cyan600"
+                rounded="$xl"
+                onPress={() => handleOpenFreightModal(item)}
+                accessibilityLabel={`Editar frete da venda de ${item.clientData.nameClient || 'cliente desconhecido'}`}
+              >
+                <HStack alignItems="center" space="xs" px="$2">
+                  <Ionicons name="car" color="white" size={16} />
+                  <Text color="$white" fontSize="$sm" lineHeight="$sm">
+                    Frete
                   </Text>
                 </HStack>
               </GluestackButton>
@@ -129,31 +244,60 @@ export function OpenSales() {
               >
                 <HStack alignItems="center" space="xs" px="$2">
                   <Feather name="trash" color="white" size={16} />
-                  <Text color="$white" fontSize="$sm">
+                  <Text color="$white" fontSize="$sm" lineHeight="$sm">
                     Excluir
                   </Text>
                 </HStack>
               </GluestackButton>
             </HStack>
-          </HStack>
+          </VStack>
 
-          <Divider bg="$trueGray700" />
+          <Divider bg="$trueGray500" />
 
-          <HStack justifyContent="space-between" mt="$2">
-            <HStack space="sm" alignItems="center">
-              <Feather name="shopping-bag" color="#60a5fa" size={20} />
-              <Text color="$textLight200">
-                {itemCount} {itemCount === 1 ? 'item' : 'itens'}
-              </Text>
+          <VStack space="sm">
+            <HStack justifyContent="space-between" mt="$2">
+              <HStack space="sm" alignItems="center">
+                <Feather name="shopping-bag" color="#60a5fa" size={20} />
+                <Text color="$textLight200">
+                  {itemCount} {itemCount === 1 ? 'item' : 'itens'}
+                </Text>
+              </HStack>
+
+              <HStack space="sm" alignItems="center">
+                <Feather name="dollar-sign" color="#34d399" size={20} />
+                <Text color="$green400" fontFamily="$heading" size="md">
+                  R$ {totalValue.toFixed(2).replace('.', ',')}
+                </Text>
+              </HStack>
             </HStack>
 
-            <HStack space="sm" alignItems="center">
-              <Feather name="dollar-sign" color="#34d399" size={20} />
-              <Text color="$green400" fontFamily="$heading" size="md">
-                R$ {totalValue.toFixed(2).replace('.', ',')}
-              </Text>
+            <HStack justifyContent="space-between">
+              <HStack space="sm" alignItems="center">
+                <Ionicons name="car" color="#60a5fa" size={20} />
+                <Text color="$textLight200">
+                  Frete: R$ {freightValue.toFixed(2).replace('.', ',')}
+                </Text>
+              </HStack>
+
+              <HStack space="sm" alignItems="center">
+                <Feather name={item.isFreightPaid ? "check-circle" : "x-circle"} color={item.isFreightPaid ? "#34d399" : "#ef4444"} size={20} />
+                <Text color={item.isFreightPaid ? "$green400" : "$red400"} fontFamily="$heading" size="sm">
+                  {item.isFreightPaid ? 'Frete Pago' : 'Frete Não Pago'}
+                </Text>
+              </HStack>
             </HStack>
-          </HStack>
+
+            <Divider bg="$trueGray500" />
+
+            <HStack justifyContent="flex-end">
+              <HStack space="sm" alignItems="center">
+                <Feather name="dollar-sign" color="#34d399" size={20} />
+                <Text color="$green400" fontFamily="$heading" size="md">
+                  Total: R$ {totalWithFreight.toFixed(2).replace('.', ',')}
+                </Text>
+              </HStack>
+            </HStack>
+          </VStack>
         </VStack>
       </Box>
     );
@@ -208,7 +352,7 @@ export function OpenSales() {
       >
         <ModalBackdrop />
         <ModalContent bg="$backgroundDark800" borderRadius="$xl" p="$6" width="80%">
-          <ModalHeader alignSelf='center'>
+          <ModalHeader alignSelf="center">
             <Text fontFamily="$heading" fontSize="$lg" color="$white" lineHeight="$md">
               Confirmar Exclusão
             </Text>
@@ -236,6 +380,84 @@ export function OpenSales() {
                 onPress={handleConfirmDelete}
               >
                 <Text color="$white" lineHeight="$sm">Excluir</Text>
+              </GluestackButton>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isFreightModalVisible}
+        onClose={() => {
+          setIsFreightModalVisible(false);
+          setSaleToEditFreight(null);
+          setFreightValue('');
+          setIsFreightPaid(false);
+        }}
+      >
+        <ModalBackdrop />
+        <ModalContent bg="$backgroundDark800" borderRadius="$xl" p="$6" width="80%">
+          <ModalHeader alignSelf="center">
+            <Text fontFamily="$heading" fontSize="$lg" color="$white" lineHeight="$md">
+              Editar Frete
+            </Text>
+          </ModalHeader>
+          <ModalBody>
+            <VStack space="md">
+              <Text color="$textLight200" fontSize="$md">
+                Valor do Frete
+              </Text>
+              <TextInput
+                style={{
+                  backgroundColor: '#27272a',
+                  color: '#ffffff',
+                  padding: 12,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: '#3f3f46',
+                }}
+                placeholder="R$ 0,00"
+                value={freightValue}
+                onChangeText={handleFreightValueChange}
+                onBlur={handleFreightValueBlur}
+                keyboardType="numeric"
+                placeholderTextColor="#71717a"
+              />
+              <HStack justifyContent="space-between" alignItems="center">
+                <Text color="$textLight200" fontSize="$md" lineHeight="$sm">
+                  Frete Pago?
+                </Text>
+                <Switch
+                  value={isFreightPaid}
+                  onValueChange={setIsFreightPaid}
+                  trackColor={{ false: "$trueGray600", true: "$green600" }}
+                />
+              </HStack>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <HStack space="md" width="100%" justifyContent="space-between">
+              <GluestackButton
+                flex={1}
+                variant="outline"
+                borderColor="$trueGray600"
+                rounded="$lg"
+                onPress={() => {
+                  setIsFreightModalVisible(false);
+                  setSaleToEditFreight(null);
+                  setFreightValue('');
+                  setIsFreightPaid(false);
+                }}
+              >
+                <Text color="$white" lineHeight="$sm">Cancelar</Text>
+              </GluestackButton>
+              <GluestackButton
+                flex={1}
+                bg="$green600"
+                rounded="$lg"
+                onPress={handleConfirmFreight}
+              >
+                <Text color="$white" lineHeight="$sm">Confirmar</Text>
               </GluestackButton>
             </HStack>
           </ModalFooter>
