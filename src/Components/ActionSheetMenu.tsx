@@ -85,15 +85,21 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                     rounded: "$xl"
                   }}
                   $hover={{
-                    bg: "$trueGray00"
+                    bg: "$trueGray200"
                   }}
                 >
-                  <Pressable 
+                  <Pressable
                     onPressIn={onPressIn}
                     onPressOut={onPressOut}
                     onPress={() => {
                       onClose();
-                      navigation.navigate(route as "openSales" | "stockUp" | "exits");
+                      if (route === "stockUp") {
+                        navigation.navigate("stockUp", { saleId: undefined }); 
+                      } else if (route === "exits") {
+                        navigation.navigate("exits");
+                      } else {
+                        navigation.navigate("openSales");
+                      }
                     }}
                   >
                     <Animated.View
