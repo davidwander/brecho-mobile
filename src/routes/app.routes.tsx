@@ -8,7 +8,7 @@ import { Shipments } from '@screens/shipments';
 import { Profile } from '@screens/Profile';
 
 import Feather from 'react-native-vector-icons/Feather';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import IonIcons from 'react-native-vector-icons/Ionicons';
 
 type AppRoutes = {
   home: undefined;
@@ -72,10 +72,10 @@ export function AppRoutes() {
         component={Shipments}
         options={{
           tabBarIcon: ({ color }) => (
-            <FontAwesome5 
-              name="people-carry" 
+            <IonIcons 
+              name="calendar-outline" 
               color={color} 
-              size={26} 
+              size={iconSize} 
               style={{ marginTop: -4, marginLeft: -2 }} 
             />
           ),
