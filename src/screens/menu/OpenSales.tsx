@@ -396,14 +396,14 @@ export function OpenSales() {
         }}
       >
         <ModalBackdrop />
-        <ModalContent bg="$backgroundDark800" borderRadius="$xl" p="$6" width="80%">
+        <ModalContent bg="$backgroundDark800" borderRadius="$2xl" p="$6" width="80%">
           <ModalHeader alignSelf="center">
             <Text fontFamily="$heading" fontSize="$lg" color="$white" lineHeight="$md">
               Editar Frete
             </Text>
           </ModalHeader>
           <ModalBody>
-            <VStack space="md">
+            <VStack space="md" >
               <Text color="$textLight200" fontSize="$md">
                 Valor do Frete
               </Text>
@@ -430,7 +430,7 @@ export function OpenSales() {
                 <Switch
                   value={isFreightPaid}
                   onValueChange={setIsFreightPaid}
-                  trackColor={{ false: "$trueGray600", true: "$green600" }}
+                  trackColor={{ false: "$trueGray600", true: "$purple600" }}
                 />
               </HStack>
             </VStack>

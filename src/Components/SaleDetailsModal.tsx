@@ -56,7 +56,7 @@ export function SaleDetailsModal({
     }
 
     try {
-      confirmPayment(saleId); // Marca a venda como paga
+      confirmPayment(saleId); 
       onConfirm();
       navigation.navigate('openSales');
       return <CustomToast message="Pagamento confirmado com sucesso!" type="success" />;

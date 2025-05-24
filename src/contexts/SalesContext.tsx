@@ -17,7 +17,8 @@ export type SalesContextType = {
   removeProductFromSale: (saleId: string, productId: string) => void;
   deleteSale: (saleId: string) => void;
   confirmPayment: (saleId: string) => void;
-  updateFreight: (saleId: string, freightValue: number, isFreightPaid: boolean) => void; // Nova função
+  updateFreight: (saleId: string, freightValue: number, isFreightPaid: boolean) => void;
+  updateDeliveryDate: (saleId: string, deliveryDate: string) => void; // Nova função
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -33,8 +34,9 @@ export interface OpenSaleItem {
   total: number;
   date: string;
   isPaid: boolean;
-  freightValue?: number; // Novo campo para valor do frete
-  isFreightPaid?: boolean; // Novo campo para status do pagamento do frete
+  freightValue?: number;
+  isFreightPaid?: boolean;
+  deliveryDate?: string; // Novo campo para data de entrega
 }
 
 export const SalesProvider = ({ children }: Props) => {
@@ -61,8 +63,9 @@ export const SalesProvider = ({ children }: Props) => {
         total: sale.total,
         date: new Date().toISOString(),
         isPaid: false,
-        freightValue: 0, // Inicializa com 0
-        isFreightPaid: false, // Inicializa como não pago
+        freightValue: 0,
+        isFreightPaid: false,
+        deliveryDate: undefined, // Inicializa como undefined
       },
     ]);
   };
@@ -132,8 +135,9 @@ export const SalesProvider = ({ children }: Props) => {
         ...sale,
         isPaid: false,
         date: new Date().toISOString(),
-        freightValue: 0, // Inicializa com 0
-        isFreightPaid: false, // Inicializa como não pago
+        freightValue: 0,
+        isFreightPaid: false,
+        deliveryDate: undefined, // Inicializa como undefined
       }
     ]);
   };
@@ -196,6 +200,16 @@ export const SalesProvider = ({ children }: Props) => {
     );
   };
 
+  const updateDeliveryDate = (saleId: string, deliveryDate: string) => {
+    setOpenSales((prevSales) =>
+      prevSales.map((sale) =>
+        sale.id === saleId
+          ? { ...sale, deliveryDate }
+          : sale
+      )
+    );
+  };
+
   return (
     <SalesContext.Provider
       value={{
@@ -214,6 +228,7 @@ export const SalesProvider = ({ children }: Props) => {
         deleteSale,
         confirmPayment,
         updateFreight,
+        updateDeliveryDate,
       }}
     >
       {children}
