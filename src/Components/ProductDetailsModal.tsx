@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'react-native';
-import { Box, Text, Button } from '@gluestack-ui/themed';
+import { Box, Text, Button, Divider } from '@gluestack-ui/themed';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 interface ProductDetailsModalProps {
@@ -25,20 +25,13 @@ export default function ProductDetailsModal({
         flex={1}
         justifyContent="center"
         alignItems="center"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
       >
         <Box
           bg="$backgroundDark900"
           p="$6"
-          borderRadius="$2xl"
+          borderRadius="$3xl"
           width="90%"
-          style={{
-            elevation: 5, 
-            shadowColor: '#000', 
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.8,
-            shadowRadius: 3, 
-          }}
         >
           <Text 
             textAlign="center"
@@ -50,6 +43,8 @@ export default function ProductDetailsModal({
           >
             Detalhes da Peça
           </Text>
+
+         <Divider mb="$4" bg="$grey" />
 
           <Text color="$white" mb="$2" lineHeight="$md" fontSize="$md">
             Tipo: {item?.type}

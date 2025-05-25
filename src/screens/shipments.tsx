@@ -4,10 +4,15 @@ import { Box, Center, Text, VStack, HStack, Divider, Button as GluestackButton, 
 
 import { useSales, OpenSaleItem } from '@contexts/SalesContext';
 import Feather from 'react-native-vector-icons/Feather';
-import { Calendar } from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import BackButton from '@components/BackButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
+
+import { ptBR } from '../utils/localeCalendarConfig'
+
+LocaleConfig.locales['pt-BR'] = ptBR;
+LocaleConfig.defaultLocale = 'pt-BR';
 
 export function Shipments() {
   const { openSales, updateDeliveryDate } = useSales();
@@ -16,7 +21,6 @@ export function Shipments() {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const toast = useToast();
 
-  // Filtrar vendas com pagamento e frete pagos
   const availableShipments = openSales.filter(
     (sale) => sale.isPaid && sale.isFreightPaid
   );
@@ -43,7 +47,7 @@ export function Shipments() {
         placement: 'bottom',
         duration: 3000,
         render: () => (
-          <Toast action="success" variant="solid" bg="$green600" borderRadius="$md" padding="$3" marginBottom="$6">
+          <Toast action="success" variant="solid" bg="$green600" borderRadius="$xl" padding="$3" marginBottom="$16">
             <Text color="$white" fontSize="$sm" fontWeight="$medium">
               Data de entrega atualizada com sucesso!
             </Text>
@@ -83,15 +87,19 @@ export function Shipments() {
         mb="$5"
         p="$5"
         bg="$backgroundDark800"
-        borderRadius="$2xl"
+        borderRadius="$3xl"
         borderWidth={1}
         borderColor="$trueGray700"
         shadowColor="black"
-        shadowOffset={{ width: 0, height: 2 }}
-        shadowOpacity={0.2}
-        shadowRadius={4}
         position="relative"
         overflow="hidden"
+        style={{
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+        }}
       >
         <Box
           position="absolute"
@@ -223,31 +231,62 @@ export function Shipments() {
         }}
       >
         <ModalBackdrop />
-        <ModalContent bg="$backgroundDark800" borderRadius="$xl" p="$6" width="90%">
+        <ModalContent 
+          bg="$backgroundDark800" 
+          borderRadius="$3xl" 
+          p="$6" 
+          width="100%"
+        >
           <ModalHeader alignSelf="center">
-            <Text fontFamily="$heading" fontSize="$lg" color="$white" lineHeight="$md">
+            <Text 
+              fontFamily="$heading" 
+              fontSize="$xl" 
+              color="$white" 
+              lineHeight="$md"
+            >
               Selecionar Data de Entrega
             </Text>
           </ModalHeader>
           <ModalBody>
             <Calendar
+              headerStyle={{ 
+                borderBottomWidth: 0.5, 
+                borderColor: '#e8e8e8', 
+                paddingBottom: 10,
+                marginBottom: 10,
+              }} 
+              renderArrow={(direction: "right" | "left") => {
+                return (
+                  <Ionicons
+                    name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
+                    size={24}
+                    color="#a78bfa"
+                  />
+                );
+              }}
               onDayPress={handleDateSelect}
               markedDates={{
-                [selectedDate]: { selected: true, selectedColor: '#2563eb' },
+                [selectedDate]: { selected: true, selectedColor: '#7c3aed' },
               }}
               theme={{
-                backgroundColor: '#1f2937',
-                calendarBackground: '#1f2937',
+                backgroundColor: 'transparent',
+                calendarBackground: 'transparent',
+                textMonthFontSize: 20,
                 textSectionTitleColor: '#e5e7eb',
                 selectedDayBackgroundColor: '#2563eb',
                 selectedDayTextColor: '#ffffff',
                 todayTextColor: '#34d399',
                 dayTextColor: '#e5e7eb',
-                textDisabledColor: '#4b5563',
-                arrowColor: '#2563eb',
+                textDisabledColor: '#717171',
+                arrowColor: '#a78bfa',
                 monthTextColor: '#e5e7eb',
+                arrowStyle:{
+                  margin: 0, 
+                  padding: 0,
+                }
               }}
               minDate={new Date().toISOString().split('T')[0]}
+              hideExtraDays={true}
             />
           </ModalBody>
           <ModalFooter>

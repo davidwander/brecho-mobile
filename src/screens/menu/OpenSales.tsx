@@ -114,8 +114,13 @@ export function OpenSales() {
         placement: "bottom",
         duration: 3000,
         render: () => (
-          <Toast action="success" variant="solid" bg="$green600" borderRadius="$md" padding="$3" marginBottom="$6">
-            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+          <Toast action="success" variant="solid" bg="$green600" borderRadius="$xl" padding="$4" marginBottom="$16">
+            <Text 
+              color="$white" 
+              fontSize="$sm" 
+              fontWeight="$medium" 
+              lineHeight="$sm"
+            >
               Frete atualizado com sucesso!
             </Text>
           </Toast>
@@ -171,15 +176,16 @@ export function OpenSales() {
         mb="$5"
         p="$5"
         bg="$backgroundDark800"
-        borderRadius="$2xl"
-        borderWidth={1}
-        borderColor="$trueGray700"
-        shadowColor="black"
-        shadowOffset={{ width: 0, height: 2 }}
-        shadowOpacity={0.2}
-        shadowRadius={4}
+        borderRadius="$3xl"
         position="relative"
         overflow="hidden"
+        style={{
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+        }}
       >
         <Box
           position="absolute"

@@ -42,14 +42,14 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
         <ActionsheetContent
           bg="$trueGray600"
           rounded="$2xl"
-          p="$8"
+          p="$6"
           minHeight={150}
         >
           <HStack
             flexWrap="wrap"
             justifyContent="space-evenly"
             alignItems="center"
-            gap="$2"
+            gap="$3"
             opacity={sheetReady ? 1 : 0}
             pointerEvents={sheetReady ? "auto" : "none"}
           >
@@ -108,7 +108,7 @@ export function ActionSheetMenu({ isOpen, onClose, sheetReady }: ActionSheetMenu
                         width: 80,
                         height: 80,
                         backgroundColor: '#9647d6',
-                        borderRadius: 20,
+                        borderRadius: 26,
                         alignItems: "center",
                         justifyContent: "center",
                         shadowColor: '#000',
