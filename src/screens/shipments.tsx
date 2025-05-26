@@ -15,15 +15,13 @@ LocaleConfig.locales['pt-BR'] = ptBR;
 LocaleConfig.defaultLocale = 'pt-BR';
 
 export function Shipments() {
-  const { openSales, updateDeliveryDate } = useSales();
+  const { shipments, updateDeliveryDate } = useSales(); // Alterado de openSales para shipments
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const toast = useToast();
 
-  const availableShipments = openSales.filter(
-    (sale) => sale.isPaid && sale.isFreightPaid
-  );
+  const availableShipments = shipments; // Usa a lista shipments diretamente
 
   const handleOpenCalendarModal = (saleId: string) => {
     setSelectedSaleId(saleId);
@@ -280,7 +278,7 @@ export function Shipments() {
                 textDisabledColor: '#717171',
                 arrowColor: '#a78bfa',
                 monthTextColor: '#e5e7eb',
-                arrowStyle:{
+                arrowStyle: {
                   margin: 0, 
                   padding: 0,
                 }

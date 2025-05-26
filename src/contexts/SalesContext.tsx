@@ -4,6 +4,7 @@ import { ProductItem, ClientData, SaleData, OpenSale } from '../types/SaleTypes'
 
 export type SalesContextType = {
   openSales: OpenSaleItem[];
+  shipments: OpenSaleItem[];
   addSale: (sale: SaleData) => void;
   finalizeSale: (index: number) => void;
   cancelSale: () => void;
@@ -18,7 +19,7 @@ export type SalesContextType = {
   deleteSale: (saleId: string) => void;
   confirmPayment: (saleId: string) => void;
   updateFreight: (saleId: string, freightValue: number, isFreightPaid: boolean) => void;
-  updateDeliveryDate: (saleId: string, deliveryDate: string) => void; // Nova função
+  updateDeliveryDate: (saleId: string, deliveryDate: string) => void; 
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -36,7 +37,7 @@ export interface OpenSaleItem {
   isPaid: boolean;
   freightValue?: number;
   isFreightPaid?: boolean;
-  deliveryDate?: string; // Novo campo para data de entrega
+  deliveryDate?: string; 
 }
 
 export const SalesProvider = ({ children }: Props) => {
@@ -44,6 +45,7 @@ export const SalesProvider = ({ children }: Props) => {
   const [selectedProducts, setSelectedProductsState] = useState<ProductItem[]>([]);
   const { removeProduct, addProduct, reserveProduct, releaseProduct } = useProduct();
   const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]);
+  const [shipments, setShipments] = useState<OpenSaleItem[]>([]);
 
   const setClientData = (client: ClientData) => {
     setClientDataState(client);
@@ -65,7 +67,7 @@ export const SalesProvider = ({ children }: Props) => {
         isPaid: false,
         freightValue: 0,
         isFreightPaid: false,
-        deliveryDate: undefined, // Inicializa como undefined
+        deliveryDate: undefined,
       },
     ]);
   };
@@ -137,7 +139,7 @@ export const SalesProvider = ({ children }: Props) => {
         date: new Date().toISOString(),
         freightValue: 0,
         isFreightPaid: false,
-        deliveryDate: undefined, // Inicializa como undefined
+        deliveryDate: undefined,
       }
     ]);
   };
@@ -180,32 +182,47 @@ export const SalesProvider = ({ children }: Props) => {
       }
       return prevSales.filter((s) => s.id !== saleId);
     });
+    setShipments((prevShipments) => prevShipments.filter((s) => s.id !== saleId));
   };
 
   const confirmPayment = (saleId: string) => {
-    setOpenSales((prevSales) =>
-      prevSales.map((sale) =>
-        sale.id === saleId ? { ...sale, isPaid: true } : sale
-      )
-    );
+    setOpenSales((prevSales) => {
+      const sale = prevSales.find((s) => s.id === saleId);
+      if (!sale) return prevSales;
+
+      const updatedSale = { ...sale, isPaid: true };
+
+      // Se a venda está paga e o frete está pago, move para shipments
+      if (updatedSale.isPaid && updatedSale.isFreightPaid) {
+        setShipments((prev) => [...prev, updatedSale]);
+        return prevSales.filter((s) => s.id !== saleId);
+      }
+
+      return prevSales.map((s) => (s.id === saleId ? updatedSale : s));
+    });
   };
 
   const updateFreight = (saleId: string, freightValue: number, isFreightPaid: boolean) => {
-    setOpenSales((prevSales) =>
-      prevSales.map((sale) =>
-        sale.id === saleId
-          ? { ...sale, freightValue, isFreightPaid }
-          : sale
-      )
-    );
+    setOpenSales((prevSales) => {
+      const sale = prevSales.find((s) => s.id === saleId);
+      if (!sale) return prevSales;
+
+      const updatedSale = { ...sale, freightValue, isFreightPaid };
+
+      // Se a venda está paga e o frete está pago, move para shipments
+      if (updatedSale.isPaid && updatedSale.isFreightPaid) {
+        setShipments((prev) => [...prev, updatedSale]);
+        return prevSales.filter((s) => s.id !== saleId);
+      }
+
+      return prevSales.map((s) => (s.id === saleId ? updatedSale : s));
+    });
   };
 
   const updateDeliveryDate = (saleId: string, deliveryDate: string) => {
-    setOpenSales((prevSales) =>
-      prevSales.map((sale) =>
-        sale.id === saleId
-          ? { ...sale, deliveryDate }
-          : sale
+    setShipments((prevShipments) =>
+      prevShipments.map((sale) =>
+        sale.id === saleId ? { ...sale, deliveryDate } : sale
       )
     );
   };
@@ -214,6 +231,7 @@ export const SalesProvider = ({ children }: Props) => {
     <SalesContext.Provider
       value={{
         openSales,
+        shipments,
         addSale,
         finalizeSale,
         cancelSale,
