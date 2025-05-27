@@ -1,27 +1,36 @@
 import React, { useState } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { Box, Center, Text, VStack, HStack, Divider, Button as GluestackButton, Modal, ModalBackdrop, ModalContent, ModalHeader, ModalBody, ModalFooter, useToast, Toast } from '@gluestack-ui/themed';
-
 import { useSales, OpenSaleItem } from '@contexts/SalesContext';
 import Feather from 'react-native-vector-icons/Feather';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import BackButton from '@components/BackButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
-
-import { ptBR } from '../utils/localeCalendarConfig'
+import { ptBR } from '../utils/localeCalendarConfig';
 
 LocaleConfig.locales['pt-BR'] = ptBR;
 LocaleConfig.defaultLocale = 'pt-BR';
 
+const formatDateToLocal = (dateString: string): string => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day); 
+  return date.toLocaleDateString('pt-BR'); 
+};
+
+const parseLocalDate = (dateString: string): string => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day).toISOString().split('T')[0]; 
+};
+
 export function Shipments() {
-  const { shipments, updateDeliveryDate } = useSales(); // Alterado de openSales para shipments
+  const { shipments, updateDeliveryDate } = useSales();
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const toast = useToast();
 
-  const availableShipments = shipments; // Usa a lista shipments diretamente
+  const availableShipments = shipments;
 
   const handleOpenCalendarModal = (saleId: string) => {
     setSelectedSaleId(saleId);
@@ -30,14 +39,14 @@ export function Shipments() {
   };
 
   const handleDateSelect = (day: { dateString: string }) => {
-    setSelectedDate(day.dateString);
+    setSelectedDate(parseLocalDate(day.dateString));
   };
 
   const handleConfirmDeliveryDate = () => {
     if (!selectedSaleId || !selectedDate) return;
 
     try {
-      updateDeliveryDate(selectedSaleId, selectedDate);
+      updateDeliveryDate(selectedSaleId, selectedDate); 
       setIsCalendarModalVisible(false);
       setSelectedSaleId(null);
       setSelectedDate('');
@@ -150,7 +159,8 @@ export function Shipments() {
                 <Text 
                   color="$green400" 
                   fontFamily="$heading" 
-                  size="md" lineHeight="$sm"
+                  size="md" 
+                  lineHeight="$sm"
                 >
                   R$ {totalValue.toFixed(2).replace('.', ',')}
                 </Text>
@@ -177,7 +187,7 @@ export function Shipments() {
               <HStack space="sm" alignItems="center">
                 <Feather name="calendar" color="#60a5fa" size={20} />
                 <Text color="$textLight200" lineHeight="$sm">
-                  Entrega: {item.deliveryDate ? new Date(item.deliveryDate).toLocaleDateString('pt-BR') : 'Não agendada'}
+                  Entrega: {item.deliveryDate ? formatDateToLocal(item.deliveryDate) : 'Não agendada'}
                 </Text>
               </HStack>
             </HStack>
