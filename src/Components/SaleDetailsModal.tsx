@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Modal, FlatList, View, TouchableOpacity } from 'react-native';
+import { Modal, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@routes/AppStackRoutes';
@@ -43,26 +43,38 @@ export function SaleDetailsModal({
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
   const [localProducts, setLocalProducts] = useState<ProductItem[]>(selectedProducts);
   const [removalFeedback, setRemovalFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     setLocalProducts(selectedProducts);
   }, [selectedProducts, visible]);
 
+  // Função para mostrar toast
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToastMessage({ message, type });
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleConfirmPayment = () => {
+    console.log('handleConfirmPayment chamado');
+    
     setShowPaymentDialog(false);
 
     if (!saleId) {
-      return <CustomToast message="Erro: ID da venda não encontrado" type="error" />;
+      console.log('Erro: saleId não encontrado');
+      showToast('Erro: ID da venda não encontrado', 'error');
+      return;
     }
 
     try {
+      console.log('Confirmando pagamento para saleId:', saleId);
       confirmPayment(saleId); 
       onConfirm();
       navigation.navigate('openSales');
-      return <CustomToast message="Pagamento confirmado com sucesso!" type="success" />;
+      showToast('Pagamento confirmado com sucesso!', 'success');
     } catch (error) {
       console.error('Erro ao confirmar pagamento:', error);
-      return <CustomToast message="Erro ao confirmar o pagamento" type="error" />;
+      showToast('Erro ao confirmar o pagamento', 'error');
     }
   };
 
@@ -207,6 +219,29 @@ export function SaleDetailsModal({
     onClose();
   };
 
+  // Função para confirmar pagamento com Alert nativo (funciona melhor no iOS)
+  const handleConfirmPaymentPress = () => {
+    console.log('Botão Confirmar Pagamento clicado');
+    
+    // Usando Alert nativo como alternativa mais confiável
+    Alert.alert(
+      'Confirmar Pagamento',
+      'Tem certeza que deseja confirmar o pagamento desta venda?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirmar',
+          style: 'default',
+          onPress: handleConfirmPayment,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   React.useEffect(() => {
     console.log('Estado do showPaymentDialog:', showPaymentDialog);
   }, [showPaymentDialog]);
@@ -215,6 +250,14 @@ export function SaleDetailsModal({
 
   return (
     <>
+      {/* Toast personalizado */}
+      {toastMessage && (
+        <CustomToast 
+          message={toastMessage.message} 
+          type={toastMessage.type} 
+        />
+      )}
+
       <Modal
         visible={visible}
         animationType="slide"
@@ -225,7 +268,7 @@ export function SaleDetailsModal({
           flex={1}
           justifyContent="center"
           alignItems="center"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1000 }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
         >
           <Box
             bg="$backgroundDark900"
@@ -233,7 +276,6 @@ export function SaleDetailsModal({
             borderRadius="$2xl"
             width="90%"
             maxHeight="80%"
-            zIndex={1000}
           >
             <Text
               textAlign="center"
@@ -257,7 +299,6 @@ export function SaleDetailsModal({
                 softShadow="2"
                 maxWidth="$full"
                 mx="$2"
-                zIndex={999999}
                 position="absolute"
                 top="$4"
                 left={25}
@@ -429,15 +470,13 @@ export function SaleDetailsModal({
                   </Button>
                 </HStack>
 
+                {/* Botão com Alert nativo (mais confiável no iOS) */}
                 <Button
                   mt="$2"
                   h="$11"
                   bg="$teal600"
                   rounded="$xl"
-                  onPress={() => {
-                    console.log('Botão Confirmar Pagamento clicado');
-                    setShowPaymentDialog(true);
-                  }}
+                  onPress={handleConfirmPaymentPress}
                   accessibilityLabel="Confirmar pagamento da venda"
                 >
                   <HStack alignItems="center" space="sm" justifyContent="center">
@@ -453,30 +492,25 @@ export function SaleDetailsModal({
         </Box>
       </Modal>
 
+      {/* Modal customizado para confirmação (mantido como alternativa) */}
       <Modal
         visible={showPaymentDialog}
         transparent={true}
         animationType="fade"
         onRequestClose={() => setShowPaymentDialog(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            zIndex: 2000,
-          }}
+        <Box
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
         >
-          <View
-            style={{
-              backgroundColor: '#1F2937',
-              borderRadius: 16,
-              padding: 24,
-              width: '80%',
-              alignItems: 'center',
-              zIndex: 2000,
-            }}
+          <Box
+            bg="$backgroundDark900"
+            borderRadius="$2xl"
+            p="$6"
+            width="80%"
+            alignItems="center"
           >
             <Text fontFamily="$heading" fontSize="$lg" color="$white" mb="$4" lineHeight="$md">
               Confirmar Pagamento
@@ -494,7 +528,7 @@ export function SaleDetailsModal({
                 rounded="$lg"
                 onPress={() => setShowPaymentDialog(false)}
               >
-                <Text>Cancelar</Text>
+                <Text color="$white">Cancelar</Text>
               </Button>
 
               <Button
@@ -508,8 +542,8 @@ export function SaleDetailsModal({
                 </Text>
               </Button>
             </HStack>
-          </View>
-        </View>
+          </Box>
+        </Box>
       </Modal>
     </>
   );
