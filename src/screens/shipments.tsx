@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { Box, Center, Text, VStack, HStack, Divider, Button as GluestackButton, Modal, ModalBackdrop, ModalContent, ModalHeader, ModalBody, ModalFooter, useToast, Toast } from '@gluestack-ui/themed';
 import { useSales, OpenSaleItem } from '@contexts/SalesContext';
+import { useDelivery } from '@contexts/DeliveryContext';
 import Feather from 'react-native-vector-icons/Feather';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import BackButton from '@components/BackButton';
@@ -24,18 +25,25 @@ const parseLocalDate = (dateString: string): string => {
 };
 
 export function Shipments() {
-  const { shipments, updateDeliveryDate } = useSales();
+  const { shipments } = useSales();
+  const { updateDeliveryDate, confirmShipment, pendingDeliveries } = useDelivery();
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const toast = useToast();
 
-  const availableShipments = shipments;
+  const availableShipments = pendingDeliveries;
 
   const handleOpenCalendarModal = (saleId: string) => {
     setSelectedSaleId(saleId);
     setSelectedDate('');
     setIsCalendarModalVisible(true);
+  };
+
+  const handleOpenConfirmModal = (saleId: string) => {
+    setSelectedSaleId(saleId);
+    setIsConfirmModalVisible(true);
   };
 
   const handleDateSelect = (day: { dateString: string }) => {
@@ -80,6 +88,44 @@ export function Shipments() {
     }
   };
 
+  const handleConfirmShipment = () => {
+    if (!selectedSaleId) return;
+
+    try {
+      // Assumindo que você tem uma função confirmShipment no contexto
+      // que marca a venda como enviada
+      confirmShipment(selectedSaleId);
+      setIsConfirmModalVisible(false);
+      setSelectedSaleId(null);
+      toast.show({
+        placement: 'bottom',
+        duration: 3000,
+        render: () => (
+          <Toast action="success" variant="solid" bg="$blue600" borderRadius="$xl" padding="$3" marginBottom="$16">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Venda confirmada como enviada!
+            </Text>
+          </Toast>
+        ),
+      });
+    } catch (error) {
+      console.error('Erro ao confirmar envio:', error);
+      setIsConfirmModalVisible(false);
+      setSelectedSaleId(null);
+      toast.show({
+        placement: 'bottom',
+        duration: 3000,
+        render: () => (
+          <Toast action="error" variant="solid" bg="$red600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Erro ao confirmar o envio!
+            </Text>
+          </Toast>
+        ),
+      });
+    }
+  };
+
   const renderShipmentCard = ({ item }: { item: OpenSaleItem }) => {
     const totalValue = item.selectedProducts.reduce(
       (total, product) => total + product.salePrice,
@@ -88,6 +134,7 @@ export function Shipments() {
     const itemCount = item.selectedProducts.length;
     const freightValue = item.freightValue || 0;
     const totalWithFreight = totalValue + freightValue;
+    const hasDeliveryDate = !!item.deliveryDate;
 
     return (
       <Box
@@ -127,20 +174,39 @@ export function Shipments() {
               </Text>
             </HStack>
 
-            <TouchableOpacity
-              onPress={() => handleOpenCalendarModal(item.id)}
-              accessibilityLabel={`Agendar entrega para ${item.clientData.nameClient || 'cliente desconhecido'}`}
-              style={{
-                width: 32,
-                height: 32,
-                backgroundColor: '#7c3aed',
-                borderRadius: 8,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Feather name="calendar" size={22} color="#ffffff" />
-            </TouchableOpacity>
+            <HStack space="sm">
+              <TouchableOpacity
+                onPress={() => handleOpenCalendarModal(item.id)}
+                accessibilityLabel={`Agendar entrega para ${item.clientData.nameClient || 'cliente desconhecido'}`}
+                style={{
+                  width: 32,
+                  height: 32,
+                  backgroundColor: '#7c3aed',
+                  borderRadius: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Feather name="calendar" size={22} color="#ffffff" />
+              </TouchableOpacity>
+
+              {hasDeliveryDate && (
+                <TouchableOpacity
+                  onPress={() => handleOpenConfirmModal(item.id)}
+                  accessibilityLabel={`Confirmar envio para ${item.clientData.nameClient || 'cliente desconhecido'}`}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    backgroundColor: '#059669',
+                    borderRadius: 8,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Feather name="truck" size={22} color="#ffffff" />
+                </TouchableOpacity>
+              )}
+            </HStack>
           </HStack>
 
           <Divider bg="$trueGray600" />
@@ -200,6 +266,24 @@ export function Shipments() {
                 </Text>
               </HStack>
             </HStack>
+
+            {hasDeliveryDate && (
+              <Box mt="$3" pt="$3" borderTopWidth={1} borderTopColor="$trueGray600">
+                <GluestackButton
+                  bg="$green600"
+                  rounded="$lg"
+                  onPress={() => handleOpenConfirmModal(item.id)}
+                  width="100%"
+                >
+                  <HStack space="sm" alignItems="center">
+                    <Feather name="truck" size={18} color="#ffffff" />
+                    <Text color="$white" fontWeight="$medium">
+                      Confirmar Saída para Entrega
+                    </Text>
+                  </HStack>
+                </GluestackButton>
+              </Box>
+            )}
           </VStack>
         </VStack>
       </Box>
@@ -230,6 +314,7 @@ export function Shipments() {
         )}
       />
 
+      {/* Modal do Calendário */}
       <Modal
         isOpen={isCalendarModalVisible}
         onClose={() => {
@@ -320,6 +405,85 @@ export function Shipments() {
                 isDisabled={!selectedDate}
               >
                 <Text color="$white" lineHeight="$sm">Confirmar</Text>
+              </GluestackButton>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal de Confirmação de Envio */}
+      <Modal
+        isOpen={isConfirmModalVisible}
+        onClose={() => {
+          setIsConfirmModalVisible(false);
+          setSelectedSaleId(null);
+        }}
+      >
+        <ModalBackdrop />
+        <ModalContent 
+          bg="$backgroundDark800" 
+          borderRadius="$3xl" 
+          p="$6" 
+          width="90%"
+        >
+          <ModalHeader alignSelf="center">
+            <HStack space="sm" alignItems="center">
+              <Feather name="truck" size={24} color="#34d399" />
+              <Text 
+                fontFamily="$heading" 
+                fontSize="$xl" 
+                color="$white" 
+                lineHeight="$md"
+              >
+                Confirmar Envio
+              </Text>
+            </HStack>
+          </ModalHeader>
+          <ModalBody>
+            <Center>
+              <Text 
+                color="$textLight200" 
+                fontSize="$md" 
+                textAlign="center"
+                lineHeight="$md"
+              >
+                Tem certeza que deseja confirmar que esta venda saiu para entrega?
+              </Text>
+              <Text 
+                color="$textLight400" 
+                fontSize="$sm" 
+                textAlign="center"
+                mt="$2"
+                lineHeight="$sm"
+              >
+                Esta ação não poderá ser desfeita.
+              </Text>
+            </Center>
+          </ModalBody>
+          <ModalFooter>
+            <HStack space="md" width="100%" justifyContent="space-between">
+              <GluestackButton
+                flex={1}
+                variant="outline"
+                borderColor="$trueGray600"
+                rounded="$lg"
+                onPress={() => {
+                  setIsConfirmModalVisible(false);
+                  setSelectedSaleId(null);
+                }}
+              >
+                <Text color="$white" lineHeight="$sm">Cancelar</Text>
+              </GluestackButton>
+              <GluestackButton
+                flex={1}
+                bg="$green600"
+                rounded="$lg"
+                onPress={handleConfirmShipment}
+              >
+                <HStack space="sm" alignItems="center">
+                  <Feather name="check" size={16} color="#ffffff" />
+                  <Text color="$white" lineHeight="$sm">Confirmar</Text>
+                </HStack>
               </GluestackButton>
             </HStack>
           </ModalFooter>

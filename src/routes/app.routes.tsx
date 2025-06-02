@@ -5,7 +5,7 @@ import { gluestackUIConfig } from '../../config/gluestack-ui.config';
 import { Home } from '@screens/Home';
 import { NewRegister } from '@screens/NewRegister';
 import { Shipments } from '@screens/shipments';
-import { Profile } from '@screens/Profile';
+import { DeliveryHistory } from '@screens/DeliveryHistory';
 
 import Feather from 'react-native-vector-icons/Feather';
 import IonIcons from 'react-native-vector-icons/Ionicons';
@@ -14,7 +14,7 @@ type AppRoutes = {
   home: undefined;
   newRegister: undefined;
   shipments: undefined;
-  profile: undefined;
+  deliveryHistory: undefined;
 };
 
 const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
@@ -82,8 +82,8 @@ export function AppRoutes() {
         }}
       />
       <Screen
-        name="profile"
-        component={Profile}
+        name="deliveryHistory"
+        component={DeliveryHistory}
         options={{
           tabBarIcon: ({ color }) => (
             <Feather 
