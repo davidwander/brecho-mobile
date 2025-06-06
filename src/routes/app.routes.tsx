@@ -87,7 +87,7 @@ export function AppRoutes() {
         options={{
           tabBarIcon: ({ color }) => (
             <Feather 
-              name="user" 
+              name="clock" 
               color={color} 
               size={iconSize} 
               style={{ marginTop: -4 }} 
