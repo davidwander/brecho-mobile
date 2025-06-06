@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSales, OpenSaleItem } from './SalesContext';
+import { useProduct } from './ProductContext';
 
 export interface DeliveryItem extends OpenSaleItem {
   deliveryStatus: 'pending' | 'scheduled' | 'shipped' | 'delivered';
@@ -8,18 +9,13 @@ export interface DeliveryItem extends OpenSaleItem {
 }
 
 interface DeliveryContextType {
-  // Estados
   pendingDeliveries: DeliveryItem[];
   shippedDeliveries: DeliveryItem[];
   deliveredItems: DeliveryItem[];
-  
-  // Ações
   updateDeliveryDate: (saleId: string, deliveryDate: string) => void;
   confirmShipment: (saleId: string) => void;
   confirmDelivery: (saleId: string) => void;
   cancelDelivery: (saleId: string) => void;
-  
-  // Utilitários
   getDeliveryById: (saleId: string) => DeliveryItem | undefined;
   getDeliveriesByStatus: (status: DeliveryItem['deliveryStatus']) => DeliveryItem[];
 }
@@ -32,15 +28,12 @@ interface DeliveryProviderProps {
 
 export function DeliveryProvider({ children }: DeliveryProviderProps) {
   const { shipments, updateDeliveryDate: updateSaleDeliveryDate } = useSales();
-  
-  // Estados locais para gerenciar as entregas
+  const { removeProduct, releaseProduct } = useProduct();
   const [deliveryItems, setDeliveryItems] = useState<DeliveryItem[]>([]);
 
-  // Sincronizar com as vendas do SalesContext
   useEffect(() => {
     const updatedDeliveries: DeliveryItem[] = shipments.map(sale => {
       const existingDelivery = deliveryItems.find(item => item.id === sale.id);
-      
       return {
         ...sale,
         deliveryStatus: existingDelivery?.deliveryStatus || 
@@ -49,11 +42,9 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
         deliveredDate: existingDelivery?.deliveredDate,
       } as DeliveryItem;
     });
-    
     setDeliveryItems(updatedDeliveries);
   }, [shipments]);
 
-  // Filtros por status
   const pendingDeliveries = deliveryItems.filter(
     item => item.deliveryStatus === 'pending' || item.deliveryStatus === 'scheduled'
   );
@@ -66,13 +57,10 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
     item => item.deliveryStatus === 'delivered'
   );
 
-  // Atualizar data de entrega
   const updateDeliveryDate = (saleId: string, deliveryDate: string) => {
     try {
-      // Atualizar no contexto de vendas
+      console.log('Atualizando data de entrega:', { saleId, deliveryDate });
       updateSaleDeliveryDate(saleId, deliveryDate);
-      
-      // Atualizar no contexto de entregas
       setDeliveryItems(prev => prev.map(item => 
         item.id === saleId 
           ? { ...item, deliveryDate, deliveryStatus: 'scheduled' as const }
@@ -84,11 +72,10 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
     }
   };
 
-  // Confirmar que a venda saiu para entrega
   const confirmShipment = (saleId: string) => {
     try {
+      console.log('Confirmando envio:', saleId);
       const currentDate = new Date().toISOString().split('T')[0];
-      
       setDeliveryItems(prev => prev.map(item => 
         item.id === saleId 
           ? { 
@@ -104,50 +91,65 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
     }
   };
 
-  // Confirmar entrega realizada
   const confirmDelivery = (saleId: string) => {
     try {
+      console.log('Confirmando entrega:', saleId);
       const currentDate = new Date().toISOString().split('T')[0];
+      const sale = deliveryItems.find(item => item.id === saleId);
       
-      setDeliveryItems(prev => prev.map(item => 
-        item.id === saleId 
-          ? { 
-              ...item, 
-              deliveryStatus: 'delivered' as const,
-              deliveredDate: currentDate
-            }
-          : item
-      ));
+      if (sale) {
+        sale.selectedProducts.forEach(p => {
+          console.log(`Removendo produto ${p.id} do estoque`);
+          removeProduct(p.id);
+        });
+        
+        setDeliveryItems(prev => prev.map(item => 
+          item.id === saleId 
+            ? { 
+                ...item, 
+                deliveryStatus: 'delivered' as const,
+                deliveredDate: currentDate
+              }
+            : item
+        ));
+      }
     } catch (error) {
       console.error('Erro ao confirmar entrega:', error);
       throw error;
     }
   };
 
-  // Cancelar entrega (voltar para pendente)
   const cancelDelivery = (saleId: string) => {
     try {
-      setDeliveryItems(prev => prev.map(item => 
-        item.id === saleId 
-          ? { 
-              ...item, 
-              deliveryStatus: 'pending' as const,
-              deliveryDate: undefined,
-              shippedDate: undefined,
-              deliveredDate: undefined
-            }
-          : item
-      ));
+      console.log('Cancelando entrega:', saleId);
+      const sale = deliveryItems.find(item => item.id === saleId);
       
-      // Também limpar a data no contexto de vendas
-      updateSaleDeliveryDate(saleId, '');
+      if (sale) {
+        sale.selectedProducts.forEach(p => {
+          console.log(`Liberando produto ${p.id} com quantidade ${p.quantity || 1}`);
+          releaseProduct(p.id, p.quantity || 1);
+        });
+        
+        setDeliveryItems(prev => prev.map(item => 
+          item.id === saleId 
+            ? { 
+                ...item, 
+                deliveryStatus: 'pending' as const,
+                deliveryDate: undefined,
+                shippedDate: undefined,
+                deliveredDate: undefined
+              }
+            : item
+        ));
+        
+        updateSaleDeliveryDate(saleId, '');
+      }
     } catch (error) {
       console.error('Erro ao cancelar entrega:', error);
       throw error;
     }
   };
 
-  // Utilitários
   const getDeliveryById = (saleId: string): DeliveryItem | undefined => {
     return deliveryItems.find(item => item.id === saleId);
   };
@@ -157,18 +159,13 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
   };
 
   const contextValue: DeliveryContextType = {
-    // Estados
     pendingDeliveries,
     shippedDeliveries,
     deliveredItems,
-    
-    // Ações
     updateDeliveryDate,
     confirmShipment,
     confirmDelivery,
     cancelDelivery,
-    
-    // Utilitários
     getDeliveryById,
     getDeliveriesByStatus,
   };

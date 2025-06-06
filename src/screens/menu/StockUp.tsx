@@ -5,7 +5,7 @@ import BackButton from "@components/BackButton";
 import { Button } from "@components/Button";
 import { useProduct } from "@contexts/ProductContext";
 import { useSales } from "@contexts/SalesContext";
-import {  ProductItem } from '../../types/SaleTypes'; 
+import { ProductItem } from '../../types/SaleTypes'; 
 import { VStack, HStack, Text, Box, Button as GluestackButton } from "@gluestack-ui/themed";
 import { Checkbox } from "@gluestack-ui/themed";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -34,7 +34,6 @@ export function StockUp() {
   const [isSaleModalVisible, setIsSaleModalVisible] = useState(false); 
   const [currentSelectedProducts, setCurrentSelectedProducts] = useState<ProductItem[]>([]); 
   const [hasCreatedBag, setHasCreatedBag] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const allTypes = [
@@ -57,24 +56,19 @@ export function StockUp() {
     }, [salesContext?.clientData])
   );
 
-  const reservedProductIds = useMemo(() => {
-    if (!salesContext?.openSales) return [];
-    return salesContext.openSales.flatMap(sale => sale.selectedProducts.map(product => product.id));
-  }, [salesContext?.openSales]);
-
   const filteredProducts = useMemo(() => {
     const availableProducts = products.filter(
-      product => !reservedProductIds.includes(product.id)
+      product => product.quantity > 0 && !product.reserved
     );
     if (!selectedType) return availableProducts;
 
     return availableProducts.filter(
       p => p.type?.toLowerCase().trim() === selectedType.toLowerCase().trim()
     );
-  }, [products, selectedType, reservedProductIds]);
+  }, [products, selectedType]);
 
   const handleOpenSaleModal = () => {
-    if (selectedProductIds.length === 0 || selectedProductIds.every(id => reservedProductIds.includes(id))) {
+    if (selectedProductIds.length === 0) {
       return; 
     }
 
@@ -112,10 +106,10 @@ export function StockUp() {
       console.error("ID da venda não definido ou função não encontrada");
     }
 
-  setIsSaleModalVisible(false);
-  setSelectedProductIds([]);
-  navigation.navigate("openSales");
-};
+    setIsSaleModalVisible(false);
+    setSelectedProductIds([]);
+    navigation.navigate("openSales");
+  };
 
   const handleCheckboxChange = (itemId: string) => {
     if (!saleId && !salesContext.clientData && !hasCreatedBag) {
@@ -323,8 +317,7 @@ export function StockUp() {
             onPress={handleOpenSaleModal}
             isDisabled={
               isLoading ||
-              selectedProductIds.length === 0 ||
-              (!saleId && selectedProductIds.every(id => reservedProductIds.includes(id)))
+              selectedProductIds.length === 0
             }
             isLoading={isLoading}
           />

@@ -15,18 +15,18 @@ LocaleConfig.defaultLocale = 'pt-BR';
 
 const formatDateToLocal = (dateString: string): string => {
   const [year, month, day] = dateString.split('-').map(Number);
-  const date = new Date(year, month - 1, day); 
-  return date.toLocaleDateString('pt-BR'); 
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('pt-BR');
 };
 
 const parseLocalDate = (dateString: string): string => {
   const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day).toISOString().split('T')[0]; 
+  return new Date(year, month - 1, day).toISOString().split('T')[0];
 };
 
 export function Shipments() {
   const { shipments } = useSales();
-  const { updateDeliveryDate, confirmShipment, pendingDeliveries } = useDelivery();
+  const { updateDeliveryDate, confirmDelivery, pendingDeliveries } = useDelivery();
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
@@ -54,7 +54,7 @@ export function Shipments() {
     if (!selectedSaleId || !selectedDate) return;
 
     try {
-      updateDeliveryDate(selectedSaleId, selectedDate); 
+      updateDeliveryDate(selectedSaleId, selectedDate);
       setIsCalendarModalVisible(false);
       setSelectedSaleId(null);
       setSelectedDate('');
@@ -88,13 +88,11 @@ export function Shipments() {
     }
   };
 
-  const handleConfirmShipment = () => {
+  const handleConfirmDelivery = () => {
     if (!selectedSaleId) return;
 
     try {
-      // Assumindo que você tem uma função confirmShipment no contexto
-      // que marca a venda como enviada
-      confirmShipment(selectedSaleId);
+      confirmDelivery(selectedSaleId);
       setIsConfirmModalVisible(false);
       setSelectedSaleId(null);
       toast.show({
@@ -103,13 +101,13 @@ export function Shipments() {
         render: () => (
           <Toast action="success" variant="solid" bg="$blue600" borderRadius="$xl" padding="$3" marginBottom="$16">
             <Text color="$white" fontSize="$sm" fontWeight="$medium">
-              Venda confirmada como enviada!
+              Venda confirmada como entregue!
             </Text>
           </Toast>
         ),
       });
     } catch (error) {
-      console.error('Erro ao confirmar envio:', error);
+      console.error('Erro ao confirmar entrega:', error);
       setIsConfirmModalVisible(false);
       setSelectedSaleId(null);
       toast.show({
@@ -118,7 +116,7 @@ export function Shipments() {
         render: () => (
           <Toast action="error" variant="solid" bg="$red600" borderRadius="$md" padding="$3" marginBottom="$6">
             <Text color="$white" fontSize="$sm" fontWeight="$medium">
-              Erro ao confirmar o envio!
+              Erro ao confirmar a entrega!
             </Text>
           </Toast>
         ),
@@ -128,10 +126,10 @@ export function Shipments() {
 
   const renderShipmentCard = ({ item }: { item: OpenSaleItem }) => {
     const totalValue = item.selectedProducts.reduce(
-      (total, product) => total + product.salePrice,
+      (total, product) => total + (product.salePrice * (product.quantity || 1)),
       0
     );
-    const itemCount = item.selectedProducts.length;
+    const itemCount = item.selectedProducts.reduce((acc, p) => acc + (p.quantity || 1), 0);
     const freightValue = item.freightValue || 0;
     const totalWithFreight = totalValue + freightValue;
     const hasDeliveryDate = !!item.deliveryDate;
@@ -142,18 +140,8 @@ export function Shipments() {
         p="$5"
         bg="$backgroundDark800"
         borderRadius="$3xl"
-        borderWidth={1}
-        borderColor="$trueGray700"
-        shadowColor="black"
         position="relative"
         overflow="hidden"
-        style={{
-          elevation: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-        }}
       >
         <Box
           position="absolute"
@@ -162,7 +150,7 @@ export function Shipments() {
           right={-1}
           bottom={0}
           width={6}
-          bg="$green600"
+          bg="$purple600"
           zIndex={-1}
         />
         <VStack space="md">
@@ -189,23 +177,6 @@ export function Shipments() {
               >
                 <Feather name="calendar" size={22} color="#ffffff" />
               </TouchableOpacity>
-
-              {hasDeliveryDate && (
-                <TouchableOpacity
-                  onPress={() => handleOpenConfirmModal(item.id)}
-                  accessibilityLabel={`Confirmar envio para ${item.clientData.nameClient || 'cliente desconhecido'}`}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    backgroundColor: '#059669',
-                    borderRadius: 8,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Feather name="truck" size={22} color="#ffffff" />
-                </TouchableOpacity>
-              )}
             </HStack>
           </HStack>
 
@@ -276,9 +247,8 @@ export function Shipments() {
                   width="100%"
                 >
                   <HStack space="sm" alignItems="center">
-                    <Feather name="truck" size={18} color="#ffffff" />
                     <Text color="$white" fontWeight="$medium">
-                      Confirmar Saída para Entrega
+                      Saiu para entrega
                     </Text>
                   </HStack>
                 </GluestackButton>
@@ -314,7 +284,6 @@ export function Shipments() {
         )}
       />
 
-      {/* Modal do Calendário */}
       <Modal
         isOpen={isCalendarModalVisible}
         onClose={() => {
@@ -348,15 +317,13 @@ export function Shipments() {
                 paddingBottom: 10,
                 marginBottom: 10,
               }} 
-              renderArrow={(direction: "right" | "left") => {
-                return (
-                  <Ionicons
-                    name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
-                    size={24}
-                    color="#a78bfa"
-                  />
-                );
-              }}
+              renderArrow={(direction: "right" | "left") => (
+                <Ionicons
+                  name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
+                  size={24}
+                  color="#a78bfa"
+                />
+              )}
               onDayPress={handleDateSelect}
               markedDates={{
                 [selectedDate]: { selected: true, selectedColor: '#7c3aed' },
@@ -374,9 +341,9 @@ export function Shipments() {
                 arrowColor: '#a78bfa',
                 monthTextColor: '#e5e7eb',
                 arrowStyle: {
-                  margin: 0, 
+                  margin: 0,
                   padding: 0,
-                }
+                },
               }}
               minDate={new Date().toISOString().split('T')[0]}
               hideExtraDays={true}
@@ -411,7 +378,6 @@ export function Shipments() {
         </ModalContent>
       </Modal>
 
-      {/* Modal de Confirmação de Envio */}
       <Modal
         isOpen={isConfirmModalVisible}
         onClose={() => {
@@ -428,14 +394,13 @@ export function Shipments() {
         >
           <ModalHeader alignSelf="center">
             <HStack space="sm" alignItems="center">
-              <Feather name="truck" size={24} color="#34d399" />
               <Text 
                 fontFamily="$heading" 
                 fontSize="$xl" 
                 color="$white" 
                 lineHeight="$md"
               >
-                Confirmar Envio
+                Sacola saiu para entrega
               </Text>
             </HStack>
           </ModalHeader>
@@ -447,7 +412,7 @@ export function Shipments() {
                 textAlign="center"
                 lineHeight="$md"
               >
-                Tem certeza que deseja confirmar que esta venda saiu para entrega?
+                certifique-se que o as peças e o endereço da sacola confere com o pedido da cliente
               </Text>
               <Text 
                 color="$textLight400" 
@@ -478,7 +443,7 @@ export function Shipments() {
                 flex={1}
                 bg="$green600"
                 rounded="$lg"
-                onPress={handleConfirmShipment}
+                onPress={handleConfirmDelivery}
               >
                 <HStack space="sm" alignItems="center">
                   <Feather name="check" size={16} color="#ffffff" />

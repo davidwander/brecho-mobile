@@ -43,7 +43,7 @@ export interface OpenSaleItem {
 export const SalesProvider = ({ children }: Props) => {
   const [clientData, setClientDataState] = useState<ClientData | null>(null);
   const [selectedProducts, setSelectedProductsState] = useState<ProductItem[]>([]);
-  const { removeProduct, addProduct, reserveProduct, releaseProduct } = useProduct();
+  const { removeProduct, addProduct, reserveProduct, releaseProduct, products } = useProduct();
   const [openSales, setOpenSales] = useState<OpenSaleItem[]>([]);
   const [shipments, setShipments] = useState<OpenSaleItem[]>([]);
 
@@ -56,6 +56,8 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   const addSale = (sale: SaleData) => {
+    console.log('Adicionando venda:', sale.id, 'Produtos:', sale.products);
+    sale.products.forEach(p => reserveProduct(p.id, p.quantity || 1));
     setOpenSales(prev => [
       ...prev,
       {
@@ -73,25 +75,15 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   const finalizeSale = (index: number) => {
+    console.log('Finalizando venda no índice:', index);
     const sale = openSales[index];
-    sale.selectedProducts.forEach(p => {
-      addProduct({
-        id: p.id,
-        name: '',
-        costPrice: p.costPrice,
-        salePrice: p.salePrice,
-        profitMargin: 0,
-        quantity: p.quantity,
-        description: '',
-        createdAt: new Date().toISOString(),
-      });
-    });
+    console.log('Produtos mantidos reservados:', sale.selectedProducts);
     setOpenSales(prev => prev.filter((_, i) => i !== index));
   };
 
   const cancelSale = () => {
     selectedProducts.forEach(p => {
-      releaseProduct(p.id);
+      releaseProduct(p.id, p.quantity || 1);
     });
     setSelectedProductsState([]);
     setClientDataState(null);
@@ -99,7 +91,7 @@ export const SalesProvider = ({ children }: Props) => {
 
   const returnProductsToStock = (products: ProductItem[]) => {
     products.forEach(p => {
-      releaseProduct(p.id);
+      releaseProduct(p.id, p.quantity || 1);
     });
   };
 
@@ -112,7 +104,8 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   function addProductsToSale(saleId: string, newProducts: ProductItem[]) {
-    newProducts.forEach(p => reserveProduct(p.id));
+    console.log('Adicionando produtos à venda:', saleId, 'Produtos:', newProducts);
+    newProducts.forEach(p => reserveProduct(p.id, p.quantity || 1));
 
     setOpenSales((prevSales) =>
       prevSales.map((sale) => {
@@ -124,13 +117,14 @@ export const SalesProvider = ({ children }: Props) => {
         return {
           ...sale,
           selectedProducts: [...sale.selectedProducts, ...uniqueNewProducts],
-          total: sale.total + uniqueNewProducts.reduce((acc, p) => acc + p.salePrice, 0),
+          total: sale.total + uniqueNewProducts.reduce((acc, p) => acc + (p.salePrice * (p.quantity || 1)), 0),
         };
       })
     );
   }
 
   const addOpenSale = (sale: OpenSale) => {
+    console.log('Adicionando venda aberta:', sale.id);
     setOpenSales((prevSales) => [
       ...prevSales,
       {
@@ -145,6 +139,7 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   const removeProductFromSale = (saleId: string, productId: string) => {
+    console.log('Removendo produto da venda:', saleId, 'Produto:', productId);
     let removedProduct: ProductItem | undefined;
 
     setOpenSales((prevSales) =>
@@ -159,7 +154,7 @@ export const SalesProvider = ({ children }: Props) => {
           return true;
         });
 
-        const updatedTotal = updatedProducts.reduce((acc, p) => acc + p.salePrice, 0);
+        const updatedTotal = updatedProducts.reduce((acc, p) => acc + (p.salePrice * (p.quantity || 1)), 0);
 
         return {
           ...sale,
@@ -170,11 +165,13 @@ export const SalesProvider = ({ children }: Props) => {
     );
 
     if (removedProduct) {
-      releaseProduct(removedProduct.id);
+      console.log('Liberando produto:', removedProduct.id);
+      releaseProduct(removedProduct.id, removedProduct.quantity || 1);
     }
   };
 
   const deleteSale = (saleId: string) => {
+    console.log('Excluindo venda:', saleId);
     setOpenSales((prevSales) => {
       const saleToDelete = prevSales.find((s) => s.id === saleId);
       if (saleToDelete) {
@@ -182,18 +179,26 @@ export const SalesProvider = ({ children }: Props) => {
       }
       return prevSales.filter((s) => s.id !== saleId);
     });
-    setShipments((prevShipments) => prevShipments.filter((s) => s.id !== saleId));
+    setShipments((prevShipments) => {
+      const saleToDelete = prevShipments.find((s) => s.id === saleId);
+      if (saleToDelete) {
+        returnProductsToStock(saleToDelete.selectedProducts);
+      }
+      return prevShipments.filter((s) => s.id !== saleId);
+    });
+    console.log('Venda excluída:', saleId);
   };
 
   const confirmPayment = (saleId: string) => {
+    console.log('Confirmando pagamento para venda:', saleId);
     setOpenSales((prevSales) => {
       const sale = prevSales.find((s) => s.id === saleId);
       if (!sale) return prevSales;
 
       const updatedSale = { ...sale, isPaid: true };
 
-      // Se a venda está paga e o frete está pago, move para shipments
       if (updatedSale.isPaid && updatedSale.isFreightPaid) {
+        console.log('Movendo venda para shipments:', saleId);
         setShipments((prev) => [...prev, updatedSale]);
         return prevSales.filter((s) => s.id !== saleId);
       }
@@ -203,23 +208,34 @@ export const SalesProvider = ({ children }: Props) => {
   };
 
   const updateFreight = (saleId: string, freightValue: number, isFreightPaid: boolean) => {
+    console.log('Antes de atualizar frete:', { saleId, stock: products, shipments });
     setOpenSales((prevSales) => {
       const sale = prevSales.find((s) => s.id === saleId);
-      if (!sale) return prevSales;
+      if (!sale) {
+        console.log('Venda não encontrada:', saleId);
+        return prevSales;
+      }
 
       const updatedSale = { ...sale, freightValue, isFreightPaid };
+      console.log('Atualizando venda:', { saleId, freightValue, isFreightPaid });
 
-      // Se a venda está paga e o frete está pago, move para shipments
       if (updatedSale.isPaid && updatedSale.isFreightPaid) {
-        setShipments((prev) => [...prev, updatedSale]);
+        console.log('Movendo venda para shipments:', saleId);
+        setShipments((prev) => {
+          const newShipments = [...prev, updatedSale];
+          console.log('Novo estado de shipments:', newShipments);
+          return newShipments;
+        });
         return prevSales.filter((s) => s.id !== saleId);
       }
 
       return prevSales.map((s) => (s.id === saleId ? updatedSale : s));
     });
+    console.log('Depois de atualizar frete:', { saleId, stock: products, shipments });
   };
 
   const updateDeliveryDate = (saleId: string, deliveryDate: string) => {
+    console.log('Atualizando data de entrega para venda:', saleId, deliveryDate);
     setShipments((prevShipments) =>
       prevShipments.map((sale) =>
         sale.id === saleId ? { ...sale, deliveryDate } : sale
