@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { Box, Center, Text, VStack, HStack, Divider, Button as GluestackButton, Modal, ModalBackdrop, ModalContent, ModalHeader, ModalBody, ModalFooter, useToast, Toast } from '@gluestack-ui/themed';
 import { useSales, OpenSaleItem } from '@contexts/SalesContext';
-import { useDelivery } from '@contexts/DeliveryContext';
+import { useDelivery, DeliveryItem } from '@contexts/DeliveryContext';
 import Feather from 'react-native-vector-icons/Feather';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import BackButton from '@components/BackButton';
@@ -26,10 +26,11 @@ const parseLocalDate = (dateString: string): string => {
 
 export function Shipments() {
   const { shipments } = useSales();
-  const { updateDeliveryDate, confirmDelivery, pendingDeliveries } = useDelivery();
+  const { updateDeliveryDate, confirmShipment, confirmDelivery, pendingDeliveries } = useDelivery();
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+  const [isFinalConfirmModalVisible, setIsFinalConfirmModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const toast = useToast();
 
@@ -44,6 +45,11 @@ export function Shipments() {
   const handleOpenConfirmModal = (saleId: string) => {
     setSelectedSaleId(saleId);
     setIsConfirmModalVisible(true);
+  };
+
+  const handleOpenFinalConfirmModal = (saleId: string) => {
+    setSelectedSaleId(saleId);
+    setIsFinalConfirmModalVisible(true);
   };
 
   const handleDateSelect = (day: { dateString: string }) => {
@@ -88,12 +94,48 @@ export function Shipments() {
     }
   };
 
+  const handleConfirmOutForDelivery = () => {
+    if (!selectedSaleId) return;
+
+    try {
+      confirmShipment(selectedSaleId);
+      setIsConfirmModalVisible(false);
+      setSelectedSaleId(null);
+      toast.show({
+        placement: 'bottom',
+        duration: 3000,
+        render: () => (
+          <Toast action="success" variant="solid" bg="$green600" borderRadius="$xl" padding="$3" marginBottom="$16">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Venda marcada como saiu para entrega!
+            </Text>
+          </Toast>
+        ),
+      });
+    } catch (error) {
+      console.error('Erro ao confirmar saída para entrega:', error);
+      setIsConfirmModalVisible(false);
+      setSelectedSaleId(null);
+      toast.show({
+        placement: 'bottom',
+        duration: 3000,
+        render: () => (
+          <Toast action="error" variant="solid" bg="$red600" borderRadius="$md" padding="$3" marginBottom="$6">
+            <Text color="$white" fontSize="$sm" fontWeight="$medium">
+              Erro ao confirmar saída para entrega!
+            </Text>
+          </Toast>
+        ),
+      });
+    }
+  };
+
   const handleConfirmDelivery = () => {
     if (!selectedSaleId) return;
 
     try {
       confirmDelivery(selectedSaleId);
-      setIsConfirmModalVisible(false);
+      setIsFinalConfirmModalVisible(false);
       setSelectedSaleId(null);
       toast.show({
         placement: 'bottom',
@@ -108,7 +150,7 @@ export function Shipments() {
       });
     } catch (error) {
       console.error('Erro ao confirmar entrega:', error);
-      setIsConfirmModalVisible(false);
+      setIsFinalConfirmModalVisible(false);
       setSelectedSaleId(null);
       toast.show({
         placement: 'bottom',
@@ -124,7 +166,7 @@ export function Shipments() {
     }
   };
 
-  const renderShipmentCard = ({ item }: { item: OpenSaleItem }) => {
+  const renderShipmentCard = ({ item }: { item: DeliveryItem }) => {
     const totalValue = item.selectedProducts.reduce(
       (total, product) => total + (product.salePrice * (product.quantity || 1)),
       0
@@ -133,6 +175,7 @@ export function Shipments() {
     const freightValue = item.freightValue || 0;
     const totalWithFreight = totalValue + freightValue;
     const hasDeliveryDate = !!item.deliveryDate;
+    const isOutForDelivery = item.deliveryStatus === 'shipped';
 
     return (
       <Box
@@ -150,7 +193,7 @@ export function Shipments() {
           right={-1}
           bottom={0}
           width={6}
-          bg="$purple600"
+          bg={isOutForDelivery ? "$green500" : "$purple600"}
           zIndex={-1}
         />
         <VStack space="md">
@@ -243,12 +286,12 @@ export function Shipments() {
                 <GluestackButton
                   bg="$green600"
                   rounded="$lg"
-                  onPress={() => handleOpenConfirmModal(item.id)}
+                  onPress={() => isOutForDelivery ? handleOpenFinalConfirmModal(item.id) : handleOpenConfirmModal(item.id)}
                   width="100%"
                 >
                   <HStack space="sm" alignItems="center">
                     <Text color="$white" fontWeight="$medium">
-                      Saiu para entrega
+                      {isOutForDelivery ? 'Confirmar entrega' : 'Saiu para entrega'}
                     </Text>
                   </HStack>
                 </GluestackButton>
@@ -412,7 +455,7 @@ export function Shipments() {
                 textAlign="center"
                 lineHeight="$md"
               >
-                certifique-se que o as peças e o endereço da sacola confere com o pedido da cliente
+                Certifique-se que as peças e o endereço da sacola conferem com o pedido da cliente
               </Text>
               <Text 
                 color="$textLight400" 
@@ -434,6 +477,83 @@ export function Shipments() {
                 rounded="$lg"
                 onPress={() => {
                   setIsConfirmModalVisible(false);
+                  setSelectedSaleId(null);
+                }}
+              >
+                <Text color="$white" lineHeight="$sm">Cancelar</Text>
+              </GluestackButton>
+              <GluestackButton
+                flex={1}
+                bg="$green600"
+                rounded="$lg"
+                onPress={handleConfirmOutForDelivery}
+              >
+                <HStack space="sm" alignItems="center">
+                  <Feather name="check" size={16} color="#ffffff" />
+                  <Text color="$white" lineHeight="$sm">Confirmar</Text>
+                </HStack>
+              </GluestackButton>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isFinalConfirmModalVisible}
+        onClose={() => {
+          setIsFinalConfirmModalVisible(false);
+          setSelectedSaleId(null);
+        }}
+      >
+        <ModalBackdrop />
+        <ModalContent 
+          bg="$backgroundDark800" 
+          borderRadius="$3xl" 
+          p="$6" 
+          width="90%"
+        >
+          <ModalHeader alignSelf="center">
+            <HStack space="sm" alignItems="center">
+              <Text 
+                fontFamily="$heading" 
+                fontSize="$xl" 
+                color="$white" 
+                lineHeight="$md"
+              >
+                Confirmar Entrega
+              </Text>
+            </HStack>
+          </ModalHeader>
+          <ModalBody>
+            <Center>
+              <Text 
+                color="$textLight200" 
+                fontSize="$md" 
+                textAlign="center"
+                lineHeight="$md"
+              >
+                Confirme que a sacola foi entregue à cliente
+              </Text>
+              <Text 
+                color="$textLight400" 
+                fontSize="$sm" 
+                textAlign="center"
+                mt="$2"
+                lineHeight="$sm"
+              >
+                Esta ação não poderá ser desfeita.
+              </Text>
+            </Center>
+          </ModalBody>
+          <ModalFooter>
+            <HStack space="md" width="100%" justifyContent="space-between">
+              <GluestackButton
+                flex={1}
+                variant="outline"
+                borderColor="$trueGray600"
+                rounded="$lg"
+                onPress={() => {
+                  setIsFinalConfirmModalVisible(false);
                   setSelectedSaleId(null);
                 }}
               >

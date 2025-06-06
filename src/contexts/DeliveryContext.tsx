@@ -46,7 +46,7 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
   }, [shipments]);
 
   const pendingDeliveries = deliveryItems.filter(
-    item => item.deliveryStatus === 'pending' || item.deliveryStatus === 'scheduled'
+    item => item.deliveryStatus === 'pending' || item.deliveryStatus === 'scheduled' || item.deliveryStatus === 'shipped'
   );
   
   const shippedDeliveries = deliveryItems.filter(
@@ -75,6 +75,10 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
   const confirmShipment = (saleId: string) => {
     try {
       console.log('Confirmando envio:', saleId);
+      const sale = deliveryItems.find(item => item.id === saleId);
+      if (!sale?.deliveryDate) {
+        throw new Error('Não é possível confirmar envio sem uma data de entrega definida');
+      }
       const currentDate = new Date().toISOString().split('T')[0];
       setDeliveryItems(prev => prev.map(item => 
         item.id === saleId 
@@ -94,7 +98,6 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
   const confirmDelivery = (saleId: string) => {
     try {
       console.log('Confirmando entrega:', saleId);
-      const currentDate = new Date().toISOString().split('T')[0];
       const sale = deliveryItems.find(item => item.id === saleId);
       
       if (sale) {
@@ -108,7 +111,7 @@ export function DeliveryProvider({ children }: DeliveryProviderProps) {
             ? { 
                 ...item, 
                 deliveryStatus: 'delivered' as const,
-                deliveredDate: currentDate
+                deliveredDate: new Date().toISOString().split('T')[0]
               }
             : item
         ));
