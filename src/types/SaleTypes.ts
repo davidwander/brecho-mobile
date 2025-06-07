@@ -14,6 +14,8 @@ export interface Product {
 }
 
 export interface ProductItem {
+  description: any;
+  name: string;
   id: string;
   costPrice: number;
   salePrice: number;
