@@ -21,17 +21,19 @@ import Foundation from 'react-native-vector-icons/Foundation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { PieChart, LineChart } from 'react-native-chart-kit';
 import { useProduct, Product } from '@contexts/ProductContext';
+import { useSales, OpenSaleItem } from '@contexts/SalesContext';
 
 export function Home() {
-  // Access products from ProductContext
+  // Access products and sales from contexts
   const { products } = useProduct();
+  const { openSales, shipments } = useSales();
 
   // Initialize states
   const [totalCost, setTotalCost] = useState(0);
-  const [totalSales] = useState(0);
-  const [totalSold] = useState(0);
-  const [totalInStock] = useState(0);
-  const [totalProfit] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalSold, setTotalSold] = useState(0);
+  const [totalInStock, setTotalInStock] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState<'Diário' | 'Semanal' | 'Mensal'>('Mensal');
 
   // Placeholder chart data
@@ -49,17 +51,37 @@ export function Home() {
     legend: ['Vendas', 'Custos'],
   });
 
-  // Calculate total cost from products
+  // Calculate total cost, sales, and sold items
   useEffect(() => {
+    // Calculate total cost from products
     const calculatedCost = products.reduce((sum, product) => sum + product.costPrice, 0);
     setTotalCost(calculatedCost);
+
+    // Combine openSales and shipments for paid sales
+    const allSales = [...openSales, ...shipments].filter(sale => sale.isPaid);
+
+    // Calculate total sales (total + paid freight)
+    const calculatedSales = allSales.reduce((sum, sale) => {
+      const freight = sale.isFreightPaid ? sale.freightValue || 0 : 0;
+      return sum + sale.total + freight;
+    }, 0);
+    setTotalSales(calculatedSales);
+
+    // Calculate total sold items (sum of product quantities)
+    const calculatedSold = allSales.reduce((sum, sale) => {
+      return sum + sale.selectedProducts.reduce((total, product) => total + (product.quantity || 1), 0);
+    }, 0);
+    setTotalSold(calculatedSold);
+
+    // Calculate total profit
+    setTotalProfit(calculatedSales - calculatedCost);
 
     // Update pie chart data
     setPieChartData([
       { name: 'Saídas', value: calculatedCost, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
-      { name: 'Entradas', value: 0, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
+      { name: 'Entradas', value: calculatedSales, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
     ]);
-  }, [products]);
+  }, [products, openSales, shipments]);
 
   // Handle period change
   const handlePeriodChange = (period: string) => {

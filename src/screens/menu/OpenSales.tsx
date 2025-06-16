@@ -22,9 +22,8 @@ import {
   useToast,
   Toast,
 } from '@gluestack-ui/themed';
-import { useSales } from '@contexts/SalesContext';
+import { useSales, OpenSaleItem } from '@contexts/SalesContext';
 import { SaleDetailsModal } from '@components/SaleDetailsModal';
-import { OpenSaleItem } from '@contexts/SalesContext';
 import { CustomToast } from '@components/CustomToast';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -163,13 +162,9 @@ export function OpenSales() {
   };
 
   const renderSaleCard = ({ item }: { item: OpenSaleItem }) => {
-    const totalValue = item.selectedProducts.reduce(
-      (total, product) => total + product.salePrice,
-      0
-    );
-    const itemCount = item.selectedProducts.length;
+    const itemCount = item.selectedProducts.reduce((sum, product) => sum + (product.quantity || 1), 0);
     const freightValue = item.freightValue || 0;
-    const totalWithFreight = totalValue + freightValue;
+    const totalWithFreight = item.total + freightValue;
 
     return (
       <Box
@@ -272,7 +267,7 @@ export function OpenSales() {
               <HStack space="sm" alignItems="center">
                 <Feather name="dollar-sign" color="#34d399" size={20} />
                 <Text color="$green400" fontFamily="$heading" size="md">
-                  R$ {totalValue.toFixed(2).replace('.', ',')}
+                  R$ {item.total.toFixed(2).replace('.', ',')}
                 </Text>
               </HStack>
             </HStack>
@@ -342,11 +337,8 @@ export function OpenSales() {
             setIsDetailsModalVisible(false);
             setSelectedSale(null);
           }}
-          onConfirm={() => {
-            setIsDetailsModalVisible(false);
-            setSelectedSale(null);
-          }}
-          isConfirmMode={false}
+          onConfirm={() => {}} // Empty function since confirm is handled internally
+          isConfirmMode={false} // Details mode, not confirm mode
           fromStockScreen={false}
           saleId={selectedSale.id}
         />
@@ -365,7 +357,7 @@ export function OpenSales() {
           </ModalHeader>
           <ModalBody>
             <Text color="$textLight200" fontSize="$md" textAlign="center">
-              Tem certeza que deseja excluir esta venda? Essa ação não pode ser desfeita.
+              Tem certeza que deseja excluir esta venda? Essa ação não pode be desfeita.
             </Text>
           </ModalBody>
           <ModalFooter>

@@ -57,7 +57,7 @@ export function SaleDetailsModal({
 
   const handleConfirmPayment = () => {
     console.log('handleConfirmPayment chamado');
-    
+
     setShowPaymentDialog(false);
 
     if (!saleId) {
@@ -68,9 +68,10 @@ export function SaleDetailsModal({
 
     try {
       console.log('Confirmando pagamento para saleId:', saleId);
-      confirmPayment(saleId); 
+      confirmPayment(saleId);
       onConfirm();
-      navigation.navigate('openSales');
+      console.log('Chamando onClose para fechar o modal');
+      onClose();
       showToast('Pagamento confirmado com sucesso!', 'success');
     } catch (error) {
       console.error('Erro ao confirmar pagamento:', error);
@@ -470,7 +471,7 @@ export function SaleDetailsModal({
                   </Button>
                 </HStack>
 
-                {/* Botão com Alert nativo (mais confiável no iOS) */}
+                {/* Botão com Alert nativo (mais confiável) */}
                 <Button
                   mt="$2"
                   h="$11"
