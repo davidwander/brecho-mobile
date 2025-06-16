@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dimensions, Alert } from 'react-native';
 import {
   VStack,
@@ -20,24 +20,27 @@ import Feather from 'react-native-vector-icons/Feather';
 import Foundation from 'react-native-vector-icons/Foundation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { PieChart, LineChart } from 'react-native-chart-kit';
+import { useProduct, Product } from '@contexts/ProductContext';
 
 export function Home() {
-  // Initialize states with empty or default values
-  const [products, setProducts] = useState([]);
+  // Access products from ProductContext
+  const { products } = useProduct();
+
+  // Initialize states
   const [totalCost, setTotalCost] = useState(0);
-  const [totalSales, setTotalSales] = useState(0);
-  const [totalSold, setTotalSold] = useState(0);
-  const [totalInStock, setTotalInStock] = useState(0);
-  const [totalProfit, setTotalProfit] = useState(0);
+  const [totalSales] = useState(0);
+  const [totalSold] = useState(0);
+  const [totalInStock] = useState(0);
+  const [totalProfit] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState<'Diário' | 'Semanal' | 'Mensal'>('Mensal');
 
-  // Placeholder chart data (empty)
+  // Placeholder chart data
   const [pieChartData, setPieChartData] = useState([
     { name: 'Saídas', value: 0, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
     { name: 'Entradas', value: 0, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
   ]);
 
-  const [lineChartData, setLineChartData] = useState({
+  const [lineChartData] = useState({
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
     datasets: [
       { data: [0, 0, 0, 0, 0, 0], color: () => '#36A2EB' },
@@ -46,9 +49,20 @@ export function Home() {
     legend: ['Vendas', 'Custos'],
   });
 
-  // Handle period change with string type for compatibility with Select
+  // Calculate total cost from products
+  useEffect(() => {
+    const calculatedCost = products.reduce((sum, product) => sum + product.costPrice, 0);
+    setTotalCost(calculatedCost);
+
+    // Update pie chart data
+    setPieChartData([
+      { name: 'Saídas', value: calculatedCost, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
+      { name: 'Entradas', value: 0, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
+    ]);
+  }, [products]);
+
+  // Handle period change
   const handlePeriodChange = (period: string) => {
-    // Validate the period to ensure it's one of the expected values
     if (['Diário', 'Semanal', 'Mensal'].includes(period)) {
       setSelectedPeriod(period as 'Diário' | 'Semanal' | 'Mensal');
     } else {
