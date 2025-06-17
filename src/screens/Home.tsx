@@ -17,6 +17,7 @@ import {
   Center,
 } from '@gluestack-ui/themed';
 import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Foundation from 'react-native-vector-icons/Foundation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { PieChart, LineChart } from 'react-native-chart-kit';
@@ -31,8 +32,8 @@ export function Home() {
   // Initialize states
   const [totalCost, setTotalCost] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
+  const [totalFreight, setTotalFreight] = useState(0); // New state for freight
   const [totalSold, setTotalSold] = useState(0);
-  const [totalInStock, setTotalInStock] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState<'Diário' | 'Semanal' | 'Mensal'>('Mensal');
 
@@ -40,6 +41,7 @@ export function Home() {
   const [pieChartData, setPieChartData] = useState([
     { name: 'Saídas', value: 0, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
     { name: 'Entradas', value: 0, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
+    { name: 'Frete', value: 0, color: '#F59E0B', legendFontColor: '#FFFFFF', legendFontSize: 15 }, // Added freight
   ]);
 
   const [lineChartData] = useState({
@@ -51,7 +53,7 @@ export function Home() {
     legend: ['Vendas', 'Custos'],
   });
 
-  // Calculate total cost, sales, and sold items
+  // Calculate total cost, sales, freight, and sold items
   useEffect(() => {
     // Calculate total cost from products
     const calculatedCost = products.reduce((sum, product) => sum + product.costPrice, 0);
@@ -60,12 +62,15 @@ export function Home() {
     // Combine openSales and shipments for paid sales
     const allSales = [...openSales, ...shipments].filter(sale => sale.isPaid);
 
-    // Calculate total sales (total + paid freight)
-    const calculatedSales = allSales.reduce((sum, sale) => {
-      const freight = sale.isFreightPaid ? sale.freightValue || 0 : 0;
-      return sum + sale.total + freight;
-    }, 0);
+    // Calculate total sales (excluding freight)
+    const calculatedSales = allSales.reduce((sum, sale) => sum + sale.total, 0);
     setTotalSales(calculatedSales);
+
+    // Calculate total freight
+    const calculatedFreight = allSales.reduce((sum, sale) => {
+      return sum + (sale.isFreightPaid ? sale.freightValue || 0 : 0);
+    }, 0);
+    setTotalFreight(calculatedFreight);
 
     // Calculate total sold items (sum of product quantities)
     const calculatedSold = allSales.reduce((sum, sale) => {
@@ -73,13 +78,14 @@ export function Home() {
     }, 0);
     setTotalSold(calculatedSold);
 
-    // Calculate total profit
+    // Calculate total profit (sales - cost, freight not included in profit)
     setTotalProfit(calculatedSales - calculatedCost);
 
     // Update pie chart data
     setPieChartData([
       { name: 'Saídas', value: calculatedCost, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
       { name: 'Entradas', value: calculatedSales, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
+      { name: 'Frete', value: calculatedFreight, color: '#F59E0B', legendFontColor: '#FFFFFF', legendFontSize: 15 },
     ]);
   }, [products, openSales, shipments]);
 
@@ -92,6 +98,7 @@ export function Home() {
     }
   };
 
+  // Notification logic remains unchanged
   const showNotification = () => {
     if (totalProfit > 0) {
       Alert.alert('Notificação', 'Os lucros mensais ultrapassaram a meta!');
@@ -164,6 +171,13 @@ export function Home() {
               <Text color="$textLight400">Lucro:</Text>
               <Text color="$textLight400" fontWeight="$bold">
                 R$ {totalProfit.toFixed(2)}
+              </Text>
+            </Center>
+            <Center>
+              <Ionicons name="car" size={28} color="#F59E0B" />
+              <Text color="$textLight400">Frete:</Text>
+              <Text color="$textLight400" fontWeight="$bold">
+                R$ {totalFreight.toFixed(2)}
               </Text>
             </Center>
           </HStack>
