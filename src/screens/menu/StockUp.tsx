@@ -208,17 +208,17 @@ export function StockUp() {
               shadowRadius: 12,
             }}
           >
-            <HStack justifyContent="space-between" alignItems="center" mb="$3">
-              <HStack alignItems="center" space="md" flex={1}>
+            <HStack justifyContent="space-between" alignItems="center" mb="$2">
+              <HStack alignItems="center" space="lg" flex={1}>
                 <Checkbox
                   value={item.id}
                   isChecked={selectedProductIds.includes(item.id)}
                   onChange={() => handleCheckboxChange(item.id)}
                   aria-label="Selecionar peça"
                   size="lg"
-                  borderWidth={2}
+                  borderWidth={1}
                   borderColor="$purple700"
-                  borderRadius="$md"
+                  borderRadius="$lg"
                   justifyContent="center"
                   alignItems="center"
                 >
@@ -227,8 +227,10 @@ export function StockUp() {
                     borderWidth={0}
                     justifyContent="center"
                     alignItems="center"
+                    alignSelf="center"
+                    
                   >
-                    <Checkbox.Icon>
+                    <Checkbox.Icon >
                       <Feather name="shopping-bag" color="white" size={20}/>
                     </Checkbox.Icon>
                   </Checkbox.Indicator>

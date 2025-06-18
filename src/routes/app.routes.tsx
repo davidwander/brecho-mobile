@@ -6,6 +6,7 @@ import { Home } from '@screens/Home';
 import { NewRegister } from '@screens/NewRegister';
 import { Shipments } from '@screens/shipments';
 import { DeliveryHistory } from '@screens/DeliveryHistory';
+import { Clients } from '@screens/menu/Clients';
 
 import Feather from 'react-native-vector-icons/Feather';
 import IonIcons from 'react-native-vector-icons/Ionicons';
@@ -15,6 +16,7 @@ type AppRoutes = {
   newRegister: undefined;
   shipments: undefined;
   deliveryHistory: undefined;
+  clients: undefined;
 };
 
 const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
@@ -60,6 +62,20 @@ export function AppRoutes() {
           tabBarIcon: ({ color }) => (
             <Feather 
               name="plus-circle" 
+              color={color} 
+              size={iconSize} 
+              style={{ marginTop: -4 }} 
+            />
+          ),
+        }}
+      />
+      <Screen
+        name="clients"
+        component={Clients}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Feather 
+              name="users" 
               color={color} 
               size={iconSize} 
               style={{ marginTop: -4 }} 

@@ -13,6 +13,7 @@ import { Loading } from './src/components/Loading';
 import { ProductProvider } from '@contexts/ProductContext';
 import { SalesProvider } from '@contexts/SalesContext';
 import { DeliveryProvider } from '@contexts/DeliveryContext';
+import { ClientProvider } from '@contexts/ClientContext';
 //import { SignIn } from './src/screens/SignIn';
 //import { SignUp } from './src/screens/SignUp';
 
@@ -24,13 +25,15 @@ export default function App() {
       <ProductProvider>
         <SalesProvider>
           <DeliveryProvider>
-            <StatusBar 
-              barStyle="light-content" 
-              backgroundColor="transparent" 
-              translucent
-            />
+            <ClientProvider>
+              <StatusBar 
+                barStyle="light-content" 
+                backgroundColor="transparent" 
+                translucent
+              />
 
-            {fontsLoaded ? <Routes /> : <Loading /> }
+              {fontsLoaded ? <Routes /> : <Loading /> }
+            </ClientProvider>
           </DeliveryProvider>
         </SalesProvider>
       </ProductProvider>

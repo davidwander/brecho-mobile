@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { ScrollView } from 'react-native';
+import { ScrollView, Alert } from 'react-native';
 import MaskInput, { Masks } from 'react-native-mask-input';
 
-import { VStack, Text, Center, Box } from '@gluestack-ui/themed';
+import { VStack, Text, Center, Box, HStack } from '@gluestack-ui/themed';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
@@ -15,6 +15,7 @@ import BackButton from '@components/BackButton';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useSales } from '@contexts/SalesContext';
+import { useClient } from '@contexts/ClientContext';
 import { ClientData, OpenSale } from '../../types/SaleTypes';
 
 import uuid from 'react-native-uuid';
@@ -51,8 +52,73 @@ export function Exits() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setClientData, addOpenSale } = useSales(); // ✅ usa addOpenSale
+  const [isSavingClient, setIsSavingClient] = useState(false);
+  const { setClientData, addOpenSale } = useSales();
+  const { addClient, getClientByCpf, updateClientByCpf } = useClient();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleSaveClient = async (data: FormDataProps) => {
+    setIsSavingClient(true);
+    
+    try {
+      // Verificar se o cliente já existe pelo CPF
+      const existingClient = getClientByCpf(data.cpf);
+      
+      if (existingClient) {
+        Alert.alert(
+          "Cliente já cadastrado",
+          "Este CPF já está cadastrado no sistema. Deseja atualizar os dados?",
+          [
+            {
+              text: "Cancelar",
+              style: "cancel"
+            },
+            {
+              text: "Atualizar",
+              onPress: () => {
+                const clientData: ClientData = {
+                  nameClient: data.nameClient,
+                  phone: data.phone,
+                  cpf: data.cpf,
+                  address: data.address,
+                };
+                
+                updateClientByCpf(data.cpf, clientData);
+                Alert.alert("Sucesso", "Cliente atualizado com sucesso!");
+              }
+            }
+          ]
+        );
+        return;
+      }
+
+      // Salvar novo cliente
+      const clientData: ClientData = {
+        nameClient: data.nameClient,
+        phone: data.phone,
+        cpf: data.cpf,
+        address: data.address,
+      };
+
+      const clientId = addClient(clientData);
+      
+      Alert.alert(
+        "Sucesso", 
+        "Cliente salvo com sucesso!",
+        [
+          {
+            text: "OK",
+            onPress: () => console.log("Cliente salvo com ID:", clientId)
+          }
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Erro", "Erro ao salvar cliente. Tente novamente.");
+      console.error("Erro ao salvar cliente:", error);
+    } finally {
+      setIsSavingClient(false);
+    }
+  };
 
   const handleFormSubmit = (data: FormDataProps) => {
     console.log("Formulário enviado com dados:", data);
@@ -171,12 +237,22 @@ export function Exits() {
           />
 
           <Center mt="$4">
-            <Button
-              title="Confirmar"
-              variant="solid"
-              onPress={handleSubmit(handleFormSubmit, onError)}
-              isLoading={isSubmitting}
-            />
+            <HStack space="md" w="100%">
+              <Button
+                title="Salvar Cliente"
+                variant="outline"
+                onPress={handleSubmit(handleSaveClient, onError)}
+                isLoading={isSavingClient}
+                flex={1}
+              />
+              <Button
+                title="Confirmar"
+                variant="solid"
+                onPress={handleSubmit(handleFormSubmit, onError)}
+                isLoading={isSubmitting}
+                flex={1}
+              />
+            </HStack>
           </Center>
         </VStack>
       </ScrollView>
