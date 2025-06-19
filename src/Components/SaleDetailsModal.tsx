@@ -49,7 +49,6 @@ export function SaleDetailsModal({
     setLocalProducts(selectedProducts);
   }, [selectedProducts, visible]);
 
-  // Função para mostrar toast
   const showToast = (message: string, type: 'success' | 'error') => {
     setToastMessage({ message, type });
     setTimeout(() => setToastMessage(null), 3000);
@@ -220,11 +219,9 @@ export function SaleDetailsModal({
     onClose();
   };
 
-  // Função para confirmar pagamento com Alert nativo (funciona melhor no iOS)
   const handleConfirmPaymentPress = () => {
     console.log('Botão Confirmar Pagamento clicado');
     
-    // Usando Alert nativo como alternativa mais confiável
     Alert.alert(
       'Confirmar Pagamento',
       'Tem certeza que deseja confirmar o pagamento desta venda?',
@@ -251,7 +248,6 @@ export function SaleDetailsModal({
 
   return (
     <>
-      {/* Toast personalizado */}
       {toastMessage && (
         <CustomToast 
           message={toastMessage.message} 
@@ -471,7 +467,6 @@ export function SaleDetailsModal({
                   </Button>
                 </HStack>
 
-                {/* Botão com Alert nativo (mais confiável) */}
                 <Button
                   mt="$2"
                   h="$11"
@@ -493,7 +488,6 @@ export function SaleDetailsModal({
         </Box>
       </Modal>
 
-      {/* Modal customizado para confirmação (mantido como alternativa) */}
       <Modal
         visible={showPaymentDialog}
         transparent={true}

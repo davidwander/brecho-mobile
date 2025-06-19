@@ -337,8 +337,8 @@ export function OpenSales() {
             setIsDetailsModalVisible(false);
             setSelectedSale(null);
           }}
-          onConfirm={() => {}} // Empty function since confirm is handled internally
-          isConfirmMode={false} // Details mode, not confirm mode
+          onConfirm={() => {}} 
+          isConfirmMode={false} 
           fromStockScreen={false}
           saleId={selectedSale.id}
         />

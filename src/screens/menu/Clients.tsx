@@ -38,7 +38,7 @@ export function Clients() {
           style: "destructive",
           onPress: () => {
             deleteClient(clientId);
-            Alert.alert("Sucesso", "Cliente excluído com sucesso!");
+            Alert.alert("Sucesso", "Cliente excluída com sucesso!");
           }
         }
       ]
@@ -141,7 +141,7 @@ export function Clients() {
         fontFamily="$heading"
         alignSelf="center"
       >
-        Clientes Cadastrados
+        Clientes Cadastradas
       </Text>
 
       <VStack space="md" flex={1}>

@@ -25,23 +25,20 @@ import { useProduct, Product } from '@contexts/ProductContext';
 import { useSales, OpenSaleItem } from '@contexts/SalesContext';
 
 export function Home() {
-  // Access products and sales from contexts
   const { products } = useProduct();
   const { openSales, shipments } = useSales();
 
-  // Initialize states
   const [totalCost, setTotalCost] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
-  const [totalFreight, setTotalFreight] = useState(0); // New state for freight
+  const [totalFreight, setTotalFreight] = useState(0); 
   const [totalSold, setTotalSold] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState<'Diário' | 'Semanal' | 'Mensal'>('Mensal');
 
-  // Placeholder chart data
   const [pieChartData, setPieChartData] = useState([
     { name: 'Saídas', value: 0, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
     { name: 'Entradas', value: 0, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
-    { name: 'Frete', value: 0, color: '#F59E0B', legendFontColor: '#FFFFFF', legendFontSize: 15 }, // Added freight
+    { name: 'Frete', value: 0, color: '#F59E0B', legendFontColor: '#FFFFFF', legendFontSize: 15 }, 
   ]);
 
   const [lineChartData] = useState({
@@ -53,35 +50,27 @@ export function Home() {
     legend: ['Vendas', 'Custos'],
   });
 
-  // Calculate total cost, sales, freight, and sold items
-  useEffect(() => {
-    // Calculate total cost from products
+  useEffect(() => {   
     const calculatedCost = products.reduce((sum, product) => sum + product.costPrice, 0);
     setTotalCost(calculatedCost);
 
-    // Combine openSales and shipments for paid sales
     const allSales = [...openSales, ...shipments].filter(sale => sale.isPaid);
 
-    // Calculate total sales (excluding freight)
     const calculatedSales = allSales.reduce((sum, sale) => sum + sale.total, 0);
     setTotalSales(calculatedSales);
 
-    // Calculate total freight
     const calculatedFreight = allSales.reduce((sum, sale) => {
       return sum + (sale.isFreightPaid ? sale.freightValue || 0 : 0);
     }, 0);
     setTotalFreight(calculatedFreight);
 
-    // Calculate total sold items (sum of product quantities)
     const calculatedSold = allSales.reduce((sum, sale) => {
       return sum + sale.selectedProducts.reduce((total, product) => total + (product.quantity || 1), 0);
     }, 0);
     setTotalSold(calculatedSold);
 
-    // Calculate total profit (sales - cost, freight not included in profit)
     setTotalProfit(calculatedSales - calculatedCost);
 
-    // Update pie chart data
     setPieChartData([
       { name: 'Saídas', value: calculatedCost, color: '#FF6384', legendFontColor: '#FFFFFF', legendFontSize: 15 },
       { name: 'Entradas', value: calculatedSales, color: '#36A2EB', legendFontColor: '#FFFFFF', legendFontSize: 15 },
@@ -89,7 +78,6 @@ export function Home() {
     ]);
   }, [products, openSales, shipments]);
 
-  // Handle period change
   const handlePeriodChange = (period: string) => {
     if (['Diário', 'Semanal', 'Mensal'].includes(period)) {
       setSelectedPeriod(period as 'Diário' | 'Semanal' | 'Mensal');
@@ -98,7 +86,6 @@ export function Home() {
     }
   };
 
-  // Notification logic remains unchanged
   const showNotification = () => {
     if (totalProfit > 0) {
       Alert.alert('Notificação', 'Os lucros mensais ultrapassaram a meta!');

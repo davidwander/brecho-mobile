@@ -61,7 +61,6 @@ export function Exits() {
     setIsSavingClient(true);
     
     try {
-      // Verificar se o cliente já existe pelo CPF
       const existingClient = getClientByCpf(data.cpf);
       
       if (existingClient) {
@@ -92,7 +91,6 @@ export function Exits() {
         return;
       }
 
-      // Salvar novo cliente
       const clientData: ClientData = {
         nameClient: data.nameClient,
         phone: data.phone,
@@ -104,11 +102,11 @@ export function Exits() {
       
       Alert.alert(
         "Sucesso", 
-        "Cliente salvo com sucesso!",
+        "Cliente salva com sucesso!",
         [
           {
             text: "OK",
-            onPress: () => console.log("Cliente salvo com ID:", clientId)
+            onPress: () => console.log("Cliente salva com ID:", clientId)
           }
         ]
       );

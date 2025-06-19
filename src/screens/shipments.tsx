@@ -201,14 +201,14 @@ export function Shipments() {
             <HStack space="sm" alignItems="center">
               <Feather name="user" size={20} color="#a78bfa" />
               <Text size="lg" color="$textLight0" fontFamily="$heading">
-                {item.clientData.nameClient || 'Cliente desconhecido'}
+                {item.clientData.nameClient || 'Cliente desconhecida'}
               </Text>
             </HStack>
 
             <HStack space="sm">
               <TouchableOpacity
                 onPress={() => handleOpenCalendarModal(item.id)}
-                accessibilityLabel={`Agendar entrega para ${item.clientData.nameClient || 'cliente desconhecido'}`}
+                accessibilityLabel={`Agendar entrega para ${item.clientData.nameClient || 'cliente desconhecida'}`}
                 style={{
                   width: 32,
                   height: 32,
