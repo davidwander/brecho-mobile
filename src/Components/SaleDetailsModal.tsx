@@ -504,7 +504,7 @@ export function SaleDetailsModal({
           flex={1}
           justifyContent="center"
           alignItems="center"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+          style={{ backgroundColor: '#000000cc' }}
         >
           <Box
             bg="$backgroundDark900"
