@@ -108,7 +108,7 @@ export function DeliveryHistory() {
         ListEmptyComponent={() => (
           <Center mt="$10" flex={1}>
             <Text color="$textLight400" lineHeight="$md">
-              Nenhuma entrega concluída.
+              Nenhuma venda concluida.
             </Text>
           </Center>
         )}
