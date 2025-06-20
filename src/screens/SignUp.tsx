@@ -1,4 +1,4 @@
-import { VStack, Image, Center, Heading, Text, ScrollView } from '@gluestack-ui/themed';
+import { VStack, Image, Center, Heading, Text, ScrollView, useToast } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -9,6 +9,8 @@ import Logo from '@assets/vb-logo.png';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { useAuth } from '@contexts/AuthContext';
+import { useState } from 'react';
 
 type FormDataProps = {
   name: string;
@@ -25,12 +27,15 @@ const signUpSchema = yup.object({
     .required("Informe a senha")
     .min(6, "A senha deve ter no mínimo 6 dígitos"),
   confirmPassword: yup
-  .string()
-  .required("Confirme a senha")
-  .oneOf([yup.ref("password"), ""], "As senhas não conferem"),
+    .string()
+    .required("Confirme a senha")
+    .oneOf([yup.ref("password"), ""], "As senhas não conferem"),
 });
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
+  const toast = useToast();
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema),
@@ -42,8 +47,19 @@ export function SignUp() {
     navigation.goBack()
   };
 
-  function handleSignUp({ name, email, password, confirmPassword }: FormDataProps) {
-    console.log({ name, email, password, confirmPassword })
+  async function handleSignUp({ name, email, password }: FormDataProps) {
+    try {
+      setIsLoading(true);
+      await signUp({ name, email, password });
+    } catch (error) {
+      toast.show({
+        title: "Erro ao criar conta",
+        description: "Ocorreu um erro ao tentar criar sua conta. Tente novamente.",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -148,6 +164,7 @@ export function SignUp() {
             <Button 
               title="Criar e entrar" 
               onPress={handleSubmit(handleSignUp)}
+              isLoading={isLoading}
             />
           </Center>
 
