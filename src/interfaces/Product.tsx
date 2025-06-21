@@ -6,6 +6,9 @@ export interface Product {
   costPrice: number;
   profitMargin: number;
   salePrice: number;
+  quantity: number;
+  reserved?: boolean;
   sold?: boolean;
-  createdAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 }

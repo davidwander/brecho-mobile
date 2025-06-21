@@ -14,8 +14,9 @@ import { CustomToast } from '@components/CustomToast';
 
 const generateRegisterId = (type: string) => {
   const prefix = type.trim().toUpperCase().slice(0, 3);
-  const random = Math.floor(1000 + Math.random() * 90009);
-  return `${prefix}${random}`;
+  const timestamp = new Date().getTime().toString().slice(-5);
+  const random = Math.floor(1000 + Math.random() * 9000).toString();
+  return `${prefix}-${timestamp}-${random}`;
 };
 
 type FormDataProps = {
@@ -23,6 +24,7 @@ type FormDataProps = {
   costPrice: string;
   profitMargin: string;
   selectedPiece: string;
+  quantity: string;
 };
 
 const newRegisterSchema = yup.object({
@@ -30,6 +32,7 @@ const newRegisterSchema = yup.object({
   costPrice: yup.string().required("Informe o preço de custo"),
   profitMargin: yup.string().required("Informe a margem de lucro"),
   selectedPiece: yup.string().required("Escolha uma peça"),
+  quantity: yup.string().required("Informe a quantidade").test('positive', 'A quantidade deve ser maior que 0', value => parseInt(value) > 0),
 });
 
 export function NewRegister() {
@@ -40,6 +43,7 @@ export function NewRegister() {
       costPrice: "",
       profitMargin: "",
       selectedPiece: "",
+      quantity: "1",
     },
   });
 
@@ -48,6 +52,7 @@ export function NewRegister() {
   const [registerId, setRegisterId] = useState(generateRegisterId("Peca"));
   const [rawCostPrice, setRawCostPrice] = useState('');
   const [rawProfitMargin, setRawProfitMargin] = useState('');
+  const [rawQuantity, setRawQuantity] = useState('1');
   const [salePrice, setSalePrice] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const { addProduct } = useProduct();
@@ -56,93 +61,46 @@ export function NewRegister() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleRegister = (data: FormDataProps) => {
+  const handleRegister = async (data: FormDataProps) => {
     setIsRegistering(true);
-    setTimeout(() => {
-      try {
-        const cost = parseFloat(data.costPrice
-          .replace("R$", "")
-          .replace(",", ".")
-          .trim());
-        const margin = parseFloat(data.profitMargin.replace("%", ""));
-        const sale = cost + (cost * (margin / 100));
-  
-        const newId = generateRegisterId(data.selectedPiece);
-  
-        const product = {
-          id: newId,
-          name: data.selectedPiece,
-          type: data.selectedPiece,
-          description: data.description,
-          costPrice: cost,
-          profitMargin: margin,
-          salePrice: sale,
-          createdAt: new Date().toISOString(),
-          quantity: 1,
-        };
-  
-        addProduct(product);
-  
-        setRegisterId(newId);
-        reset();
-        setRawCostPrice("");
-        setRawProfitMargin("");
-        setSalePrice("");
-        setIsRegistering(false);
+    try {
+      const cost = parseFloat(data.costPrice
+        .replace("R$", "")
+        .replace(",", ".")
+        .trim());
+      const margin = parseFloat(data.profitMargin.replace("%", ""));
+      const sale = cost + (cost * (margin / 100));
+      const quantity = parseInt(data.quantity);
 
-        console.log("Exibindo toast de sucesso");
-        toast.show({
-          placement: "bottom",
-          duration: 3000,
-          render: () => {
-            console.log("Renderizando toast");
-            return (
-              <Toast
-                action="success"
-                variant="solid"
-                bg="$green600"
-                borderRadius="$lg"
-                padding="$2"
-                mb="$24" 
-              >
-                <Text 
-                  color="$white" 
-                  fontSize="$md" 
-                  fontWeight="$medium"
-                  lineHeight="$sm"
-                >
-                  Peça adicionada ao estoque com sucesso!
-                </Text>
-              </Toast>
-            );
-          },
-        });
-      } catch (error) {
-        console.error("Erro ao registrar peça:", error);
-        setIsRegistering(false);
-        toast.show({
-          placement: "bottom",
-          duration: 3000,
-          render: () => {
-            console.log("Renderizando toast de erro");
-            return (
-              <Toast
-                action="error"
-                variant="solid"
-                bg="$red600"
-                borderRadius="$lg"
-                padding="$3"
-                mb="$24" 
-              >
-                <Text color="$white" fontSize="$sm" fontWeight="$medium">
-                  Erro ao adicionar peça ao estoque!
-                </Text>
-              </Toast>
-            );
-          },
-        });
-      }
-    }, 700);
+      const product = {
+        name: data.selectedPiece,
+        type: data.selectedPiece,
+        description: data.description,
+        costPrice: cost,
+        profitMargin: margin,
+        salePrice: sale,
+        quantity: quantity,
+        reserved: false,
+        sold: false,
+        code: generateRegisterId(data.selectedPiece)
+      };
+
+      // Removemos o toast de sucesso daqui pois ele será mostrado pelo ProductContext
+      await addProduct(product);
+
+      // Só resetamos o formulário se a adição foi bem sucedida
+      reset();
+      setRawCostPrice("");
+      setRawProfitMargin("");
+      setRawQuantity("1");
+      setSalePrice("");
+      
+    } catch (error: any) {
+      // Não precisamos mostrar o toast de erro aqui pois ele será mostrado pelo ProductContext
+      console.error("Erro ao registrar peça:", error);
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   const handleProfitMarginChange = (text: string) => {
@@ -174,6 +132,13 @@ export function NewRegister() {
       setValue("costPrice", "");
     }
     calculateSalePrice();
+  };
+
+  const handleQuantityChange = (text: string) => {
+    const numeric = text.replace(/[^0-9]/g, "");
+    setRawQuantity(numeric);
+    setValue("quantity", numeric);
+    if (numeric !== "") clearErrors("quantity");
   };
 
   const calculateSalePrice = () => {
@@ -295,11 +260,26 @@ export function NewRegister() {
                 )}
               />
 
+              <Controller
+                name="quantity"
+                control={control}
+                render={({ field: { value } }) => (
+                  <Input
+                    placeholder="Quantidade"
+                    value={value}
+                    onChangeText={handleQuantityChange}
+                    keyboardType="numeric"
+                    errorMessage={errors.quantity?.message}
+                  />
+                )}
+              />
+
               <Button 
                 title="Calcular preço de venda"
                 onPress={handleSubmit(() => calculateSalePrice())} 
                 isLoading={isCalculating}
               />
+
               <Input 
                 placeholder="Preço de Venda" 
                 value={salePrice} 
@@ -313,6 +293,7 @@ export function NewRegister() {
                 onPress={handleSubmit(handleRegister)} 
                 isLoading={isRegistering}
               />
+
               <Button 
                 title="Abrir Menu" 
                 onPress={openSheet} 

@@ -42,6 +42,7 @@
     "react-native-svg": "15.11.2",
     "react-native-uuid": "^2.0.3",
     "react-native-vector-icons": "^10.2.0",
+    "socket.io-client": "^4.8.1",
     "undefined": "\\",
     "uuid": "^11.1.0",
     "yup": "^1.6.1"

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
+import { socketService } from '../services/socketService';
 
 interface User {
   id: string;
@@ -47,15 +48,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       if (token[1] && user[1]) {
-        api.defaults.headers.authorization = `Bearer ${token[1]}`;
+        try {
+          // Adiciona o token no header das requisições
+          api.defaults.headers.authorization = `Bearer ${token[1]}`;
+          
+          // Faz uma requisição para verificar se o token ainda é válido
+          await api.get('/auth/validate');
+          
+          const userData = JSON.parse(user[1]);
+          setData({ token: token[1], user: userData });
 
-        setData({ token: token[1], user: JSON.parse(user[1]) });
+          // Conecta ao Socket.IO após validar o token
+          await socketService.connect();
+        } catch (error) {
+          // Se o token não for válido, remove os dados do storage
+          await signOut();
+        }
       }
 
       setLoading(false);
     }
 
     loadStorageData();
+
+    // Desconecta o Socket.IO quando o componente for desmontado
+    return () => {
+      socketService.disconnect();
+    };
   }, []);
 
   const signIn = async ({ email, password }: SignInCredentials) => {
@@ -73,8 +92,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       api.defaults.headers.authorization = `Bearer ${token}`;
-
       setData({ token, user });
+
+      // Conecta ao Socket.IO após o login
+      await socketService.connect();
     } catch (error) {
       throw new Error('Erro ao fazer login');
     }
@@ -96,16 +117,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       api.defaults.headers.authorization = `Bearer ${token}`;
-
       setData({ token, user });
+
+      // Conecta ao Socket.IO após o registro
+      await socketService.connect();
     } catch (error) {
       throw new Error('Erro ao criar conta');
     }
   };
 
   const signOut = async () => {
-    await AsyncStorage.multiRemove(['@brecho:token', '@brecho:user']);
+    // Desconecta do Socket.IO
+    socketService.disconnect();
 
+    await AsyncStorage.multiRemove(['@brecho:token', '@brecho:user']);
+    api.defaults.headers.authorization = undefined;
     setData({} as AuthState);
   };
 
