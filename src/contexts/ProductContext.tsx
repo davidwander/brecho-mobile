@@ -3,6 +3,8 @@ import { Product } from '../interfaces/Product';
 import { productService } from '../services/productService';
 import { useToast, Toast, Text } from '@gluestack-ui/themed';
 import { socketService } from '../services/socketService';
+import { useAuth } from '../contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ProductContextType = {
   products: Product[];
@@ -24,37 +26,60 @@ export const ProductProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();
+  const { isAuthenticated } = useAuth();
 
   // Carregar produtos ao iniciar e configurar listeners do Socket.IO
   useEffect(() => {
-    loadProducts();
+    async function checkAuthAndLoadProducts() {
+      try {
+        const token = await AsyncStorage.getItem('@brecho:token');
+        if (!token || !isAuthenticated) {
+          console.log('Usuário não autenticado, pulando carregamento de produtos');
+          return;
+        }
+        
+        await loadProducts();
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+      }
+    }
+
+    checkAuthAndLoadProducts();
 
     // Configurar listeners do Socket.IO para atualizações em tempo real
-    socketService.on('product:created', (newProduct: Product) => {
-      setProducts(prev => [...prev, newProduct]);
-    });
+    if (isAuthenticated) {
+      socketService.on('product:created', (newProduct: Product) => {
+        // Verifica se o produto já existe antes de adicionar
+        setProducts(prev => {
+          if (prev.some(p => p.id === newProduct.id)) {
+            return prev;
+          }
+          return [...prev, newProduct];
+        });
+      });
 
-    socketService.on('product:updated', (updatedProduct: Product) => {
-      setProducts(prev => 
-        prev.map(product => 
-          product.id === updatedProduct.id ? updatedProduct : product
-        )
-      );
-    });
+      socketService.on('product:updated', (updatedProduct: Product) => {
+        setProducts(prev => 
+          prev.map(product => 
+            product.id === updatedProduct.id ? updatedProduct : product
+          )
+        );
+      });
 
-    socketService.on('product:deleted', (deletedProductId: string) => {
-      setProducts(prev => prev.filter(product => product.id !== deletedProductId));
-    });
+      socketService.on('product:deleted', (deletedProductId: string) => {
+        setProducts(prev => prev.filter(product => product.id !== deletedProductId));
+      });
 
-    socketService.on('product:stock_updated', (data: { id: string, quantity: number }) => {
-      setProducts(prev => 
-        prev.map(product => 
-          product.id === data.id 
-            ? { ...product, quantity: data.quantity }
-            : product
-        )
-      );
-    });
+      socketService.on('product:stock_updated', (data: { id: string, quantity: number }) => {
+        setProducts(prev => 
+          prev.map(product => 
+            product.id === data.id 
+              ? { ...product, quantity: data.quantity }
+              : product
+          )
+        );
+      });
+    }
 
     // Cleanup dos listeners quando o componente for desmontado
     return () => {
@@ -63,16 +88,29 @@ export const ProductProvider = ({ children }: Props) => {
       socketService.off('product:deleted');
       socketService.off('product:stock_updated');
     };
-  }, []);
+  }, [isAuthenticated]);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
+      console.log('Iniciando carregamento de produtos...');
+      
+      const token = await AsyncStorage.getItem('@brecho:token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const data = await productService.list();
+      console.log('Produtos carregados do backend:', data);
       setProducts(data);
       setError(null);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erro ao carregar produtos';
+      const errorMessage = err.response?.data?.message || err.message || 'Erro ao carregar produtos';
+      console.error('Erro ao carregar produtos:', {
+        message: errorMessage,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError(errorMessage);
       showErrorToast(errorMessage);
     } finally {
@@ -82,10 +120,11 @@ export const ProductProvider = ({ children }: Props) => {
 
   const showSuccessToast = (message: string) => {
     toast.show({
-      placement: "bottom",
+      placement: "top",
+      offset: 50,
       render: () => (
-        <Toast action="success" variant="solid">
-          <Text color="$white">{message}</Text>
+        <Toast action="success" variant="solid" bgColor="$green500">
+          <Text color="$white" fontWeight="$bold">{message}</Text>
         </Toast>
       )
     });
@@ -119,16 +158,8 @@ export const ProductProvider = ({ children }: Props) => {
         throw new Error('Quantidade deve ser maior que zero');
       }
 
-      // Log dos dados sendo enviados
-      console.log('Enviando produto:', {
-        ...product,
-        costPrice: Number(product.costPrice.toFixed(2)),
-        salePrice: Number(product.salePrice.toFixed(2)),
-        profitMargin: Number(product.profitMargin.toFixed(2)),
-        quantity: Math.floor(product.quantity)
-      });
-
-      const newProduct = await productService.create({
+      // Formata os dados do produto
+      const formattedProduct = {
         ...product,
         costPrice: Number(product.costPrice.toFixed(2)),
         salePrice: Number(product.salePrice.toFixed(2)),
@@ -136,14 +167,15 @@ export const ProductProvider = ({ children }: Props) => {
         quantity: Math.floor(product.quantity),
         reserved: false,
         sold: false
-      });
+      };
+
+      // Log dos dados sendo enviados
+      console.log('Enviando produto:', formattedProduct);
+
+      // Cria o produto usando o serviço REST
+      const newProduct = await productService.create(formattedProduct);
       
-      // Atualiza o estado local apenas após confirmação do backend
-      setProducts(prev => [...prev, newProduct]);
-      
-      // Emite evento para outros clientes
-      socketService.emit('product:create', newProduct);
-      
+      // Não atualizamos o estado aqui, pois o socket irá notificar a criação
       showSuccessToast('Produto adicionado com sucesso!');
       setError(null);
       
@@ -177,12 +209,7 @@ export const ProductProvider = ({ children }: Props) => {
       setLoading(true);
       await productService.delete(id);
       
-      // Atualiza o estado local apenas após confirmação do backend
-      setProducts(prev => prev.filter(product => product.id !== id));
-      
-      // Emite evento para outros clientes
-      socketService.emit('product:delete', id);
-      
+      // Não atualizamos o estado aqui, pois o socket irá notificar a remoção
       showSuccessToast('Produto removido com sucesso!');
       setError(null);
     } catch (err: any) {
@@ -198,18 +225,9 @@ export const ProductProvider = ({ children }: Props) => {
   const updateStock = async (id: string, quantity: number) => {
     try {
       setLoading(true);
-      const updatedProduct = await productService.updateStock(id, quantity);
+      await productService.updateStock(id, quantity);
       
-      // Atualiza o estado local apenas após confirmação do backend
-      setProducts(prev => 
-        prev.map(product => 
-          product.id === id ? updatedProduct : product
-        )
-      );
-      
-      // Emite evento para outros clientes
-      socketService.emit('product:update_stock', { id, quantity });
-      
+      // Não atualizamos o estado aqui, pois o socket irá notificar a atualização
       showSuccessToast('Estoque atualizado com sucesso!');
       setError(null);
     } catch (err: any) {
@@ -223,16 +241,7 @@ export const ProductProvider = ({ children }: Props) => {
   };
 
   return (
-    <ProductContext.Provider 
-      value={{ 
-        products, 
-        addProduct, 
-        removeProduct,
-        updateStock,
-        loading,
-        error
-      }}
-    >
+    <ProductContext.Provider value={{ products, addProduct, removeProduct, updateStock, loading, error }}>
       {children}
     </ProductContext.Provider>
   );
