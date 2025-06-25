@@ -11,7 +11,7 @@ interface User {
 }
 
 interface AuthState {
-  token: string;
+  accessToken: string;
   user: User;
   refreshToken: string;
 }
@@ -40,16 +40,17 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
-  const [data, setData] = useState<AuthState>({} as AuthState);
+  const [data, setData] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStorageData(): Promise<void> {
       try {
         console.log('Verificando token armazenado...');
-        const [token, user] = await AsyncStorage.multiGet([
+        const [token, user, refreshToken] = await AsyncStorage.multiGet([
           '@brecho:token',
           '@brecho:user',
+          '@brecho:refreshToken'
         ]);
 
         if (token[1] && user[1]) {
@@ -60,22 +61,71 @@ export const AuthProvider: React.FC = ({ children }) => {
             api.defaults.headers.authorization = token[1]; // Token já está com "Bearer "
             console.log('Token adicionado aos headers da API');
             
-            // Faz uma requisição para verificar se o token ainda é válido
-            const response = await api.get('/auth/validate');
-            console.log('Token validado com sucesso');
-            
-            const userData = JSON.parse(user[1]);
-            setData({ token: token[1], user: userData, refreshToken: '' });
+            try {
+              // Faz uma requisição para verificar se o token ainda é válido
+              const response = await api.get('/auth/validate');
+              console.log('Token validado com sucesso:', response.data);
+              
+              const userData = JSON.parse(user[1]);
+              const storedToken = token[1].replace('Bearer ', '');
+              const storedRefreshToken = refreshToken[1] || '';
 
-            // Conecta ao Socket.IO após validar o token
-            await socketService.connect();
+              console.log('Dados carregados do storage:', {
+                hasToken: !!storedToken,
+                hasUser: !!userData,
+                hasRefreshToken: !!storedRefreshToken
+              });
+
+              setData({ 
+                accessToken: storedToken,
+                user: userData,
+                refreshToken: storedRefreshToken
+              });
+
+              // Conecta ao Socket.IO após validar o token
+              await socketService.connect();
+            } catch (validationError: any) {
+              console.log('Erro na validação, tentando refresh do token...');
+              
+              if (refreshToken[1]) {
+                try {
+                  const refreshResponse = await api.post('/auth/refresh-token', {
+                    refreshToken: refreshToken[1]
+                  });
+
+                  console.log('Refresh do token bem sucedido:', {
+                    hasAccessToken: !!refreshResponse.data.accessToken,
+                    hasRefreshToken: !!refreshResponse.data.refreshToken
+                  });
+
+                  const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data;
+                  const userData = JSON.parse(user[1]);
+
+                  await AsyncStorage.multiSet([
+                    ['@brecho:token', `Bearer ${newAccessToken}`],
+                    ['@brecho:refreshToken', newRefreshToken]
+                  ]);
+
+                  api.defaults.headers.authorization = `Bearer ${newAccessToken}`;
+                  setData({
+                    accessToken: newAccessToken,
+                    user: userData,
+                    refreshToken: newRefreshToken
+                  });
+
+                  await socketService.connect();
+                  return;
+                } catch (refreshError) {
+                  console.error('Erro ao fazer refresh do token:', refreshError);
+                  await signOut();
+                }
+              } else {
+                console.error('Refresh token não encontrado');
+                await signOut();
+              }
+            }
           } catch (error: any) {
-            console.error('Erro ao validar token:', {
-              status: error.response?.status,
-              data: error.response?.data,
-              headers: error.response?.headers
-            });
-            // Se o token não for válido, remove os dados do storage
+            console.error('Erro ao processar autenticação:', error);
             await signOut();
           }
         } else {
@@ -106,19 +156,32 @@ export const AuthProvider: React.FC = ({ children }) => {
         password,
       });
 
-      const { token, user: userData, refreshToken } = response.data;
-      console.log('Login bem sucedido. Token recebido:', token.substring(0, 10) + '...');
+      console.log('Resposta do login:', {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: Object.keys(response.data || {})
+      });
+
+      const { accessToken, user: userData, refreshToken } = response.data;
+      console.log('Login bem sucedido. Token recebido:', accessToken.substring(0, 10) + '...');
 
       console.log('Salvando token no AsyncStorage...');
       await AsyncStorage.multiSet([
-        ['@brecho:token', `Bearer ${token}`],
+        ['@brecho:token', `Bearer ${accessToken}`],
         ['@brecho:user', JSON.stringify(userData)],
         ['@brecho:refreshToken', refreshToken],
       ]);
 
       console.log('Configurando token nos headers da API...');
-      api.defaults.headers.authorization = `Bearer ${token}`;
-      setData({ token, user: userData, refreshToken });
+      api.defaults.headers.authorization = `Bearer ${accessToken}`;
+      setData({ accessToken, user: userData, refreshToken });
+
+      console.log('Estado de autenticação atualizado:', {
+        hasAccessToken: !!accessToken,
+        hasUser: !!userData,
+        hasRefreshToken: !!refreshToken,
+        userData
+      });
 
       // Conecta ao Socket.IO após o login
       await socketService.connect();
@@ -172,25 +235,26 @@ export const AuthProvider: React.FC = ({ children }) => {
       console.log('Resposta do registro:', {
         status: response.status,
         headers: response.headers,
-        data: { ...response.data, token: response.data.token ? '[REDACTED]' : undefined }
+        hasData: !!response.data,
+        dataKeys: Object.keys(response.data || {})
       });
 
-      if (!response.data.token || !response.data.user) {
+      if (!response.data.accessToken || !response.data.user) {
         throw new Error('Resposta inválida do servidor: token ou dados do usuário ausentes');
       }
 
-      const { token, user } = response.data;
+      const { accessToken, user, refreshToken } = response.data;
 
       console.log('Salvando dados do usuário...');
       await AsyncStorage.multiSet([
-        ['@brecho:token', `Bearer ${token}`],
+        ['@brecho:token', `Bearer ${accessToken}`],
         ['@brecho:user', JSON.stringify(user)],
-        ['@brecho:refreshToken', response.data.refreshToken],
+        ['@brecho:refreshToken', refreshToken],
       ]);
 
       console.log('Configurando token na API...');
-      api.defaults.headers.authorization = `Bearer ${token}`;
-      setData({ token, user, refreshToken: response.data.refreshToken });
+      api.defaults.headers.authorization = `Bearer ${accessToken}`;
+      setData({ accessToken, user, refreshToken });
 
       // Conecta ao Socket.IO após o registro
       console.log('Conectando ao Socket.IO...');
@@ -245,7 +309,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       
       console.log('Removendo token dos headers da API...');
       delete api.defaults.headers.authorization;
-      setData({} as AuthState);
+      setData(null);
       
       console.log('Logout completo');
     } catch (error) {
@@ -274,8 +338,8 @@ export const AuthProvider: React.FC = ({ children }) => {
   return (
     <AuthContext.Provider 
       value={{ 
-        signed: !!data.user, 
-        user: data.user, 
+        signed: !!data?.accessToken && !!data?.user, 
+        user: data?.user || null, 
         loading, 
         signIn, 
         signUp,
@@ -283,6 +347,12 @@ export const AuthProvider: React.FC = ({ children }) => {
         refreshSession,
       }}
     >
+      {console.log('AuthContext estado atual:', {
+        signed: !!data?.accessToken && !!data?.user,
+        hasUser: !!data?.user,
+        hasToken: !!data?.accessToken,
+        loading
+      })}
       {children}
     </AuthContext.Provider>
   );

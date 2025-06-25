@@ -9,7 +9,8 @@ interface User {
 
 interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 interface RegisterData {
@@ -63,15 +64,19 @@ export const authService = {
         data: { ...response.data, token: '[REDACTED]' }
       });
 
-      if (!response.data.token || !response.data.user) {
-        throw new Error('Resposta inválida do servidor: token ou dados do usuário ausentes');
+      if (!response.data.accessToken || !response.data.refreshToken || !response.data.user) {
+        throw new Error('Resposta inválida do servidor: tokens ou dados do usuário ausentes');
       }
 
-      // Salva o token e usuário no AsyncStorage
+      // Salva os tokens e usuário no AsyncStorage
       await AsyncStorage.multiSet([
-        ['@brecho:token', response.data.token],
+        ['@brecho:token', response.data.accessToken],
+        ['@brecho:refreshToken', response.data.refreshToken],
         ['@brecho:user', JSON.stringify(response.data.user)]
       ]);
+
+      // Configura o token no axios
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`;
 
       console.log('Dados do usuário salvos localmente');
       return response.data;
@@ -118,43 +123,129 @@ export const authService = {
     }
 
     try {
-      const response = await api.post<AuthResponse>('/auth/login', {
+      console.log('Tentando fazer login com:', {
+        email: data.email,
+        url: '/auth/login'
+      });
+
+      const response = await api.post('/auth/login', {
         email: data.email.trim().toLowerCase(),
         password: data.password
       });
-      
-      // Salva o token e usuário no AsyncStorage
+
+      console.log('Resposta do login recebida:', {
+        status: response.status,
+        headers: response.headers,
+        dataType: typeof response.data,
+        hasData: !!response.data,
+        hasUser: !!response.data?.user,
+        hasAccessToken: !!response.data?.accessToken,
+        hasRefreshToken: !!response.data?.refreshToken,
+        responseData: response.data
+      });
+
+      // Validação da resposta
+      if (!response.data) {
+        throw new Error('Resposta vazia do servidor');
+      }
+
+      const { user, accessToken, refreshToken } = response.data;
+
+      if (!user || !accessToken || !refreshToken) {
+        console.error('Dados ausentes na resposta:', response.data);
+        throw new Error('Resposta inválida do servidor: dados ausentes');
+      }
+
+      if (!user.id || !user.name || !user.email) {
+        console.error('Dados do usuário inválidos:', user);
+        throw new Error('Dados do usuário inválidos ou incompletos');
+      }
+
+      // Salva os tokens e usuário no AsyncStorage
       await AsyncStorage.multiSet([
-        ['@brecho:token', response.data.token],
-        ['@brecho:user', JSON.stringify(response.data.user)]
+        ['@brecho:token', accessToken],
+        ['@brecho:refreshToken', refreshToken],
+        ['@brecho:user', JSON.stringify(user)]
       ]);
+
+      // Configura o token no axios
+      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+      console.log('Login realizado com sucesso para:', user.email);
 
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao fazer login:', {
-        data: error.response?.data,
-        status: error.response?.status
+      console.error('Erro detalhado no login:', {
+        name: error.name,
+        message: error.message,
+        isAxiosError: error.isAxiosError,
+        stack: error.stack,
+        fullError: error
       });
-      throw error;
+
+      if (!error.response) {
+        throw new Error('Erro de conexão. Verifique sua internet e tente novamente');
+      }
+
+      if (error.response.status === 401) {
+        throw new Error('Email ou senha incorretos');
+      }
+
+      if (error.response.status === 400) {
+        const errorMessage = error.response.data?.error || 'Dados inválidos';
+        throw new Error(errorMessage);
+      }
+
+      if (error.response.status === 500) {
+        throw new Error('Erro no servidor. Tente novamente mais tarde');
+      }
+
+      throw new Error('Não foi possível fazer login. Tente novamente');
     }
   },
 
   async validate(): Promise<User> {
     try {
+      console.log('Iniciando validação de token...');
       const response = await api.get<{ user: User }>('/auth/validate');
+      
+      if (!response.data?.user) {
+        console.error('Resposta da validação sem dados do usuário:', response.data);
+        throw new Error('Dados do usuário ausentes na validação');
+      }
+
+      console.log('Token validado com sucesso:', {
+        userId: response.data.user.id,
+        userName: response.data.user.name
+      });
+
       return response.data.user;
     } catch (error: any) {
       console.error('Erro ao validar token:', {
-        data: error.response?.data,
-        status: error.response?.status
+        name: error.name,
+        message: error.message,
+        response: {
+          data: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers
+        }
       });
-      throw error;
+
+      if (!error.response) {
+        throw new Error('Erro de conexão ao validar token');
+      }
+
+      if (error.response.status === 401) {
+        throw new Error('Token inválido ou expirado');
+      }
+
+      throw new Error('Erro ao validar token');
     }
   },
 
   async logout(): Promise<void> {
     try {
-      await AsyncStorage.multiRemove(['@brecho:token', '@brecho:user']);
+      await AsyncStorage.multiRemove(['@brecho:token', '@brecho:refreshToken', '@brecho:user']);
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       throw error;
