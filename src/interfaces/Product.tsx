@@ -11,4 +11,5 @@ export interface Product {
   sold?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  code: string;
 }

@@ -1,5 +1,7 @@
 import { api } from './api';
 import { Product } from '../@types/entities';
+import { PRODUCT_STATUS, ProductStatus } from '../constants/status';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const formatProductData = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
   return {
@@ -8,16 +10,18 @@ const formatProductData = (product: Omit<Product, 'id' | 'createdAt' | 'updatedA
     salePrice: Number(product.salePrice.toFixed(2)),
     profitMargin: Number(product.profitMargin.toFixed(2)),
     quantity: Math.floor(product.quantity),
-    reserved: false,
-    sold: false
+    status: product.status || PRODUCT_STATUS.AVAILABLE,
+    reserved: product.reserved || false,
+    sold: product.sold || false,
+    code: product.code || null
   };
 };
 
 export const productService = {
   async create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
     // Validação dos dados
-    if (!product.name || !product.type || !product.description) {
-      throw new Error('Campos obrigatórios não preenchidos');
+    if (!product.name || !product.type) {
+      throw new Error('Nome e tipo são obrigatórios');
     }
 
     if (product.costPrice <= 0 || product.profitMargin < 0 || product.salePrice <= 0) {
@@ -45,21 +49,77 @@ export const productService = {
   },
 
   async list() {
-    const response = await api.get('/products');
-    return response.data;
+    try {
+      console.log('Iniciando busca de produtos...');
+      
+      // Verifica se há token antes de fazer a requisição
+      const token = await AsyncStorage.getItem('@brecho:token');
+      if (!token) {
+        console.error('Tentativa de listar produtos sem token de autenticação');
+        throw new Error('Usuário não autenticado');
+      }
+
+      console.log('Token encontrado, fazendo requisição...');
+      const response = await api.get('/products');
+      console.log('Produtos recebidos com sucesso');
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao listar produtos:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers
+      });
+      throw error;
+    }
   },
 
-  async update(id: string, data: Partial<Product>) {
-    const response = await api.put(`/products/${id}`, data);
-    return response.data;
+  async findById(id: string) {
+    try {
+      const response = await api.get(`/products/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar produto:', {
+        id,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  },
+
+  async updateStatus(id: string, status: ProductStatus) {
+    if (!Object.values(PRODUCT_STATUS).includes(status)) {
+      throw new Error(`Status inválido. Use um dos seguintes: ${Object.values(PRODUCT_STATUS).join(', ')}`);
+    }
+
+    try {
+      const response = await api.patch(`/products/${id}/status`, { status });
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao atualizar status:', {
+        id,
+        status,
+        error: error.response?.data
+      });
+      throw error;
+    }
   },
 
   async updateStock(id: string, quantity: number) {
-    const response = await api.patch(`/products/${id}/stock`, { quantity });
-    return response.data;
-  },
+    if (quantity < 0) {
+      throw new Error('Quantidade não pode ser negativa');
+    }
 
-  async delete(id: string) {
-    await api.delete(`/products/${id}`);
+    try {
+      const response = await api.patch(`/products/${id}/stock`, { quantity });
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao atualizar estoque:', {
+        id,
+        quantity,
+        error: error.response?.data
+      });
+      throw error;
+    }
   }
 }; 

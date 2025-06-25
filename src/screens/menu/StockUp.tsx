@@ -80,6 +80,7 @@ export function StockUp() {
 
     const convertedProducts: ProductItem[] = selectedProductsData.map(product => ({
       ...product,
+      id: `${product.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       quantity: 1,
       type: product.type === "entrada" || product.type === "saida" ? product.type : undefined 
     }));
@@ -242,16 +243,22 @@ export function StockUp() {
                   fontFamily="$heading"
                   lineHeight="$lg"
                 >
-                  {item.type}
+                  {item.name}
                 </Text>
               </HStack>
 
-              <Box px="$1" py="$0" alignItems="flex-end">
+              <Box px="$1" py="$0" alignItems="flex-end" minWidth="$32">
                 <Text color="$trueGray300" fontSize="$sm">
                   COD:
                 </Text>
-                <Text color="$trueGray100" fontSize="$xl">
-                  {item.id}
+                <Text 
+                  color="$trueGray100" 
+                  fontSize="$md" 
+                  fontFamily="$heading"
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                >
+                  {item.code || 'N/A'}
                 </Text>
               </Box>
             </HStack>

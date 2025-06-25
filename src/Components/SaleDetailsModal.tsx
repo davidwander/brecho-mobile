@@ -244,7 +244,7 @@ export function SaleDetailsModal({
     console.log('Estado do showPaymentDialog:', showPaymentDialog);
   }, [showPaymentDialog]);
 
-  const keyExtractor = (item: ProductItem) => item.id;
+  const keyExtractor = (item: ProductItem, index: number) => `${item.id}-${index}-${Math.random()}`;
 
   return (
     <>

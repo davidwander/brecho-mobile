@@ -3,14 +3,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useState } from 'react';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+import { useAuth } from '@contexts/AuthContext';
 
 import BackgroundImg from '@assets/background.png';
 import Logo from '@assets/vb-logo.png';
 
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { Alert } from 'react-native';
 
 type FormDataProps = {
   email: string;
@@ -23,6 +26,8 @@ const signInSchema = yup.object({
 })
 
 export function SignIn() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signInSchema),
@@ -34,8 +39,16 @@ export function SignIn() {
     navigation.navigate("signUp")
   };
 
-  function handleSignIn({ email, password }: FormDataProps) {
-    console.log({ email, password })
+  async function handleSignIn({ email, password }: FormDataProps) {
+    try {
+      setIsLoading(true);
+      await signIn({ email, password });
+    } catch (error: any) {
+      const message = error?.message || 'Não foi possível entrar. Tente novamente mais tarde.';
+      Alert.alert('Erro no login', message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,11 +121,12 @@ export function SignIn() {
 
             <Button 
               title="Entrar" 
-              onPress={handleSubmit(handleSignIn)} 
+              onPress={handleSubmit(handleSignIn)}
+              isLoading={isLoading}
             />
           </Center>
 
-          <Center                   >
+          <Center>
             <Text
               color="$textLight400"
               mb="$3"
@@ -127,6 +141,7 @@ export function SignIn() {
               title="Criar conta" 
               variant="outline" 
               onPress={handleNewAccount}
+              isDisabled={isLoading}
             />
           </Center>
         </VStack>

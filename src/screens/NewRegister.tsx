@@ -13,9 +13,13 @@ import { ButtonSpinner } from '@gluestack-ui/themed';
 import { CustomToast } from '@components/CustomToast'; 
 
 const generateRegisterId = (type: string) => {
-  const prefix = type.trim().toUpperCase().slice(0, 3);
+  const safeType = type?.trim() || 'PEC';
+  
+  const prefix = safeType.toUpperCase().slice(0, 3);
+  
   const timestamp = new Date().getTime().toString().slice(-5);
   const random = Math.floor(1000 + Math.random() * 9000).toString();
+  
   return `${prefix}-${timestamp}-${random}`;
 };
 
@@ -72,6 +76,8 @@ export function NewRegister() {
       const sale = cost + (cost * (margin / 100));
       const quantity = parseInt(data.quantity);
 
+      const pieceCode = generateRegisterId(data.selectedPiece);
+
       const product = {
         name: data.selectedPiece,
         type: data.selectedPiece,
@@ -82,13 +88,13 @@ export function NewRegister() {
         quantity: quantity,
         reserved: false,
         sold: false,
-        code: generateRegisterId(data.selectedPiece)
+        code: pieceCode
       };
 
-      // Removemos o toast de sucesso daqui pois ele será mostrado pelo ProductContext
+      console.log('Produto a ser criado:', product);
+
       await addProduct(product);
 
-      // Só resetamos o formulário se a adição foi bem sucedida
       reset();
       setRawCostPrice("");
       setRawProfitMargin("");
@@ -96,7 +102,6 @@ export function NewRegister() {
       setSalePrice("");
       
     } catch (error: any) {
-      // Não precisamos mostrar o toast de erro aqui pois ele será mostrado pelo ProductContext
       console.error("Erro ao registrar peça:", error);
     } finally {
       setIsRegistering(false);
@@ -110,7 +115,9 @@ export function NewRegister() {
     if (numeric !== "") clearErrors("profitMargin");
   };
 
-  const handleProfitMarginBlur = () => {
+  type HandleProfitMarginBlur = () => void;
+  
+  const handleProfitMarginBlur: HandleProfitMarginBlur = () => {
     if (rawProfitMargin) setValue("profitMargin", `${rawProfitMargin}%`);
     else setValue("profitMargin", "");
   };

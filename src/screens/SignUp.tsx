@@ -1,4 +1,4 @@
-import { VStack, Image, Center, Heading, Text, ScrollView, useToast } from '@gluestack-ui/themed';
+import { VStack, Image, Center, Heading, Text, ScrollView, useToast, Toast } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,7 +20,7 @@ type FormDataProps = {
 };
 
 const signUpSchema = yup.object({
-  name: yup.string().required("Informe o nome"),
+  name: yup.string().required("Informe o nome").min(3, "O nome deve ter no mínimo 3 caracteres"),
   email: yup.string().required("Informe o e-mail").email("E-mail inválido"),
   password: yup
     .string()
@@ -50,12 +50,36 @@ export function SignUp() {
   async function handleSignUp({ name, email, password }: FormDataProps) {
     try {
       setIsLoading(true);
-      await signUp({ name, email, password });
-    } catch (error) {
+      console.log('Iniciando processo de registro...', { name, email });
+      
+      await signUp({ 
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password 
+      });
+
       toast.show({
-        title: "Erro ao criar conta",
-        description: "Ocorreu um erro ao tentar criar sua conta. Tente novamente.",
-        duration: 3000,
+        render: () => (
+          <Toast action="success">
+            <Text color="$white">Conta criada com sucesso!</Text>
+          </Toast>
+        ),
+        placement: "top",
+        duration: 2000
+      });
+    } catch (error: any) {
+      console.error('Erro ao criar conta:', error);
+      
+      const errorMessage = error?.message || 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.';
+      
+      toast.show({
+        render: () => (
+          <Toast action="error">
+            <Text color="$white">{errorMessage}</Text>
+          </Toast>
+        ),
+        placement: "top",
+        duration: 3000
       });
     } finally {
       setIsLoading(false);
@@ -173,6 +197,7 @@ export function SignUp() {
             variant="outline" 
             mt="$12" 
             onPress={handleGoBack}
+            isDisabled={isLoading}
           />
         </VStack>
       </VStack>
