@@ -7,7 +7,7 @@ import { AuthRoutes } from './auth.routes';
 import { Loading } from '../components/Loading';
 
 export function Routes() {
-  const { isAuthenticated, loading } = useAuth();
+  const { signed, loading } = useAuth();
   
   const theme = DefaultTheme;
   theme.colors.background = '#262626'; // textDark800
@@ -16,10 +16,12 @@ export function Routes() {
     return <Loading />;
   }
 
+  console.log('Estado de autenticação:', { signed, loading });
+
   return (
     <Box flex={1} bg="$textDark800">
       <NavigationContainer theme={theme}>
-        {isAuthenticated ? <AppStackRoutes /> : <AuthRoutes />}
+        {signed ? <AppStackRoutes /> : <AuthRoutes />}
       </NavigationContainer>
     </Box>
   );

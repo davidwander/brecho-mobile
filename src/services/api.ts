@@ -25,18 +25,17 @@ api.interceptors.request.use(
       
       if (token) {
         console.log('Token encontrado:', token.substring(0, 10) + '...');
-        // Garante que o header Authorization está no formato correto
-        config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
       } else {
         console.log('Nenhum token encontrado para a requisição');
+        config.headers.Authorization = undefined;
       }
 
       // Log dos headers da requisição
       console.log('Headers finais da requisição:', {
-        ...config.headers,
-        Authorization: config.headers.Authorization ? 
-          (config.headers.Authorization as string).substring(0, 15) + '...' : 
-          'Não definido'
+        Accept: config.headers.Accept,
+        Authorization: config.headers.Authorization ? 'Bearer [REDACTED]' : 'Não definido',
+        'Content-Type': config.headers['Content-Type']
       });
 
       return config;
@@ -54,12 +53,42 @@ api.interceptors.request.use(
 // Interceptor para tratar respostas e erros
 api.interceptors.response.use(
   (response) => {
-    console.log(`Resposta recebida de ${response.config.url}:`, {
-      status: response.status,
-      headers: response.headers,
-      data: response.data ? JSON.stringify(response.data).substring(0, 100) + '...' : undefined
-    });
-    return response;
+    try {
+      console.log('Processando resposta:', {
+        url: response.config.url,
+        method: response.config.method,
+        status: response.status,
+        dataType: typeof response.data,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : [],
+        rawData: response.data
+      });
+
+      // Se a resposta é um objeto e tem a propriedade data, retorna apenas o data
+      if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+        console.log('Extraindo dados do objeto data:', {
+          beforeExtraction: response.data,
+          extractedData: response.data.data
+        });
+        response.data = response.data.data;
+      }
+
+      console.log('Dados finais da resposta:', {
+        hasData: !!response.data,
+        dataType: typeof response.data,
+        dataKeys: response.data ? Object.keys(response.data) : []
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Erro ao processar resposta:', {
+        error,
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+        errorStack: error instanceof Error ? error.stack : undefined
+      });
+      throw error; // Propaga o erro para ser tratado no serviço
+    }
   },
   async (error) => {
     const originalRequest = error.config;
