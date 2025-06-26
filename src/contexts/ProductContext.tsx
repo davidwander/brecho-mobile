@@ -48,17 +48,24 @@ export const ProductProvider = ({ children }: Props) => {
 
     // Configurar listeners do Socket.IO para atualizações em tempo real
     if (isAuthenticated) {
+      console.log('Configurando listeners do Socket.IO...');
+      
       socketService.on('product:created', (newProduct: Product) => {
-        // Verifica se o produto já existe antes de adicionar
+        console.log('Novo produto recebido via socket:', newProduct);
         setProducts(prev => {
-          if (prev.some(p => p.id === newProduct.id)) {
+          // Verifica se o produto já existe
+          const exists = prev.some(p => p.id === newProduct.id);
+          if (exists) {
+            console.log('Produto já existe no estado local');
             return prev;
           }
+          console.log('Adicionando novo produto ao estado local');
           return [...prev, newProduct];
         });
       });
 
       socketService.on('product:updated', (updatedProduct: Product) => {
+        console.log('Atualização de produto recebida via socket:', updatedProduct);
         setProducts(prev => 
           prev.map(product => 
             product.id === updatedProduct.id ? updatedProduct : product
@@ -67,10 +74,12 @@ export const ProductProvider = ({ children }: Props) => {
       });
 
       socketService.on('product:deleted', (deletedProductId: string) => {
+        console.log('Deleção de produto recebida via socket:', deletedProductId);
         setProducts(prev => prev.filter(product => product.id !== deletedProductId));
       });
 
       socketService.on('product:stock_updated', (data: { id: string, quantity: number }) => {
+        console.log('Atualização de estoque recebida via socket:', data);
         setProducts(prev => 
           prev.map(product => 
             product.id === data.id 
@@ -79,10 +88,17 @@ export const ProductProvider = ({ children }: Props) => {
           )
         );
       });
+
+      // Reconecta o socket se necessário
+      if (!socketService.isConnected()) {
+        console.log('Socket não está conectado, tentando reconectar...');
+        socketService.reconnect();
+      }
     }
 
     // Cleanup dos listeners quando o componente for desmontado
     return () => {
+      console.log('Removendo listeners do Socket.IO...');
       socketService.off('product:created');
       socketService.off('product:updated');
       socketService.off('product:deleted');
@@ -169,15 +185,19 @@ export const ProductProvider = ({ children }: Props) => {
         sold: false
       };
 
-      // Log dos dados sendo enviados
       console.log('Enviando produto:', formattedProduct);
 
       // Cria o produto usando o serviço REST
       const newProduct = await productService.create(formattedProduct);
       
-      // Não atualizamos o estado aqui, pois o socket irá notificar a criação
+      // Atualiza o estado local imediatamente
+      setProducts(prevProducts => [...prevProducts, newProduct]);
+      
       showSuccessToast('Produto adicionado com sucesso!');
       setError(null);
+      
+      // Força um recarregamento dos produtos para garantir sincronização
+      await loadProducts();
       
       return newProduct;
     } catch (err: any) {

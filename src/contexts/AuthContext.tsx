@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
 import { socketService } from '../services/socketService';
 import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { AuthNavigatorRoutesProps } from '../routes/auth.routes';
 
 interface User {
   id: string;
@@ -39,9 +41,10 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [data, setData] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   useEffect(() => {
     async function loadStorageData(): Promise<void> {
@@ -58,7 +61,7 @@ export const AuthProvider: React.FC = ({ children }) => {
             console.log('Token encontrado:', token[1].substring(0, 10) + '...');
             
             // Adiciona o token no header das requisições
-            api.defaults.headers.authorization = token[1]; // Token já está com "Bearer "
+            api.defaults.headers.Authorization = token[1]; // Token já está com "Bearer "
             console.log('Token adicionado aos headers da API');
             
             try {
@@ -84,49 +87,18 @@ export const AuthProvider: React.FC = ({ children }) => {
 
               // Conecta ao Socket.IO após validar o token
               await socketService.connect();
-            } catch (validationError: any) {
-              console.log('Erro na validação, tentando refresh do token...');
-              
-              if (refreshToken[1]) {
-                try {
-                  const refreshResponse = await api.post('/auth/refresh-token', {
-                    refreshToken: refreshToken[1]
-                  });
-
-                  console.log('Refresh do token bem sucedido:', {
-                    hasAccessToken: !!refreshResponse.data.accessToken,
-                    hasRefreshToken: !!refreshResponse.data.refreshToken
-                  });
-
-                  const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data;
-                  const userData = JSON.parse(user[1]);
-
-                  await AsyncStorage.multiSet([
-                    ['@brecho:token', `Bearer ${newAccessToken}`],
-                    ['@brecho:refreshToken', newRefreshToken]
-                  ]);
-
-                  api.defaults.headers.authorization = `Bearer ${newAccessToken}`;
-                  setData({
-                    accessToken: newAccessToken,
-                    user: userData,
-                    refreshToken: newRefreshToken
-                  });
-
-                  await socketService.connect();
-                  return;
-                } catch (refreshError) {
-                  console.error('Erro ao fazer refresh do token:', refreshError);
-                  await signOut();
-                }
+            } catch (error: any) {
+              if (error.response?.data?.code === 'TOKEN_EXPIRED') {
+                console.log('Token expirado, tentando refresh...');
+                await refreshSession();
               } else {
-                console.error('Refresh token não encontrado');
-                await signOut();
+                throw error;
               }
             }
           } catch (error: any) {
             console.error('Erro ao processar autenticação:', error);
             await signOut();
+            navigation.navigate('signIn');
           }
         } else {
           console.log('Nenhum token encontrado no storage');
@@ -134,6 +106,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       } catch (error) {
         console.error('Erro ao carregar dados do storage:', error);
         await signOut();
+        navigation.navigate('signIn');
       } finally {
         setLoading(false);
       }
@@ -141,9 +114,21 @@ export const AuthProvider: React.FC = ({ children }) => {
 
     loadStorageData();
 
-    // Desconecta o Socket.IO quando o componente for desmontado
+    // Configurar listener global para erros de autenticação
+    const unsubscribe = api.interceptors.response.use(
+      response => response,
+      async (error) => {
+        if (error.message === 'REFRESH_TOKEN_NOT_FOUND' || error.message === 'REFRESH_TOKEN_FAILED') {
+          await signOut();
+          navigation.navigate('signIn');
+        }
+        return Promise.reject(error);
+      }
+    );
+
     return () => {
       socketService.disconnect();
+      api.interceptors.response.eject(unsubscribe);
     };
   }, []);
 
@@ -173,7 +158,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       ]);
 
       console.log('Configurando token nos headers da API...');
-      api.defaults.headers.authorization = `Bearer ${accessToken}`;
+      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
       setData({ accessToken, user: userData, refreshToken });
 
       console.log('Estado de autenticação atualizado:', {
@@ -308,7 +293,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       await AsyncStorage.multiRemove(['@brecho:token', '@brecho:user', '@brecho:refreshToken']);
       
       console.log('Removendo token dos headers da API...');
-      delete api.defaults.headers.authorization;
+      delete api.defaults.headers.Authorization;
       setData(null);
       
       console.log('Logout completo');
@@ -319,19 +304,41 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const refreshSession = async () => {
     try {
+      console.log('Tentando refresh do token...');
       const refreshToken = await AsyncStorage.getItem('@brecho:refreshToken');
+      
+      if (!refreshToken) {
+        throw new Error('REFRESH_TOKEN_NOT_FOUND');
+      }
+
       const response = await api.post('/auth/refresh-token', {
         refreshToken,
       });
 
-      const { token, newRefreshToken } = response.data;
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
 
-      await AsyncStorage.setItem('@brecho:token', token);
-      await AsyncStorage.setItem('@brecho:refreshToken', newRefreshToken);
+      console.log('Refresh bem sucedido, atualizando tokens...');
+      await AsyncStorage.multiSet([
+        ['@brecho:token', `Bearer ${newAccessToken}`],
+        ['@brecho:refreshToken', newRefreshToken]
+      ]);
 
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
+      
+      if (data?.user) {
+        setData({
+          ...data,
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken
+        });
+      }
+
+      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
+      console.error('Erro no refresh do token:', error);
       await signOut();
+      navigation.navigate('signIn');
+      throw error;
     }
   };
 
