@@ -70,13 +70,13 @@ export const authService = {
 
       // Salva os tokens e usuário no AsyncStorage
       await AsyncStorage.multiSet([
-        ['@brecho:token', response.data.accessToken],
+        ['@brecho:token', `Bearer ${response.data.accessToken}`],
         ['@brecho:refreshToken', response.data.refreshToken],
         ['@brecho:user', JSON.stringify(response.data.user)]
       ]);
 
       // Configura o token no axios
-      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`;
+      api.defaults.headers.Authorization = `Bearer ${response.data.accessToken}`;
 
       console.log('Dados do usuário salvos localmente');
       return response.data;
@@ -89,7 +89,6 @@ export const authService = {
         stack: error.stack
       });
 
-      // Tratamento de erros específicos
       if (error.response?.status === 400) {
         const errorMessage = error.response.data?.error;
         if (errorMessage?.includes('já cadastrado') || errorMessage?.includes('already exists')) {
@@ -128,7 +127,7 @@ export const authService = {
         url: '/auth/login'
       });
 
-      const response = await api.post('/auth/login', {
+      const response = await api.post<AuthResponse>('/auth/login', {
         email: data.email.trim().toLowerCase(),
         password: data.password
       });
@@ -140,8 +139,7 @@ export const authService = {
         hasData: !!response.data,
         hasUser: !!response.data?.user,
         hasAccessToken: !!response.data?.accessToken,
-        hasRefreshToken: !!response.data?.refreshToken,
-        responseData: response.data
+        hasRefreshToken: !!response.data?.refreshToken
       });
 
       // Validação da resposta
@@ -163,13 +161,13 @@ export const authService = {
 
       // Salva os tokens e usuário no AsyncStorage
       await AsyncStorage.multiSet([
-        ['@brecho:token', accessToken],
+        ['@brecho:token', `Bearer ${accessToken}`],
         ['@brecho:refreshToken', refreshToken],
         ['@brecho:user', JSON.stringify(user)]
       ]);
 
       // Configura o token no axios
-      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
 
       console.log('Login realizado com sucesso para:', user.email);
 
@@ -246,6 +244,7 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       await AsyncStorage.multiRemove(['@brecho:token', '@brecho:refreshToken', '@brecho:user']);
+      delete api.defaults.headers.Authorization;
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       throw error;
