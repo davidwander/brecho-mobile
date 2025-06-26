@@ -1,4 +1,4 @@
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { DefaultTheme } from '@react-navigation/native';
 import { Box } from '@gluestack-ui/themed';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,9 +20,7 @@ export function Routes() {
 
   return (
     <Box flex={1} bg="$textDark800">
-      <NavigationContainer theme={theme}>
-        {signed ? <AppStackRoutes /> : <AuthRoutes />}
-      </NavigationContainer>
+      {signed ? <AppStackRoutes /> : <AuthRoutes />}
     </Box>
   );
 }
