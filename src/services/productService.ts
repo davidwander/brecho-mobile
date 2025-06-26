@@ -19,6 +19,8 @@ const formatProductData = (product: Omit<Product, 'id' | 'createdAt' | 'updatedA
 
 export const productService = {
   async create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    console.log('Iniciando criação de produto...');
+
     // Validação dos dados
     if (!product.name || !product.type) {
       throw new Error('Nome e tipo são obrigatórios');
@@ -33,16 +35,29 @@ export const productService = {
     }
 
     const formattedProduct = formatProductData(product);
-    console.log('Enviando produto formatado:', formattedProduct);
+    console.log('Produto formatado:', formattedProduct);
 
     try {
+      console.log('Enviando requisição para criar produto...');
       const response = await api.post('/products', formattedProduct);
+      
+      console.log('Resposta da criação do produto:', {
+        status: response.status,
+        data: response.data,
+        headers: response.headers
+      });
+
+      if (!response.data) {
+        throw new Error('Resposta vazia do servidor');
+      }
+
       return response.data;
     } catch (error: any) {
-      console.error('Erro na requisição:', {
+      console.error('Erro na criação do produto:', {
         data: error.response?.data,
         status: error.response?.status,
-        headers: error.response?.headers
+        headers: error.response?.headers,
+        message: error.message
       });
       throw error;
     }
@@ -52,7 +67,6 @@ export const productService = {
     try {
       console.log('Iniciando busca de produtos...');
       
-      // Verifica se há token antes de fazer a requisição
       const token = await AsyncStorage.getItem('@brecho:token');
       if (!token) {
         console.error('Tentativa de listar produtos sem token de autenticação');
@@ -61,13 +75,25 @@ export const productService = {
 
       console.log('Token encontrado, fazendo requisição...');
       const response = await api.get('/products');
-      console.log('Produtos recebidos com sucesso');
+      
+      console.log('Resposta da listagem de produtos:', {
+        status: response.status,
+        quantidade: response.data?.length || 0,
+        headers: response.headers
+      });
+
+      if (!response.data) {
+        console.warn('Resposta vazia da API');
+        return [];
+      }
+
       return response.data;
     } catch (error: any) {
       console.error('Erro ao listar produtos:', {
         status: error.response?.status,
         data: error.response?.data,
-        headers: error.response?.headers
+        headers: error.response?.headers,
+        message: error.message
       });
       throw error;
     }
