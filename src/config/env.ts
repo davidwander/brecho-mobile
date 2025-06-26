@@ -1,14 +1,22 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 // Configuração do host da API
 const getApiHost = () => {
   const isEmulator = Platform.OS === 'android' && __DEV__;
   const defaultHost = '192.168.3.7'; // Seu IP local
 
-  if (isEmulator) {
-    return '10.0.2.2'; // Host especial para emulador Android
+  // Para iOS em desenvolvimento, usa o IP local
+  if (Platform.OS === 'ios' && __DEV__) {
+    return defaultHost;
   }
 
+  // Para Android em emulador, usa o host especial
+  if (isEmulator) {
+    return '10.0.2.2';
+  }
+
+  // Para produção ou outros casos, usa o IP configurado
   return defaultHost;
 };
 
@@ -31,17 +39,27 @@ console.log('Configuração detalhada da API:', {
 // Função para testar a conexão com a API
 export const testApiConnection = async () => {
   try {
-    const response = await fetch(API_URL);
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+    
+    const fetchPromise = fetch(`${API_URL}/health`);
+    
+    const response = await Promise.race([fetchPromise, timeout]);
+    
     console.log('Teste de conexão com a API:', {
       status: response.status,
       ok: response.ok,
-      statusText: response.statusText
+      statusText: response.statusText,
+      url: `${API_URL}/health`
     });
+    
     return response.ok;
   } catch (error) {
     console.error('Erro ao testar conexão com a API:', {
       message: error.message,
-      apiUrl: API_URL
+      apiUrl: `${API_URL}/health`,
+      type: error.name || typeof error
     });
     return false;
   }
