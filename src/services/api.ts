@@ -3,14 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config/env';
 import { testApiConnection } from '../config/env';
 
-console.log('Configurando API com URL:', API_URL);
-
 // Testa a conexão com a API antes de configurar
 testApiConnection().then(isConnected => {
   if (!isConnected) {
     console.error('Não foi possível conectar à API. Verifique se o servidor está rodando e acessível.');
-  } else {
-    console.log('Conexão com a API estabelecida com sucesso.');
   }
 });
 

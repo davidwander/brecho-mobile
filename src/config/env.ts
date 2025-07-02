@@ -40,7 +40,7 @@ console.log('Configuração detalhada da API:', {
 export const testApiConnection = async () => {
   try {
     const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 5000)
+      setTimeout(() => reject(new Error('Timeout')), 30000)
     );
     
     const fetchPromise = fetch(`${API_URL}/health`);
@@ -56,11 +56,14 @@ export const testApiConnection = async () => {
     
     return response.ok;
   } catch (error) {
-    console.error('Erro ao testar conexão com a API:', {
-      message: error.message,
-      apiUrl: `${API_URL}/health`,
-      type: error.name || typeof error
-    });
+    if (__DEV__) { // Apenas exibe o aviso em ambiente de desenvolvimento
+      console.warn('Aviso ao testar conexão com a API:', {
+        message: error.message,
+        apiUrl: `${API_URL}/health`,
+        type: error.name || typeof error
+      });
+      console.warn('Conexão com a API de saúde não estabelecida, mas a aplicação pode estar funcionando normalmente.');
+    }
     return false;
   }
 }; 
