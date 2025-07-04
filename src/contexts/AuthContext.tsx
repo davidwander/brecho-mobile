@@ -157,25 +157,20 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
         email: email.trim().toLowerCase(),
         password: password
       };
-      
+
       const response = await api.post('/auth/register', formattedData);
 
       if (!response.data.accessToken || !response.data.user) {
         throw new Error('Resposta inválida do servidor: token ou dados do usuário ausentes');
       }
 
-      const { accessToken, user, refreshToken } = response.data;
-
       await AsyncStorage.multiSet([
-        ['@brecho:token', `Bearer ${accessToken}`],
-        ['@brecho:user', JSON.stringify(user)],
-        ['@brecho:refreshToken', refreshToken],
+        ['@brecho:token', `Bearer ${response.data.accessToken}`],
+        ['@brecho:user', JSON.stringify(response.data.user)]
       ]);
 
-      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-      setData({ accessToken, user, refreshToken });
-
-      await socketService.connect();
+      api.defaults.headers.Authorization = `Bearer ${response.data.accessToken}`;
+      setData({ accessToken: response.data.accessToken, user: response.data.user });
     } catch (error: any) {
       if (error.response?.status === 409 || 
           error.response?.data?.error?.includes('já cadastrado') || 

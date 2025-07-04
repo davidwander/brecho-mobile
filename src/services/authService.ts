@@ -27,7 +27,7 @@ interface LoginData {
 export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
     console.log('Iniciando registro de usuário...');
-    
+
     // Validação dos dados
     if (!data.name?.trim()) {
       throw new Error('Nome é obrigatório');
@@ -57,7 +57,7 @@ export const authService = {
       });
 
       const response = await api.post<AuthResponse>('/auth/register', formattedData);
-      
+
       console.log('Resposta do registro:', {
         status: response.status,
         headers: response.headers,
@@ -80,7 +80,7 @@ export const authService = {
 
       console.log('Dados do usuário salvos localmente');
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro detalhado ao registrar:', {
         status: error.response?.status,
         data: error.response?.data,
@@ -206,7 +206,7 @@ export const authService = {
     try {
       console.log('Iniciando validação de token...');
       const response = await api.get<{ user: User }>('/auth/validate');
-      
+
       if (!response.data?.user) {
         console.error('Resposta da validação sem dados do usuário:', response.data);
         throw new Error('Dados do usuário ausentes na validação');

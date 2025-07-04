@@ -66,7 +66,7 @@ export const productService = {
   async list() {
     try {
       console.log('Iniciando busca de produtos...');
-      
+
       const token = await AsyncStorage.getItem('@brecho:token');
       if (!token) {
         console.error('Tentativa de listar produtos sem token de autenticação');
@@ -75,7 +75,7 @@ export const productService = {
 
       console.log('Token encontrado, fazendo requisição...');
       const response = await api.get('/products');
-      
+
       console.log('Resposta da listagem de produtos:', {
         status: response.status,
         quantidade: response.data?.length || 0,

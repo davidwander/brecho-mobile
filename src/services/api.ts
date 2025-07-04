@@ -24,7 +24,7 @@ api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
       const token = await AsyncStorage.getItem('@brecho:token');
-      
+
       if (token) {
         config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         console.log(`Requisição autenticada: ${config.method?.toUpperCase()} ${config.url}`);
